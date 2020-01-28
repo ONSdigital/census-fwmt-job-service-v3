@@ -35,7 +35,7 @@ public class TMHealthIndicator extends AbstractHealthIndicator {
 
   @Override protected void doHealthCheck(Health.Builder builder) {
     String swaggerUrl = tmBaseUrl + healthcheckPath;
-    
+
     int responseCode = 0;
 
     try {
@@ -45,13 +45,16 @@ public class TMHealthIndicator extends AbstractHealthIndicator {
         builder.up().withDetail(Integer.toString(responseCode), String.class);
         gatewayEventManager.triggerEvent("<N/A>", TM_SERVICE_UP, "response code", Integer.toString(responseCode));
         return;
-      }else {
-        gatewayEventManager.triggerErrorEvent(this.getClass(), null, "Cannot reach TM", "<NA>", TM_SERVICE_DOWN, "url", swaggerUrl, "Response Code", Integer.toString(responseCode));
+      } else {
+        gatewayEventManager
+            .triggerErrorEvent(this.getClass(), null, "Cannot reach TM", "<NA>", TM_SERVICE_DOWN, "url", swaggerUrl,
+                "Response Code", Integer.toString(responseCode));
       }
 
     } catch (Exception e) {
       builder.down().withDetail(e.getMessage(), e.getClass());
-      gatewayEventManager.triggerErrorEvent(this.getClass(), e, "Cannot reach TM", "<NA>", TM_SERVICE_DOWN, "url", swaggerUrl);
+      gatewayEventManager
+          .triggerErrorEvent(this.getClass(), e, "Cannot reach TM", "<NA>", TM_SERVICE_DOWN, "url", swaggerUrl);
     }
   }
 
@@ -59,7 +62,7 @@ public class TMHealthIndicator extends AbstractHealthIndicator {
     int response = 0;
 
     RestTemplate restTemplate = new RestTemplate();
-    
+
     ResponseEntity<Void> tmResponse = restTemplate.exchange(swaggerUrl, HttpMethod.GET, null, Void.class);
     response = tmResponse.getStatusCode().value();
     return response;

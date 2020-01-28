@@ -17,8 +17,7 @@ public class RestLogger implements ClientHttpRequestInterceptor {
   @Override
   @NonNull
   public ClientHttpResponse intercept(@NonNull HttpRequest request, @NonNull byte[] body,
-      ClientHttpRequestExecution execution)
-      throws IOException {
+      ClientHttpRequestExecution execution) throws IOException {
     ClientHttpResponse response = execution.execute(request, body);
 
     log.debug(

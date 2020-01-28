@@ -2,7 +2,6 @@ package uk.gov.ons.census.fwmt.jobservice.converter.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import uk.gov.ons.census.fwmt.canonical.v1.Address;
 import uk.gov.ons.census.fwmt.canonical.v1.CancelFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
@@ -85,7 +84,8 @@ public class CCSINTConverter implements CometConverter {
     return messageConverter.convertMessageToDTO(CCSPropertyListingOutcome.class, retrievedCache);
   }
 
-  private String getAdditionalInformation(CCSPropertyListingOutcome cachedSpecialInstructions, boolean isSpecialInstruction) {
+  private String getAdditionalInformation(CCSPropertyListingOutcome cachedSpecialInstructions,
+      boolean isSpecialInstruction) {
     List<String> additionalInformation = new ArrayList<>();
     String additionalInformationToString;
     String accessInfo;
@@ -100,7 +100,7 @@ public class CCSINTConverter implements CometConverter {
       }
       additionalInformation.add("Access Info: " + accessInfo);
       if (cachedSpecialInstructions.getCareCodes() != null &&
-              !cachedSpecialInstructions.getCareCodes().isEmpty()) {
+          !cachedSpecialInstructions.getCareCodes().isEmpty()) {
         careCode = formatCareCodeList(cachedSpecialInstructions.getCareCodes());
         additionalInformation.add("CareCodes: " + careCode);
       } else {
@@ -117,12 +117,12 @@ public class CCSINTConverter implements CometConverter {
 
     additionalInformationToString = additionalInformation.toString();
     additionalInformationToString = additionalInformationToString.replaceAll("[\\[\\](){}]", "");
-    additionalInformationToString = additionalInformationToString.replaceAll("," , "\n");
+    additionalInformationToString = additionalInformationToString.replaceAll(",", "\n");
 
     return additionalInformationToString;
   }
 
-  private String getCEDetails (CeDetails ceDetails) {
+  private String getCEDetails(CeDetails ceDetails) {
     String ceDetailsToreturn = "";
 
     if (ceDetails.getEstablishmentType() != null) {
@@ -147,14 +147,14 @@ public class CCSINTConverter implements CometConverter {
     return ceDetailsToreturn;
   }
 
-  private String formatCareCodeList (List<CareCode> careCode) {
+  private String formatCareCodeList(List<CareCode> careCode) {
     String careCodes = "";
 
     for (int i = 0; i <= careCode.size(); i++) {
       careCodes = careCode.toString();
       careCodes = careCodes.replaceAll("careCode=", "");
       careCodes = careCodes.replaceAll("CareCode", "");
-      careCodes = careCodes.replaceAll("[\\[\\](){}]","");
+      careCodes = careCodes.replaceAll("[\\[\\](){}]", "");
     }
     return careCodes;
   }

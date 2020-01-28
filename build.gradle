@@ -1,5 +1,4 @@
 import com.github.spotbugs.SpotBugsTask
-import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
     ext {
@@ -14,7 +13,7 @@ buildscript {
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.7.2'
         classpath 'org.ajoberstar:gradle-git:1.4.2'
     }
-}	
+}
 
 plugins {
     id 'java'
@@ -26,14 +25,14 @@ plugins {
     id 'org.springframework.boot' version '2.1.0.RELEASE'
     id 'io.spring.dependency-management' version '1.0.6.RELEASE'
     id 'jacoco'
-    id 'com.github.spotbugs' version '1.6.5'
+    id 'com.github.spotbugs' version '3.0.0'
     id 'com.github.psxpaul.execfork' version '0.1.8'
-    id 'com.jfrog.artifactory' version '4.8.1'
+    id 'com.jfrog.artifactory' version '4.13.0'
     id 'org.ajoberstar.grgit' version '3.0.0'
 }
 
-description = 'census-fwmt-job-service'
-version = '3.0.64-SNAPSHOT'
+description = 'census-fwmt-job-service-v4'
+version = '4.0.0-SNAPSHOT'
 group = 'uk.gov.ons.census.fwmt'
 
 mainClassName = 'uk.gov.ons.census.fwmt.jobservice.Application'
@@ -42,7 +41,6 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 repositories {
-    mavenLocal()
     if (!project.hasProperty('omitSDCArtifactory')) {
         maven { url 'http://artifactory-sdc.onsdigital.uk/artifactory/libs-release' }
         maven { url 'http://artifactory-sdc.onsdigital.uk/artifactory/libs-snapshot' }
@@ -61,9 +59,16 @@ springBoot {
     buildInfo {
         properties {
             additional = [
-              'Git-Commit': grgit.head().getAbbreviatedId(8)
+                    'Git-Commit': grgit.head().getAbbreviatedId(8)
             ]
         }
+    }
+}
+
+dependencyManagement {
+    dependencies {
+        dependency 'org.springframework:spring-core:4.0.3.RELEASE'
+        dependency 'org.springframework.boot:spring-boot:4.0.3.RELEASE'
     }
 }
 
@@ -81,6 +86,7 @@ dependencies {
 
     compile('org.springframework.retry:spring-retry')
     compile('org.springframework:spring-aop')
+    compile('org.springframework.data:spring-data-redis:2.2.4.RELEASE')
 
     compile('com.fasterxml.jackson.core:jackson-databind')
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
@@ -103,9 +109,8 @@ dependencies {
     compile('io.springfox:springfox-swagger2:2.9.2')
     compile('io.springfox:springfox-swagger-ui:2.9.2')
 
-    compile ('org.springframework.data:spring-data-redis:2.0.10.RELEASE')
-    compile('redis.clients:jedis:2.9.0')
-    
+    compile('redis.clients:jedis:3.2.0')
+
     compile('org.yaml:snakeyaml')
     compile('org.json:json:20180813')
 
@@ -135,14 +140,6 @@ dependencies {
     testCompile('org.powermock:powermock-module-junit4:1.7.4')
 
     integrationTestRuntime('uk.gov.ons.fwmt:fwmt-service-mocks:1.0.1-SNAPSHOT')
-}
-
-bootJar {
-    group = 'uk.gov.ons.census.fwmt'
-    baseName = 'census-fwmt-job-service'
-    manifest {
-    }
-    version = version
 }
 
 sourceSets {
@@ -193,32 +190,6 @@ task integrationTest(type: Test) {
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
-// task runMocks(type: com.github.psxpaul.task.JavaExecFork) {
-//     String mockJarPath = configurations.integrationTestRuntime.find { it.name.startsWith('fwmt-service-mocks') }
-//     classpath = sourceSets.main.runtimeClasspath
-//     main = '-jar'
-//     args = [mockJarPath]
-//     jvmArgs = ['-Xmx500m']
-//     workingDir = "$buildDir"
-//     standardOutput = "$buildDir/fwmt-service-mocks.log"
-//     errorOutput = "$buildDir/fwmt-service-mocks-errors.log"
-//     stopAfter = integrationTest
-//     waitForPort = 9099
-//     waitForOutput = 'Started Application'
-// }
-// integrationTest.dependsOn runMocks
-
-processResources {
-    filter ReplaceTokens, tokens: [
-            'project.artifactId': 'name',
-            'project.version'   : 'version',
-            'scm.url'           : 'url',
-            'buildNumber'       : 'buildnumber',
-            'scmBranch'         : 'branch',
-            'timestamp'         : 'timestamp',
-    ]
-}
-
 jacocoTestReport {
     reports {
         xml.enabled = true
@@ -243,7 +214,7 @@ test.finalizedBy(project.tasks.jacocoTestReport)
 check.dependsOn jacocoTestReport
 
 spotbugs {
-    toolVersion = '3.1.9'
+    toolVersion = '3.1.12'
 }
 
 tasks.withType(SpotBugsTask) {

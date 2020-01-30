@@ -4,6 +4,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.stereotype.Component;
@@ -22,18 +23,22 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RABBI
 @Component
 public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
 
-  private static List<String> QUEUES = Arrays.asList(
-      GatewayActionsQueueConfig.GATEWAY_ACTIONS_QUEUE,
-      GatewayActionsQueueConfig.GATEWAY_ACTIONS_DLQ
-  );
-
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+  private List<String> queues;
 
   @Autowired
   @Qualifier("connectionFactory")
   private ConnectionFactory connectionFactory;
+
+  @Autowired
+  private GatewayEventManager gatewayEventManager;
+
   private RabbitAdmin rabbitAdmin;
+
+  public RabbitQueuesHealthIndicator(
+      @Value("${rabbitmq.inboundQueue}") String inboundQueue,
+      @Value("${rabbitmq.inboundDLQ}") String inboundDLQ) {
+    queues = Arrays.asList(inboundQueue, inboundDLQ);
+  }
 
   private boolean checkQueue(String queueName) {
     Properties properties = rabbitAdmin.getQueueProperties(queueName);
@@ -42,12 +47,11 @@ public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
 
   private Map<String, Boolean> getAccessibleQueues() {
     rabbitAdmin = new RabbitAdmin(connectionFactory);
-
-    return QUEUES.stream()
-        .collect(Collectors.toMap(queueName -> queueName, this::checkQueue));
+    return queues.stream().collect(Collectors.toMap(queueName -> queueName, this::checkQueue));
   }
 
-  @Override protected void doHealthCheck(Health.Builder builder) {
+  @Override
+  protected void doHealthCheck(Health.Builder builder) {
     Map<String, Boolean> accessibleQueues = getAccessibleQueues();
 
     builder.withDetail("accessible-queues", accessibleQueues);
@@ -59,6 +63,6 @@ public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
       builder.up();
       gatewayEventManager.triggerEvent("<N/A>", RABBIT_QUEUE_UP);
     }
-
   }
+
 }

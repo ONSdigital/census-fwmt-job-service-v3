@@ -11,26 +11,34 @@ import uk.gov.ons.census.fwmt.jobservice.message.ProcessGatewayActionsDLQ;
 @Controller
 public class QueueListenerController {
 
+  // job service v3 only
   @Autowired
   ProcessGatewayActionsDLQ processGatewayActionsDLQ;
+
+  // rm adapter only
+  @Autowired
+  ProcessRMFieldDLQ processRMFieldDLQ;
 
   @Autowired
   SimpleMessageListenerContainer simpleMessageListenerContainer;
 
   @GetMapping("/processDLQ")
-  public ResponseEntity startDLQProcessor() throws GatewayException {
+  public ResponseEntity<String> startDLQProcessor() throws GatewayException {
+    // job service v3 version
     processGatewayActionsDLQ.processDLQ();
+    // rm adapter version
+    processRMFieldDLQ.processDLQ();
     return ResponseEntity.ok("DLQ listener started.");
   }
 
   @GetMapping("/startListener")
-  public ResponseEntity startListener() {
+  public ResponseEntity<String> startListener() {
     simpleMessageListenerContainer.start();
     return ResponseEntity.ok("Queue listener started.");
   }
 
   @GetMapping("/stopListener")
-  public ResponseEntity stopListener() {
+  public ResponseEntity<String> stopListener() {
     simpleMessageListenerContainer.stop();
     return ResponseEntity.ok("Queue listener stopped.");
   }

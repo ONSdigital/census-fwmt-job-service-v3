@@ -48,10 +48,10 @@ public class RedisConfig {
     return redisTemplate;
   }
 
+  // TODO do we really need this? It's probably duplicating an object
   @Bean
   public RedisConnectionFactory redisConnectionFactory() {
-    RedisConnectionFactory redisConnectionFactory = jedisConnectionFactory();
-    return redisConnectionFactory;
+    return jedisConnectionFactory();
   }
 
 }

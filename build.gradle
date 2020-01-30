@@ -50,6 +50,7 @@ repositories {
 }
 
 configurations {
+    jaxb
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
     integrationTestAnnotationProcessor.extendsFrom testAnnotationProcessor
@@ -65,18 +66,76 @@ springBoot {
     }
 }
 
+task genJaxb {
+    ext.sourcesDir = "${buildDir}/generated-sources/jaxb"
+    ext.classesDir = "${buildDir}/classes/jaxb"
+    ext.schema = "${projectDir}/src/main/resources/xsd"
+
+    outputs.dir classesDir
+
+    doLast() {
+        project.ant {
+            taskdef name: 'xjc', classname: 'com.sun.tools.xjc.XJCTask',
+                    classpath: configurations.jaxb.asPath
+            mkdir(dir: sourcesDir)
+            mkdir(dir: classesDir)
+
+            xjc(destdir: sourcesDir) {
+                produces(dir: sourcesDir, includes: '**/*.java')
+                schema(dir: schema, includes: '**/*.xsd')
+            }
+
+            javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true,
+                    debugLevel: 'lines,vars,source',
+                    classpath: configurations.jaxb.asPath) {
+                src(path: sourcesDir)
+                include(name: "**/*.java")
+                include(name: "*.java")
+            }
+
+            copy(todir: classesDir) {
+                fileset(dir: sourcesDir, erroronmissingdir: false) {
+                    exclude(name: "**/*.java")
+                }
+            }
+        }
+    }
+}
+
 dependencyManagement {
     dependencies {
         dependency 'org.springframework:spring-core:4.0.3.RELEASE'
-        dependency 'org.springframework.boot:spring-boot:4.0.3.RELEASE'
+        dependency 'org.springframework.boot:spring-boot:2.2.4.RELEASE'
     }
 }
 
 dependencies {
+    // Jaxb
+    jaxb('javax.xml.bind:jaxb-api:2.3.0')
+    jaxb('com.sun.xml.bind:jaxb-core:2.3.0.1')
+    jaxb('com.sun.xml.bind:jaxb-impl:2.3.1')
+    jaxb('com.sun.xml.bind:jaxb-xjc:2.3.1')
+    jaxb('javax.activation:activation:1.1.1')
+    compile('javax.xml.bind:jaxb-api:2.3.0')
+    compile('com.sun.xml.bind:jaxb-core:2.3.0.1')
+    compile('com.sun.xml.bind:jaxb-impl:2.3.1')
+    compile('com.sun.xml.bind:jaxb-xjc:2.3.1')
+    compile('javax.activation:activation:1.1.1')
+    compile(files((String) genJaxb.classesDir).builtBy(genJaxb))
+
+    // Custom Libraries
     compile('uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.16-RELEASE')
     compile('uk.gov.ons.census.fwmt:census-fwmt-events:1.0.18-RELEASE')
     compile('uk.gov.ons.census.fwmt:census-fwmt-common:1.0.46-RELEASE')
 
+    // General Libraries
+    compile('com.google.guava:guava:27.0.1-jre')
+    compile('org.apache.commons:commons-lang3')
+
+    // Aspects
+    compile('org.aspectj:aspectjweaver')
+
+    // Spring Boot
     compile('org.springframework.boot:spring-boot-starter')
     compile('org.springframework.boot:spring-boot-starter-security')
     compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -84,60 +143,63 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-web-services')
 
-    compile('org.springframework.retry:spring-retry')
-    compile('org.springframework:spring-aop')
-    compile('org.springframework.data:spring-data-redis:2.2.4.RELEASE')
-
-    compile('com.fasterxml.jackson.core:jackson-databind')
-    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
-    compile('com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4')
-
     // this dependency is required to fix spring-boot-starter-web-services (and saaj-impl),
     // which depend on an old non-existent version
     compile('org.jvnet.mimepull:mimepull')
 
-    compile('org.aspectj:aspectjweaver')
+    // Spring
+    compile('org.springframework.retry:spring-retry')
+    compile('org.springframework:spring-aop')
+    compile('org.springframework.data:spring-data-redis:2.2.4.RELEASE')
 
+    // Data Formats
     compile('org.apache.commons:commons-csv:1.6')
-    compile('org.apache.commons:commons-lang3')
+    compile('org.yaml:snakeyaml')
+    compile('org.json:json:20180813')
+    compile('com.fasterxml.jackson.core:jackson-databind')
+    compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
+    compile('com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4')
+
+    // Data mapping
+    compile('ma.glasnost.orika:orika-core:1.5.4')
+
+    // Networking
     compile('org.apache.httpcomponents:httpclient') {
         exclude(module: 'commons-logging')
     }
-
     compile('org.jsoup:jsoup:1.11.3')
+    compile('redis.clients:jedis:3.2.0')
+    compile('com.rabbitmq:amqp-client')
+    compile('com.microsoft.azure:adal4j:1.6.0')
 
+    // Documentation
     compile('io.springfox:springfox-swagger2:2.9.2')
     compile('io.springfox:springfox-swagger-ui:2.9.2')
 
-    compile('redis.clients:jedis:3.2.0')
-
-    compile('org.yaml:snakeyaml')
-    compile('org.json:json:20180813')
-
-    compile('ma.glasnost.orika:orika-core:1.5.4')
-
-    compile('com.microsoft.azure:adal4j:1.6.0')
-
+    // Meta
     compile('org.projectlombok:lombok')
     annotationProcessor('org.projectlombok:lombok')
-    testAnnotationProcessor('org.projectlombok:lombok')
+    //    testAnnotationProcessor('org.projectlombok:lombok')
 
     testImplementation('org.junit.jupiter:junit-jupiter-api')
     testCompile('org.junit.jupiter:junit-jupiter-params')
     testCompile('org.junit.jupiter:junit-jupiter-engine')
-    testCompile('junit:junit')
+    //    testCompile('junit:junit')
 
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude module: 'android-json'
         exclude module: 'junit'
     }
-    testCompile('org.apache.commons:commons-lang3')
+//    testCompile('org.apache.commons:commons-lang3')
 
     testCompile('org.mockito:mockito-core')
     testCompile('org.mockito:mockito-junit-jupiter')
     testCompile('org.powermock:powermock-core:1.7.4')
     testCompile('org.powermock:powermock-api-mockito2:1.7.4')
     testCompile('org.powermock:powermock-module-junit4:1.7.4')
+
+//    integrationTestCompile('org.assertj:assertj-core')
 
     integrationTestRuntime('uk.gov.ons.fwmt:fwmt-service-mocks:1.0.1-SNAPSHOT')
 }
@@ -195,19 +257,19 @@ jacocoTestReport {
         xml.enabled = true
         html.enabled = false
     }
-//    afterEvaluate {
-//        classDirectories.from = files(classDirectories.files.collect {
-//            fileTree(dir: it, exclude: [
-//                    '**/legacy_ingest/*',
-//                    '**/dto/*',
-//                    '**/data/tm/*',
-//                    '**/config/*',
-//                    '**/CSVParseFinalResult.java',
-//                    '**/ApplicationConfig.java',
-//                    '**/WebConfig.java'
-//            ])
-//        })
-//    }
+    //    afterEvaluate {
+    //        classDirectories.from = files(classDirectories.files.collect {
+    //            fileTree(dir: it, exclude: [
+    //                    '**/legacy_ingest/*',
+    //                    '**/dto/*',
+    //                    '**/data/tm/*',
+    //                    '**/config/*',
+    //                    '**/CSVParseFinalResult.java',
+    //                    '**/ApplicationConfig.java',
+    //                    '**/WebConfig.java'
+    //            ])
+    //        })
+    //    }
 }
 test.finalizedBy(project.tasks.jacocoTestReport)
 

@@ -42,6 +42,7 @@ public class RedisHealthLogging extends AbstractHealthIndicator {
       builder.down().withDetail(e.getMessage(), Exception.class);
     } finally {
       if (connection != null) {
+        // TODO replace deprecated code
         RedisConnectionUtils.releaseConnection(connection, this.redisConnectionFactory);
       }
     }

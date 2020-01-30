@@ -19,8 +19,8 @@ import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.canonical.v1.UpdateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.rmadapter.config.GatewayActionsQueueConfig;
-import uk.gov.ons.census.fwmt.rmadapter.config.GatewayEventsConfig;
+import uk.gov.ons.census.fwmt.jobservice.config.GatewayActionsQueueConfig;
+import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
 
 import java.io.IOException;
 import java.util.UUID;

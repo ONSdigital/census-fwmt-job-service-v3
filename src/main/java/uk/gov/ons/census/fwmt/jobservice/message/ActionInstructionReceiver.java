@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.rmadapter.config.GatewayEventsConfig;
-import uk.gov.ons.census.fwmt.rmadapter.service.RMAdapterService;
+import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
+import uk.gov.ons.census.fwmt.jobservice.service.RMAdapterService;
 import uk.gov.ons.ctp.response.action.message.instruction.ActionInstruction;
 
 import javax.xml.bind.JAXBContext;
@@ -15,6 +15,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @Slf4j
@@ -34,12 +35,13 @@ public class ActionInstructionReceiver {
 
   public void receiveMessage(String message) throws GatewayException {
     try {
-      // This should be moved to Queue Config, but cant get it to work
+      // TODO This should be moved to Queue Config, but can't get it to work
       Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-      ByteArrayInputStream input = new ByteArrayInputStream(message.getBytes());
+      ByteArrayInputStream input = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
       JAXBElement<ActionInstruction> rmActionInstruction = unmarshaller
           .unmarshal(new StreamSource(input), ActionInstruction.class);
-      // ===============================================================
+      // ================================================================
+
       triggerEvent(rmActionInstruction.getValue());
       rmAdapterService.sendJobRequest(rmActionInstruction.getValue());
     } catch (JAXBException e) {

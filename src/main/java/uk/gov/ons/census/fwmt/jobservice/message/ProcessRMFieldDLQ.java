@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.config.ActionFieldQueueConfig;
-import uk.gov.ons.census.fwmt.rmadapter.config.ActionFieldQueueConfig;
 
 @Slf4j
 @Component

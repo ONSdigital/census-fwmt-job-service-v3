@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.message.ProcessGatewayActionsDLQ;
+import uk.gov.ons.census.fwmt.jobservice.message.ProcessRMFieldDLQ;
 
 @Controller
 public class QueueListenerController {

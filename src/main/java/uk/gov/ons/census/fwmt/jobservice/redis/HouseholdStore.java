@@ -3,7 +3,7 @@ package uk.gov.ons.census.fwmt.jobservice.redis;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.census.fwmt.rmadapter.config.RedisUtil;
+import uk.gov.ons.census.fwmt.jobservice.config.RedisUtil;
 
 @Slf4j
 @Component

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
-import uk.gov.ons.census.fwmt.rmadapter.message.ActionInstructionReceiver;
+import uk.gov.ons.census.fwmt.jobservice.message.ActionInstructionReceiver;
 
 @Configuration
 public class ActionFieldQueueConfig {

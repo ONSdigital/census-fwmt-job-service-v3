@@ -1,5 +1,5 @@
 server:
-  port: 8020
+  port: 8000
 
 spring:
   application:
@@ -40,12 +40,17 @@ rabbitmq:
   multiplier: 3.0
   maxInterval: 45000
   concurrentConsumers: 5
+  queues:
+    rm:
+      input: "RM.Field"
+      dlq: "RM.FieldDLQ"
+      exchange: "adapter-outbound-exchange"
 
 redis:
   host: "localhost"
   port: 6379
   password: "password"
-  database: 1
+  database: 0
 
 totalmobile:
   username: "user"
@@ -72,3 +77,6 @@ fwmt:
       duration: 5
     ohs:
       duration: 5
+
+eq:
+  url: "https://fieldservice-ENV_NAME.census-gcp.onsdigital.uk/launch/"

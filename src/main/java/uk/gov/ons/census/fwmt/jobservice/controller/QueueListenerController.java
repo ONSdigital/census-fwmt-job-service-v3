@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.controller;
 
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,15 +12,21 @@ import uk.gov.ons.census.fwmt.jobservice.message.ProcessRMFieldDLQ;
 public class QueueListenerController {
 
   // job service v3 only
-  @Autowired
-  ProcessGatewayActionsDLQ processGatewayActionsDLQ;
+  private final ProcessGatewayActionsDLQ processGatewayActionsDLQ;
 
   // rm adapter only
-  @Autowired
-  ProcessRMFieldDLQ processRMFieldDLQ;
+  private final ProcessRMFieldDLQ processRMFieldDLQ;
 
-  @Autowired
-  SimpleMessageListenerContainer simpleMessageListenerContainer;
+  private final SimpleMessageListenerContainer simpleMessageListenerContainer;
+
+  public QueueListenerController(
+      ProcessGatewayActionsDLQ processGatewayActionsDLQ,
+      ProcessRMFieldDLQ processRMFieldDLQ,
+      SimpleMessageListenerContainer simpleMessageListenerContainer) {
+    this.processGatewayActionsDLQ = processGatewayActionsDLQ;
+    this.processRMFieldDLQ = processRMFieldDLQ;
+    this.simpleMessageListenerContainer = simpleMessageListenerContainer;
+  }
 
   @GetMapping("/processDLQ")
   public ResponseEntity<String> startDLQProcessor() throws GatewayException {

@@ -9,7 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.jobservice.converter.impl.CCSPLConverter;
-import uk.gov.ons.census.fwmt.jobservice.entity.CCSOutcomeStore;
+import uk.gov.ons.census.fwmt.jobservice.redis.CCSOutcomeStore;
 import uk.gov.ons.census.fwmt.jobservice.helper.FieldWorkerJobRequestBuilder;
 import uk.gov.ons.census.fwmt.jobservice.message.MessageConverter;
 

@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.converter.impl;
 
 import ma.glasnost.orika.MapperFacade;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.ons.census.fwmt.canonical.v1.CancelFieldWorkerJobRequest;
@@ -22,8 +21,11 @@ import static uk.gov.ons.census.fwmt.jobservice.utils.JobServiceUtils.addAddress
 @Component("HH")
 public class HouseholdConverter implements CometConverter {
 
-  @Autowired
   private MapperFacade mapperFacade;
+
+  public HouseholdConverter(MapperFacade mapperFacade) {
+    this.mapperFacade = mapperFacade;
+  }
 
   @Override
   public CaseRequest convert(CreateFieldWorkerJobRequest ingest) {

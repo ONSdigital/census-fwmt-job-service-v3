@@ -15,11 +15,15 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayActionsQueueConfig
 @Component
 public class ProcessGatewayActionsDLQ {
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
+  private final RabbitTemplate rabbitTemplate;
+  private final AmqpAdmin amqpAdmin;
 
-  @Autowired
-  private AmqpAdmin amqpAdmin;
+  public ProcessGatewayActionsDLQ(
+      @Autowired RabbitTemplate rabbitTemplate,
+      @Autowired AmqpAdmin amqpAdmin) {
+    this.rabbitTemplate = rabbitTemplate;
+    this.amqpAdmin = amqpAdmin;
+  }
 
   public void processDLQ() throws GatewayException {
     int messageCount;

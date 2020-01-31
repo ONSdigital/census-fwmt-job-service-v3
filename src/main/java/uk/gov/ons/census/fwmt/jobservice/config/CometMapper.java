@@ -10,7 +10,8 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 public class CometMapper extends ConfigurableMapper {
 
   @Override
-  protected final void configure(final MapperFactory factory) {
+  protected void configure(final MapperFactory factory) {
     factory.classMap(CaseRequest.class, ModelCase.class).byDefault().register();
   }
+
 }

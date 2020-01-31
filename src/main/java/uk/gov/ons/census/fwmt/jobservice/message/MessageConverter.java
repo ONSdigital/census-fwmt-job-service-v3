@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 
@@ -14,8 +13,13 @@ import java.io.IOException;
 @Component
 public class MessageConverter {
 
-  @Autowired
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper;
+
+  public MessageConverter(
+      //@Autowired ObjectMapper mapper
+  ) {
+    this.mapper = new ObjectMapper();
+  }
 
   public <T> T convertMessageToDTO(Class<T> klass, String message) throws GatewayException {
     mapper.registerModule(new JavaTimeModule());

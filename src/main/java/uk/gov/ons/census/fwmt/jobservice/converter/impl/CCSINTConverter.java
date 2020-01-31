@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.converter.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.canonical.v1.Address;
 import uk.gov.ons.census.fwmt.canonical.v1.CancelFieldWorkerJobRequest;
@@ -17,8 +16,8 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.converter.CometConverter;
-import uk.gov.ons.census.fwmt.jobservice.entity.CCSOutcomeStore;
 import uk.gov.ons.census.fwmt.jobservice.message.MessageConverter;
+import uk.gov.ons.census.fwmt.jobservice.redis.CCSOutcomeStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +28,15 @@ import static uk.gov.ons.census.fwmt.jobservice.utils.JobServiceUtils.setAddress
 @Component("CCS")
 public class CCSINTConverter implements CometConverter {
 
-  @Autowired
-  private CCSOutcomeStore ccsOutcomeStore;
+  private final CCSOutcomeStore ccsOutcomeStore;
+  private final MessageConverter messageConverter;
 
-  @Autowired
-  private MessageConverter messageConverter;
+  public CCSINTConverter(
+      CCSOutcomeStore ccsOutcomeStore,
+      MessageConverter messageConverter) {
+    this.ccsOutcomeStore = ccsOutcomeStore;
+    this.messageConverter = messageConverter;
+  }
 
   @Override
   public CaseRequest convert(CreateFieldWorkerJobRequest ingest) throws GatewayException {

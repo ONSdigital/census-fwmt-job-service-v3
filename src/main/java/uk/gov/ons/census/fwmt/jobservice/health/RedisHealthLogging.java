@@ -1,7 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.health;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -17,32 +15,32 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.REDIS
 @Component
 public class RedisHealthLogging extends AbstractHealthIndicator {
 
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+  private final GatewayEventManager gatewayEventManager;
+  private final RedisConnectionFactory redisConnectionFactory;
 
-  @Autowired
-  private RedisConnectionFactory redisConnectionFactory;
+  private RedisConnection redisConnection;
 
-  private RedisConnection connection;
-
-  public RedisHealthLogging(@Qualifier("redisConnectionFactory") RedisConnectionFactory connectionFactory) {
+  public RedisHealthLogging(
+      GatewayEventManager gatewayEventManager,
+      RedisConnectionFactory redisConnectionFactory) {
     super("Redis health check failed");
-    Assert.notNull(connectionFactory, "ConnectionFactory must not be null");
-    this.redisConnectionFactory = connectionFactory;
+    this.gatewayEventManager = gatewayEventManager;
+    Assert.notNull(redisConnectionFactory, "ConnectionFactory must not be null");
+    this.redisConnectionFactory = redisConnectionFactory;
   }
 
   @Override
   protected void doHealthCheck(Health.Builder builder) {
     try {
-      connection = RedisConnectionUtils.getConnection(this.redisConnectionFactory);
+      redisConnection = RedisConnectionUtils.getConnection(this.redisConnectionFactory);
       builder.up();
       gatewayEventManager.triggerEvent("<N/A>", REDIS_SERVICE_UP);
       return;
     } catch (Exception e) {
       builder.down().withDetail(e.getMessage(), Exception.class);
     } finally {
-      if (connection != null) {
-        RedisConnectionUtils.releaseConnection(connection, this.redisConnectionFactory, false);
+      if (redisConnection != null) {
+        RedisConnectionUtils.releaseConnection(redisConnection, this.redisConnectionFactory, false);
       }
     }
     gatewayEventManager.triggerErrorEvent(this.getClass(), "Cannot reach Redis", "<NA>", REDIS_SERVICE_DOWN);

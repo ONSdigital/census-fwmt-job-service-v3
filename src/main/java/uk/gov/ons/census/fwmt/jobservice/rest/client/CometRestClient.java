@@ -3,7 +3,6 @@ package uk.gov.ons.census.fwmt.jobservice.rest.client;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,37 +25,38 @@ import java.util.concurrent.Future;
 
 @Component
 public class CometRestClient {
-  private String resource;
 
-  //O365 credentials for authentication w/o login prompt
+  private final RestTemplate restTemplate;
+  private final GatewayEventManager gatewayEventManager;
 
-  //Azure Directory OAUTH 2.0 AUTHORIZATION ENDPOINT
-  private String authority;
+  // O365 credentials for authentication w/o login prompt
 
-  private transient RestTemplate restTemplate;
-  private transient String cometURL;
-  private transient String clientID;
-  private transient String clientSecret;
-  private transient AuthenticationResult auth;
+  // Azure Directory OAUTH 2.0 AUTHORIZATION ENDPOINT
+  private final String authority;
+  private final String resource;
+  private final String cometURL;
+  private final String clientID;
+  private final String clientSecret;
 
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+  // temporary store for authentication result
+  private AuthenticationResult auth;
 
-  @Autowired
   public CometRestClient(
       RestTemplate restTemplate,
+      GatewayEventManager gatewayEventManager,
       @Value("${totalmobile.baseUrl}") String baseUrl,
       @Value("${totalmobile.operation.case.create.path}") String tmPath,
       @Value("${totalmobile.comet.clientID}") String clientID,
       @Value("${totalmobile.comet.clientSecret}") String clientSecret,
       @Value("${totalmobile.comet.resource}") String resource,
       @Value("${totalmobile.comet.authority}") String authority) {
-    this.authority = authority;
-    this.resource = resource;
     this.restTemplate = restTemplate;
+    this.gatewayEventManager = gatewayEventManager;
     this.cometURL = baseUrl + tmPath;
     this.clientID = clientID;
     this.clientSecret = clientSecret;
+    this.resource = resource;
+    this.authority = authority;
     this.auth = null;
   }
 
@@ -98,8 +98,7 @@ public class CometRestClient {
     }
 
     HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
-    ResponseEntity<Void> exchange = restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);
-    return exchange;
+    return restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);
   }
 
   public ModelCase getCase(String caseId) throws GatewayException {

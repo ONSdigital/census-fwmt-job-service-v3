@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,14 +32,22 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 
 @Service
 public class JobServiceImpl implements JobService {
+
   private static final List<HttpStatus> validResponses = List
       .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
-  @Autowired
-  private CometRestClient cometRestClient;
-  @Autowired
-  private Map<String, CometConverter> cometConverters;
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+
+  private final CometRestClient cometRestClient;
+  private final Map<String, CometConverter> cometConverters;
+  private final GatewayEventManager gatewayEventManager;
+
+  public JobServiceImpl(
+      CometRestClient cometRestClient,
+      Map<String, CometConverter> cometConverters,
+      GatewayEventManager gatewayEventManager) {
+    this.cometRestClient = cometRestClient;
+    this.cometConverters = cometConverters;
+    this.gatewayEventManager = gatewayEventManager;
+  }
 
   @Override
   public void createJob(CreateFieldWorkerJobRequest jobRequest) throws GatewayException {

@@ -1,16 +1,19 @@
 package uk.gov.ons.census.fwmt.jobservice.redis;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.ons.census.fwmt.jobservice.config.RedisUtil;
+import uk.gov.ons.census.fwmt.jobservice.entity.HouseholdRequestEntity;
+import uk.gov.ons.census.fwmt.jobservice.utils.RedisUtil;
 
 @Slf4j
 @Component
 public class HouseholdStore {
 
-  @Autowired
-  private RedisUtil<HouseholdRequestEntity> redisUtil;
+  private final RedisUtil<HouseholdRequestEntity> redisUtil;
+
+  public HouseholdStore(RedisUtil<HouseholdRequestEntity> redisUtil) {
+    this.redisUtil = redisUtil;
+  }
 
   public HouseholdRequestEntity cacheJob(String caseId) {
     HouseholdRequestEntity householdRequestEntity = new HouseholdRequestEntity();

@@ -13,6 +13,5 @@ public interface CometConverter {
 
   CasePauseRequest convertCancel(CancelFieldWorkerJobRequest cancelIngest) throws GatewayException;
 
-  CaseRequest convertUpdate(UpdateFieldWorkerJobRequest ingest,
-      ModelCase modelCase) throws GatewayException;
+  CaseRequest convertUpdate(UpdateFieldWorkerJobRequest ingest, ModelCase modelCase) throws GatewayException;
 }

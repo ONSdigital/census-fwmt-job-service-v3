@@ -10,11 +10,15 @@ import uk.gov.ons.census.fwmt.jobservice.rest.client.CometRestClientResponseErro
 @Configuration
 public class TMRestTemplate {
 
-  @Value("${totalmobile.username}")
-  private String userName;
+  private final String userName;
+  private final String password;
 
-  @Value("${totalmobile.password}")
-  private String password;
+  public TMRestTemplate(
+      @Value("${totalmobile.username}") String userName,
+      @Value("${totalmobile.password}") String password) {
+    this.userName = userName;
+    this.password = password;
+  }
 
   @Bean(name = "tm")
   public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {

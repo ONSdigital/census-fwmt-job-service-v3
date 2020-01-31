@@ -10,7 +10,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -29,18 +28,21 @@ import java.util.UUID;
 @Component
 public class GatewayActionProducer {
 
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+  private final GatewayEventManager gatewayEventManager;
+  private final RabbitTemplate rabbitTemplate;
+  private final DirectExchange gatewayActionsExchange;
+  private final ObjectMapper objectMapper;
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
-
-  @Autowired
-  @Qualifier("gatewayActionsExchange")
-  private DirectExchange gatewayActionsExchange;
-
-  @Autowired
-  private ObjectMapper objectMapper;
+  public GatewayActionProducer(
+      GatewayEventManager gatewayEventManager,
+      RabbitTemplate rabbitTemplate,
+      @Qualifier("gatewayActionsExchange") DirectExchange gatewayActionsExchange,
+      ObjectMapper objectMapper) {
+    this.gatewayEventManager = gatewayEventManager;
+    this.rabbitTemplate = rabbitTemplate;
+    this.gatewayActionsExchange = gatewayActionsExchange;
+    this.objectMapper = objectMapper;
+  }
 
   @Retryable
   public void sendMessage(Object dto) throws GatewayException {

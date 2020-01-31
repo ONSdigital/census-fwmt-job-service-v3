@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.config.ActionFieldQueueConfig;
@@ -13,14 +12,18 @@ import uk.gov.ons.census.fwmt.jobservice.config.ActionFieldQueueConfig;
 @Component
 public class ProcessRMFieldDLQ {
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
+  private final RabbitTemplate rabbitTemplate;
+  private final AmqpAdmin amqpAdmin;
+  private final ActionFieldQueueConfig actionFieldQueueConfig;
 
-  @Autowired
-  private AmqpAdmin amqpAdmin;
-
-  @Autowired
-  private ActionFieldQueueConfig actionFieldQueueConfig;
+  public ProcessRMFieldDLQ(
+      RabbitTemplate rabbitTemplate,
+      AmqpAdmin amqpAdmin,
+      ActionFieldQueueConfig actionFieldQueueConfig) {
+    this.rabbitTemplate = rabbitTemplate;
+    this.amqpAdmin = amqpAdmin;
+    this.actionFieldQueueConfig = actionFieldQueueConfig;
+  }
 
   public void processDLQ() throws GatewayException {
     int messageCount;

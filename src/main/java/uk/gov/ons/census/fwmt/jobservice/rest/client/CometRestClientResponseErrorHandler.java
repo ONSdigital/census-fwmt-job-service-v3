@@ -29,4 +29,5 @@ public class CometRestClientResponseErrorHandler implements ResponseErrorHandler
     log.error(message);
     throw new RuntimeException(message);
   }
+
 }

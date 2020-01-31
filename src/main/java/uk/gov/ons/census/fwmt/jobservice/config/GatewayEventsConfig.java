@@ -54,8 +54,11 @@ public class GatewayEventsConfig {
   //public static final String RABBIT_QUEUE_DOWN = "RABBIT_QUEUE_DOWN";
   //public static final String REDIS_SERVICE_DOWN = "REDIS_SERVICE_DOWN";
 
-  @Value("#{'${logging.profile}' == 'CLOUD'}")
-  private boolean useJsonLogging;
+  private final boolean useJsonLogging;
+
+  public GatewayEventsConfig(@Value("#{'${logging.profile}' == 'CLOUD'}") boolean useJsonLogging) {
+    this.useJsonLogging = useJsonLogging;
+  }
 
   @Bean
   public GatewayEventManager gatewayEventManager() {

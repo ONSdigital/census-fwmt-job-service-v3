@@ -7,7 +7,6 @@ import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,18 +17,19 @@ import uk.gov.ons.census.fwmt.jobservice.message.ActionInstructionReceiver;
 @Configuration
 public class ActionFieldQueueConfig {
 
-  public String actionFieldQueueName;
-  public String actionFieldDLQName;
+  public final String actionFieldQueueName;
+  public final String actionFieldDLQName;
+
+  private final AmqpAdmin amqpAdmin;
 
   public ActionFieldQueueConfig(
       @Value("${rabbitmq.rmQueue}") String actionFieldQueueName,
-      @Value("${rabbitmq.rmDeadLetter}") String actionFieldDLQName) {
+      @Value("${rabbitmq.rmDeadLetter}") String actionFieldDLQName,
+      AmqpAdmin amqpAdmin) {
     this.actionFieldQueueName = actionFieldQueueName;
     this.actionFieldDLQName = actionFieldDLQName;
+    this.amqpAdmin = amqpAdmin;
   }
-
-  @Autowired
-  private AmqpAdmin amqpAdmin;
 
   //Queues
   @Bean

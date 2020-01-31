@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.message;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -21,16 +20,16 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class ActionInstructionReceiver {
 
-  @Autowired
-  private RMAdapterService rmAdapterService;
+  private final RMAdapterService rmAdapterService;
+  private final GatewayEventManager gatewayEventManager;
+  private final JAXBContext jaxbContext;
 
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
-
-  private JAXBContext jaxbContext;
-
-  public ActionInstructionReceiver() throws JAXBException {
-    jaxbContext = JAXBContext.newInstance(ActionInstruction.class);
+  public ActionInstructionReceiver(
+      RMAdapterService rmAdapterService,
+      GatewayEventManager gatewayEventManager) throws JAXBException {
+    this.rmAdapterService = rmAdapterService;
+    this.gatewayEventManager = gatewayEventManager;
+    this.jaxbContext = JAXBContext.newInstance(ActionInstruction.class);
   }
 
   public void receiveMessage(String message) throws GatewayException {

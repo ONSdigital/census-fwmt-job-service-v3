@@ -33,11 +33,10 @@ public class CanonicalJobHelper {
   private static final String CREATE_ACTION_TYPE = "Create";
   private static final String UPDATE_ACTION_TYPE = "Update";
 
-  private String ccsIntUrl;
+  private final String ccsIntUrl;
 
-  @Value("${equrl}")
-  private String setCcsIntUrl(String ccsIntUrl) {
-    return this.ccsIntUrl = ccsIntUrl;
+  public CanonicalJobHelper(@Value("${eq.url}") String ccsIntUrl) {
+    this.ccsIntUrl = ccsIntUrl;
   }
 
   public CreateFieldWorkerJobRequest newCreateJob(ActionInstruction actionInstruction) throws GatewayException {

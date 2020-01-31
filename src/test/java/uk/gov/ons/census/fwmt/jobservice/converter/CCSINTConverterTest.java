@@ -12,7 +12,7 @@ import uk.gov.ons.census.fwmt.common.data.ccs.CCSPropertyListingOutcome;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.converter.impl.CCSINTConverter;
-import uk.gov.ons.census.fwmt.jobservice.entity.CCSOutcomeStore;
+import uk.gov.ons.census.fwmt.jobservice.redis.CCSOutcomeStore;
 import uk.gov.ons.census.fwmt.jobservice.helper.CcsPropertyListedOutcomeBuilder;
 import uk.gov.ons.census.fwmt.jobservice.helper.FieldWorkerJobRequestBuilder;
 import uk.gov.ons.census.fwmt.jobservice.message.MessageConverter;

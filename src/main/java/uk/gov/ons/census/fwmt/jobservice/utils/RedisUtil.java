@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.config;
+package uk.gov.ons.census.fwmt.jobservice.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

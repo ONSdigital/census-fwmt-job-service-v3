@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.health;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
@@ -18,20 +17,24 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SE
 @Component
 public class TMHealthIndicator extends AbstractHealthIndicator {
 
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+  private final GatewayEventManager gatewayEventManager;
+  private final String tmBaseUrl;
+  private final String healthcheckPath;
+  private final String tmUsername;
+  private final String tmPassword;
 
-  @Value("${totalmobile.baseUrl}")
-  private String tmBaseUrl;
-
-  @Value("${totalmobile.healthcheckPath}")
-  private String healthcheckPath;
-
-  @Value("${totalmobile.username}")
-  private String tmUsername;
-
-  @Value("${totalmobile.password}")
-  private String tmPassword;
+  public TMHealthIndicator(
+      GatewayEventManager gatewayEventManager,
+      @Value("${totalmobile.baseUrl}") String tmBaseUrl,
+      @Value("${totalmobile.healthcheckPath}") String healthcheckPath,
+      @Value("${totalmobile.username}") String tmUsername,
+      @Value("${totalmobile.password}") String tmPassword) {
+    this.gatewayEventManager = gatewayEventManager;
+    this.tmBaseUrl = tmBaseUrl;
+    this.healthcheckPath = healthcheckPath;
+    this.tmUsername = tmUsername;
+    this.tmPassword = tmPassword;
+  }
 
   @Override protected void doHealthCheck(Health.Builder builder) {
     String swaggerUrl = tmBaseUrl + healthcheckPath;

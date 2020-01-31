@@ -15,17 +15,18 @@ import uk.gov.ons.census.fwmt.common.retry.GatewayMessageRecover;
 
 @Configuration
 public class QueueConfig {
-  private String username;
-  private String password;
-  private String hostname;
-  private int port;
-  private String virtualHost;
+
+  private final String username;
+  private final String password;
+  private final String hostname;
+  private final int port;
+  private final String virtualHost;
 
   public QueueConfig(
       @Value("${rabbitmq.username}") String username,
       @Value("${rabbitmq.password}") String password,
       @Value("${rabbitmq.hostname}") String hostname,
-      @Value("${rabbitmq.port}") Integer port,
+      @Value("${rabbitmq.port}") int port,
       @Value("${rabbitmq.virtualHost}") String virtualHost) {
     this.username = username;
     this.password = password;
@@ -34,8 +35,9 @@ public class QueueConfig {
     this.virtualHost = virtualHost;
   }
 
-  private static CachingConnectionFactory createConnectionFactory(int port, String hostname, String virtualHost,
-      String password, String username) {
+  @Bean
+  @Primary
+  public ConnectionFactory connectionFactory() {
     CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
 
     cachingConnectionFactory.setVirtualHost(virtualHost);
@@ -45,19 +47,11 @@ public class QueueConfig {
     return cachingConnectionFactory;
   }
 
-  // Connection Factory
-  @Bean
-  @Primary
-  public ConnectionFactory connectionFactory() {
-    return createConnectionFactory(port, hostname, virtualHost, password, username);
-  }
-
   @Bean
   public AmqpAdmin amqpAdmin() {
     return new RabbitAdmin(connectionFactory());
   }
 
-  // Interceptor
   @Bean
   public RetryOperationsInterceptor interceptor(
       @Qualifier("retryTemplate") RetryOperations retryOperations) {

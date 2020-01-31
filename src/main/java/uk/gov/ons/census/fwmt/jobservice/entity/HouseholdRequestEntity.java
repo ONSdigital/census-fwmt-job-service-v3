@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.redis;
+package uk.gov.ons.census.fwmt.jobservice.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

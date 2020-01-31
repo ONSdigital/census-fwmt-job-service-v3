@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -20,17 +19,22 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.INVAL
 @Component
 public class RMAdapterServiceImpl implements RMAdapterService {
 
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+  private final GatewayEventManager gatewayEventManager;
+  private final GatewayActionProducer gatewayActionProducer;
+  private final HouseholdStore householdStore;
+  private final CanonicalJobHelper canonicalJobHelper;
 
-  @Autowired
-  private GatewayActionProducer jobServiceProducer;
-
-  @Autowired
-  private HouseholdStore householdStore;
-
-  @Autowired
-  private CanonicalJobHelper canonicalJobHelper = new CanonicalJobHelper();
+  public RMAdapterServiceImpl(
+      GatewayEventManager gatewayEventManager,
+      GatewayActionProducer gatewayActionProducer,
+      HouseholdStore householdStore
+      // CanonicalJobHelper canonicalJobHelper
+  ) {
+    this.gatewayEventManager = gatewayEventManager;
+    this.gatewayActionProducer = gatewayActionProducer;
+    this.householdStore = householdStore;
+    this.canonicalJobHelper = new CanonicalJobHelper();
+  }
 
   public void sendJobRequest(ActionInstruction actionInstruction) throws GatewayException {
     if (actionInstruction.getActionRequest() != null) {
@@ -52,7 +56,7 @@ public class RMAdapterServiceImpl implements RMAdapterService {
       return;
 
     if (actionInstruction.getActionUpdate().getAddressType().equals("HH")) {
-      jobServiceProducer.sendMessage(canonicalJobHelper.newUpdateJob(actionInstruction));
+      gatewayActionProducer.sendMessage(canonicalJobHelper.newUpdateJob(actionInstruction));
       gatewayEventManager.triggerEvent(actionInstruction.getActionUpdate().getCaseId(), CANONICAL_UPDATE_SENT);
     } else {
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Valid address type not found");
@@ -66,7 +70,7 @@ public class RMAdapterServiceImpl implements RMAdapterService {
     if (householdStore.retrieveCache(actionInstruction.getActionCancel().getCaseId()) != null) {
       if (actionInstruction.getActionCancel().getAddressType().equals("HH")) {
 
-        jobServiceProducer.sendMessage(canonicalJobHelper.newCancelJob(actionInstruction));
+        gatewayActionProducer.sendMessage(canonicalJobHelper.newCancelJob(actionInstruction));
         gatewayEventManager
             .triggerEvent(actionInstruction.getActionCancel().getCaseId(), CANONICAL_CANCEL_SENT, "Case Ref",
                 actionInstruction.getActionCancel().getCaseRef());
@@ -78,7 +82,7 @@ public class RMAdapterServiceImpl implements RMAdapterService {
 
   private void sendCreateMessage(ActionInstruction actionInstruction) throws GatewayException {
     householdStore.cacheJob(actionInstruction.getActionRequest().getCaseId());
-    jobServiceProducer.sendMessage(canonicalJobHelper.newCreateJob(actionInstruction));
+    gatewayActionProducer.sendMessage(canonicalJobHelper.newCreateJob(actionInstruction));
     gatewayEventManager.triggerEvent(actionInstruction.getActionRequest().getCaseId(), CANONICAL_CREATE_SENT);
   }
 }

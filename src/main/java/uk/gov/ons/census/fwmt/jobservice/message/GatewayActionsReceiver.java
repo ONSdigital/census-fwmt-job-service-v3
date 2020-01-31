@@ -3,7 +3,6 @@ package uk.gov.ons.census.fwmt.jobservice.message;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.canonical.v1.CancelFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
@@ -23,17 +22,21 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CANON
 @Component
 public class GatewayActionsReceiver {
 
-  @Autowired
-  private JobService jobService;
+  private final JobService jobService;
+  private final GatewayEventManager gatewayEventManager;
+  private final ObjectMapper jsonObjectMapper;
+  private final MessageConverter messageConverter;
 
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
-
-  @Autowired
-  private ObjectMapper jsonObjectMapper = new ObjectMapper();
-
-  @Autowired
-  private MessageConverter messageConverter;
+  public GatewayActionsReceiver(
+      JobService jobService,
+      GatewayEventManager gatewayEventManager,
+      //ObjectMapper jsonObjectMapper,
+      MessageConverter messageConverter) {
+    this.jobService = jobService;
+    this.gatewayEventManager = gatewayEventManager;
+    this.jsonObjectMapper = new ObjectMapper();
+    this.messageConverter = messageConverter;
+  }
 
   public void receiveMessage(Object message) throws GatewayException {
     log.info("received a message from RM-Adapter");

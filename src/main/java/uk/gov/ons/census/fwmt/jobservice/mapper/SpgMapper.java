@@ -9,13 +9,12 @@ import uk.gov.ons.census.fwmt.jobservice.entity.tm.PutCase;
 
 import java.util.List;
 
-public class SpgMapper {
+public final class SpgMapper {
 
-  public SpgMapper() {
-
+  private SpgMapper() {
   }
 
-  public PutCase map(FieldworkFollowup in) {
+  public static PutCase map(FieldworkFollowup in) {
     PutCase out = new PutCase();
 
     out.setReference(in.getCaseRef());
@@ -66,41 +65,26 @@ public class SpgMapper {
       // SPG Unit
       if (in.getHandDeliver()) {
         // SPG Unit Deliver
-        return mapUnitDeliver(in, out);
+        out.setSurveyType("SPG Unit-D");
       } else {
         // SPG Unit Followup
-        return mapUnitFollowup(in, out);
+        out.setSurveyType("SPG Unit-F");
       }
     } else if (in.getAddressLevel().equals("E")) {
       // SPG Site
       if (in.getSecureEstablishment()) {
         // SPG Secure Site
-        return mapSecureSite(in, out);
+        out.setSurveyType("SPG SECURE SITE");
       } else {
         // SPG Site
-        return mapSite(in, out);
+        out.setSurveyType("SPG SITE");
       }
     } else {
       // Unknown
       // TODO proper error handling
     }
 
-  }
-
-  private PutCase mapUnitDeliver(FieldworkFollowup in, PutCase out) {
-
-  }
-
-  private PutCase mapUnitFollowup(FieldworkFollowup in, PutCase out) {
-
-  }
-
-  private PutCase mapSite(FieldworkFollowup in, PutCase out) {
-
-  }
-
-  private PutCase mapSecureSite(FieldworkFollowup in, PutCase out) {
-
+    return out;
   }
 
 }

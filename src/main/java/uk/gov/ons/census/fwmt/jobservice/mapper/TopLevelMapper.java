@@ -3,13 +3,13 @@ package uk.gov.ons.census.fwmt.jobservice.mapper;
 import uk.gov.ons.census.fwmt.jobservice.entity.rm.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.jobservice.entity.tm.PutCase;
 
-public class TopLevelMapper {
+public final class TopLevelMapper {
 
-  public TopLevelMapper() {
-
+  private TopLevelMapper() {
   }
 
-  public PutCase map(FieldworkFollowup in) {
+  public static PutCase map(FieldworkFollowup in) {
+    return null;
   }
 
 }

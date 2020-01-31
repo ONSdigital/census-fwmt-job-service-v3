@@ -8,12 +8,12 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.fwmt.jobservice.rest.client.CometRestClientResponseErrorHandler;
 
 @Configuration
-public class TMRestTemplate {
+public class TmRestTemplate {
 
   private final String userName;
   private final String password;
 
-  public TMRestTemplate(
+  public TmRestTemplate(
       @Value("${totalmobile.username}") String userName,
       @Value("${totalmobile.password}") String password) {
     this.userName = userName;

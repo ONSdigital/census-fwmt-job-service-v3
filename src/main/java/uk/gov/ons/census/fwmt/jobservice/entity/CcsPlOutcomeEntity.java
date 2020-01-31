@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @RedisHash("CCSPLOutcomeEntity")
-public class CCSPLOutcomeEntity implements Serializable {
+public class CcsPlOutcomeEntity implements Serializable {
 
   private String caseId;
   private String ccsPropertyListingOutcome;

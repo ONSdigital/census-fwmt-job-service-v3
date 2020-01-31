@@ -11,8 +11,8 @@ import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.common.data.ccs.CCSPropertyListingOutcome;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.jobservice.converter.impl.CCSINTConverter;
-import uk.gov.ons.census.fwmt.jobservice.redis.CCSOutcomeStore;
+import uk.gov.ons.census.fwmt.jobservice.converter.impl.CcsIntConverter;
+import uk.gov.ons.census.fwmt.jobservice.redis.CcsOutcomeStore;
 import uk.gov.ons.census.fwmt.jobservice.helper.CcsPropertyListedOutcomeBuilder;
 import uk.gov.ons.census.fwmt.jobservice.helper.FieldWorkerJobRequestBuilder;
 import uk.gov.ons.census.fwmt.jobservice.message.MessageConverter;
@@ -22,13 +22,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CCSINTConverterTest {
+public class CcsIntConverterTest {
 
   @InjectMocks
-  private CCSINTConverter ccsintConverter;
+  private CcsIntConverter ccsintConverter;
 
   @Mock
-  private CCSOutcomeStore ccsOutcomeStore;
+  private CcsOutcomeStore ccsOutcomeStore;
 
   @Mock
   private MessageConverter messageConverter;

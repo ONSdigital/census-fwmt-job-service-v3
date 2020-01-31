@@ -4,25 +4,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayActionsQueueConfig.GATEWAY_ACTIONS_DLQ;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayActionsQueueConfig.GATEWAY_ACTIONS_QUEUE;
+import uk.gov.ons.census.fwmt.jobservice.config.ActionFieldQueueConfig;
 
 @Slf4j
 @Component
-public class ProcessGatewayActionsDLQ {
+public class ProcessRmFieldDlq {
 
   private final RabbitTemplate rabbitTemplate;
   private final AmqpAdmin amqpAdmin;
+  private final ActionFieldQueueConfig actionFieldQueueConfig;
 
-  public ProcessGatewayActionsDLQ(
-      @Autowired RabbitTemplate rabbitTemplate,
-      @Autowired AmqpAdmin amqpAdmin) {
+  public ProcessRmFieldDlq(
+      RabbitTemplate rabbitTemplate,
+      AmqpAdmin amqpAdmin,
+      ActionFieldQueueConfig actionFieldQueueConfig) {
     this.rabbitTemplate = rabbitTemplate;
     this.amqpAdmin = amqpAdmin;
+    this.actionFieldQueueConfig = actionFieldQueueConfig;
   }
 
   public void processDLQ() throws GatewayException {
@@ -30,12 +30,13 @@ public class ProcessGatewayActionsDLQ {
     Message message;
 
     try {
-      messageCount = (int) amqpAdmin.getQueueProperties(GATEWAY_ACTIONS_DLQ).get("QUEUE_MESSAGE_COUNT");
+      messageCount = (int) amqpAdmin.getQueueProperties(actionFieldQueueConfig.actionFieldDLQName)
+          .get("QUEUE_MESSAGE_COUNT");
 
       for (int i = 0; i < messageCount; i++) {
-        message = rabbitTemplate.receive(GATEWAY_ACTIONS_DLQ);
+        message = rabbitTemplate.receive(actionFieldQueueConfig.actionFieldDLQName);
 
-        rabbitTemplate.send(GATEWAY_ACTIONS_QUEUE, message);
+        rabbitTemplate.send(actionFieldQueueConfig.actionFieldQueueName, message);
       }
     } catch (NullPointerException e) {
       throw new GatewayException(GatewayException.Fault.BAD_REQUEST, "No messages in queue");

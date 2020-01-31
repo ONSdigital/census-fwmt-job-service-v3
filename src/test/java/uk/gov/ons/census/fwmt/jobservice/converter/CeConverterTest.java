@@ -10,17 +10,17 @@ import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.jobservice.converter.impl.CEConverter;
+import uk.gov.ons.census.fwmt.jobservice.converter.impl.CeConverter;
 import uk.gov.ons.census.fwmt.jobservice.helper.FieldWorkerJobRequestBuilder;
 import uk.gov.ons.census.fwmt.jobservice.rest.client.CometRestClient;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CEConverterTest {
+public class CeConverterTest {
 
   @InjectMocks
-  private CEConverter ceConverter;
+  private CeConverter ceConverter;
 
   @Mock
   private CometRestClient cometRestClient;

@@ -8,21 +8,21 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
-import uk.gov.ons.census.fwmt.jobservice.converter.impl.CCSPLConverter;
-import uk.gov.ons.census.fwmt.jobservice.redis.CCSOutcomeStore;
+import uk.gov.ons.census.fwmt.jobservice.converter.impl.CcsPlConverter;
+import uk.gov.ons.census.fwmt.jobservice.redis.CcsOutcomeStore;
 import uk.gov.ons.census.fwmt.jobservice.helper.FieldWorkerJobRequestBuilder;
 import uk.gov.ons.census.fwmt.jobservice.message.MessageConverter;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CCSPLConverterTest {
+public class CcsPlConverterTest {
 
   @InjectMocks
-  private CCSPLConverter ccsplConverter;
+  private CcsPlConverter ccsplConverter;
 
   @Mock
-  private CCSOutcomeStore ccsOutcomeStore;
+  private CcsOutcomeStore ccsOutcomeStore;
 
   @Mock
   private MessageConverter messageConverter;

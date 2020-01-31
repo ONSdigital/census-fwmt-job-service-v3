@@ -16,7 +16,7 @@ import uk.gov.ons.census.fwmt.jobservice.utils.JobServiceUtils;
 import static uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest.TypeEnum.CE;
 
 @Component("CE")
-public class CEConverter implements CometConverter {
+public class CeConverter implements CometConverter {
 
   @Override
   public CaseRequest convert(CreateFieldWorkerJobRequest ingest) {

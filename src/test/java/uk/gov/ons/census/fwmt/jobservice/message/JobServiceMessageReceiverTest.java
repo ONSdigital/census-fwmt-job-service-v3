@@ -22,6 +22,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
+// TODO Some stubs were disabled for being redundant. This may require later investigation, so they have been commented out.
+// TODO Along with this, some fields were left written but un-read, and have also been commented out.
+
 @RunWith(MockitoJUnitRunner.class)
 public class JobServiceMessageReceiverTest {
 
@@ -31,8 +34,8 @@ public class JobServiceMessageReceiverTest {
   @Mock
   private JobService jobService;
 
-  @Mock
-  private ObjectMapper mapper = new ObjectMapper();
+  //@Mock
+  //private ObjectMapper mapper = new ObjectMapper();
 
   @Mock
   private GatewayEventManager gatewayEventManager;
@@ -72,13 +75,13 @@ public class JobServiceMessageReceiverTest {
 
     String message = json.toString();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode jsonNode = objectMapper.readTree(message);
+    //ObjectMapper objectMapper = new ObjectMapper();
+    //JsonNode jsonNode = objectMapper.readTree(message);
 
     when(messageConverter.convertMessageToDTO(CreateFieldWorkerJobRequest.class, message))
         .thenReturn(createFieldWorkerJobRequest);
 
-    when(mapper.readTree(message)).thenReturn(jsonNode);
+    //when(mapper.readTree(message)).thenReturn(jsonNode);
 
     messageReceiver.receiveMessage(message);
 
@@ -96,13 +99,13 @@ public class JobServiceMessageReceiverTest {
 
     String message = json.toString();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode jsonNode = objectMapper.readTree(message);
+    //ObjectMapper objectMapper = new ObjectMapper();
+    //JsonNode jsonNode = objectMapper.readTree(message);
 
     when(messageConverter.convertMessageToDTO(CancelFieldWorkerJobRequest.class, message))
         .thenReturn(cancelFieldWorkerJobRequest);
 
-    when(mapper.readTree(message)).thenReturn(jsonNode);
+    //when(mapper.readTree(message)).thenReturn(jsonNode);
 
     messageReceiver.receiveMessage(message);
 
@@ -133,13 +136,13 @@ public class JobServiceMessageReceiverTest {
 
     String message = json.toString();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode jsonNode = objectMapper.readTree(message);
+    //ObjectMapper objectMapper = new ObjectMapper();
+    //JsonNode jsonNode = objectMapper.readTree(message);
 
     when(messageConverter.convertMessageToDTO(CreateFieldWorkerJobRequest.class, message))
         .thenReturn(createFieldWorkerJobRequest);
 
-    when(mapper.readTree(message)).thenReturn(jsonNode);
+    //when(mapper.readTree(message)).thenReturn(jsonNode);
 
     messageReceiver.receiveMessage(message);
 
@@ -156,10 +159,10 @@ public class JobServiceMessageReceiverTest {
 
     String message = json.toString();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode jsonNode = objectMapper.readTree(message);
+    //ObjectMapper objectMapper = new ObjectMapper();
+    //JsonNode jsonNode = objectMapper.readTree(message);
 
-    when(mapper.readTree(message)).thenReturn(jsonNode);
+    //when(mapper.readTree(message)).thenReturn(jsonNode);
 
     messageReceiver.receiveMessage(message);
   }
@@ -173,13 +176,13 @@ public class JobServiceMessageReceiverTest {
 
     String message = json.toString();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode jsonNode = objectMapper.readTree(message);
+    //ObjectMapper objectMapper = new ObjectMapper();
+    //JsonNode jsonNode = objectMapper.readTree(message);
 
     when(messageConverter.convertMessageToDTO(UpdateFieldWorkerJobRequest.class, message))
         .thenReturn(updateFieldWorkerJobRequest);
 
-    when(mapper.readTree(message)).thenReturn(jsonNode);
+    //when(mapper.readTree(message)).thenReturn(jsonNode);
 
     messageReceiver.receiveMessage(message);
 

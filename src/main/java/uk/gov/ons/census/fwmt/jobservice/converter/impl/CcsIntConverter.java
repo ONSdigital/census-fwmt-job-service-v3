@@ -17,7 +17,7 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.converter.CometConverter;
 import uk.gov.ons.census.fwmt.jobservice.message.MessageConverter;
-import uk.gov.ons.census.fwmt.jobservice.redis.CCSOutcomeStore;
+import uk.gov.ons.census.fwmt.jobservice.redis.CcsOutcomeStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +26,13 @@ import static uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest.TypeEnum.
 import static uk.gov.ons.census.fwmt.jobservice.utils.JobServiceUtils.setAddress;
 
 @Component("CCS")
-public class CCSINTConverter implements CometConverter {
+public class CcsIntConverter implements CometConverter {
 
-  private final CCSOutcomeStore ccsOutcomeStore;
+  private final CcsOutcomeStore ccsOutcomeStore;
   private final MessageConverter messageConverter;
 
-  public CCSINTConverter(
-      CCSOutcomeStore ccsOutcomeStore,
+  public CcsIntConverter(
+      CcsOutcomeStore ccsOutcomeStore,
       MessageConverter messageConverter) {
     this.ccsOutcomeStore = ccsOutcomeStore;
     this.messageConverter = messageConverter;

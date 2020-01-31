@@ -6,11 +6,11 @@ import uk.gov.ons.census.fwmt.jobservice.utils.RedisUtil;
 
 @Slf4j
 @Component
-public class CCSOutcomeStore {
+public class CcsOutcomeStore {
 
   private final RedisUtil<String> redisUtil;
 
-  public CCSOutcomeStore(RedisUtil<String> redisUtil) {
+  public CcsOutcomeStore(RedisUtil<String> redisUtil) {
     this.redisUtil = redisUtil;
   }
 

@@ -9,13 +9,13 @@ import uk.gov.ons.census.fwmt.common.retry.DefaultListenerSupport;
 import uk.gov.ons.census.fwmt.common.retry.GatewayRetryPolicy;
 
 @Configuration
-public class RabbitMQConfig {
+public class RabbitMqConfig {
 
   private final int initialInterval;
   private final double multiplier;
   private final int maxInterval;
 
-  public RabbitMQConfig(
+  public RabbitMqConfig(
       @Value("${rabbitmq.initialinterval}") int initialInterval,
       @Value("${rabbitmq.multiplier}") double multiplier,
       @Value("${rabbitmq.maxInterval}") int maxInterval) {

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
-import uk.gov.ons.census.fwmt.jobservice.service.RMAdapterService;
+import uk.gov.ons.census.fwmt.jobservice.service.RmAdapterService;
 import uk.gov.ons.ctp.response.action.message.instruction.ActionInstruction;
 
 import javax.xml.bind.JAXBContext;
@@ -20,12 +20,12 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class ActionInstructionReceiver {
 
-  private final RMAdapterService rmAdapterService;
+  private final RmAdapterService rmAdapterService;
   private final GatewayEventManager gatewayEventManager;
   private final JAXBContext jaxbContext;
 
   public ActionInstructionReceiver(
-      RMAdapterService rmAdapterService,
+      RmAdapterService rmAdapterService,
       GatewayEventManager gatewayEventManager) throws JAXBException {
     this.rmAdapterService = rmAdapterService;
     this.gatewayEventManager = gatewayEventManager;

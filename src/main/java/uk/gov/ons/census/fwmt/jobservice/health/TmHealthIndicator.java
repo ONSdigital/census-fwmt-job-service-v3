@@ -15,7 +15,7 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SE
 
 @Slf4j
 @Component
-public class TMHealthIndicator extends AbstractHealthIndicator {
+public class TmHealthIndicator extends AbstractHealthIndicator {
 
   private final GatewayEventManager gatewayEventManager;
   private final String tmBaseUrl;
@@ -23,7 +23,7 @@ public class TMHealthIndicator extends AbstractHealthIndicator {
   private final String tmUsername;
   private final String tmPassword;
 
-  public TMHealthIndicator(
+  public TmHealthIndicator(
       GatewayEventManager gatewayEventManager,
       @Value("${totalmobile.baseUrl}") String tmBaseUrl,
       @Value("${totalmobile.healthcheckPath}") String healthcheckPath,

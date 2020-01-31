@@ -5,23 +5,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.jobservice.message.ProcessGatewayActionsDLQ;
-import uk.gov.ons.census.fwmt.jobservice.message.ProcessRMFieldDLQ;
+import uk.gov.ons.census.fwmt.jobservice.message.ProcessGatewayActionsDlq;
+import uk.gov.ons.census.fwmt.jobservice.message.ProcessRmFieldDlq;
 
 @Controller
 public class QueueListenerController {
 
   // job service v3 only
-  private final ProcessGatewayActionsDLQ processGatewayActionsDLQ;
+  private final ProcessGatewayActionsDlq processGatewayActionsDLQ;
 
   // rm adapter only
-  private final ProcessRMFieldDLQ processRMFieldDLQ;
+  private final ProcessRmFieldDlq processRMFieldDLQ;
 
   private final SimpleMessageListenerContainer simpleMessageListenerContainer;
 
   public QueueListenerController(
-      ProcessGatewayActionsDLQ processGatewayActionsDLQ,
-      ProcessRMFieldDLQ processRMFieldDLQ,
+      ProcessGatewayActionsDlq processGatewayActionsDLQ,
+      ProcessRmFieldDlq processRMFieldDLQ,
       SimpleMessageListenerContainer simpleMessageListenerContainer) {
     this.processGatewayActionsDLQ = processGatewayActionsDLQ;
     this.processRMFieldDLQ = processRMFieldDLQ;

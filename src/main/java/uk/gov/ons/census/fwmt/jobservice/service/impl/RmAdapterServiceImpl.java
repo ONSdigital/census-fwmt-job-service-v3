@@ -7,7 +7,7 @@ import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.canonical.CanonicalJobHelper;
 import uk.gov.ons.census.fwmt.jobservice.message.GatewayActionProducer;
 import uk.gov.ons.census.fwmt.jobservice.redis.HouseholdStore;
-import uk.gov.ons.census.fwmt.jobservice.service.RMAdapterService;
+import uk.gov.ons.census.fwmt.jobservice.service.RmAdapterService;
 import uk.gov.ons.ctp.response.action.message.instruction.ActionInstruction;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CANONICAL_CANCEL_SENT;
@@ -17,23 +17,23 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.INVAL
 
 @Slf4j
 @Component
-public class RMAdapterServiceImpl implements RMAdapterService {
+public class RmAdapterServiceImpl implements RmAdapterService {
 
   private final GatewayEventManager gatewayEventManager;
   private final GatewayActionProducer gatewayActionProducer;
   private final HouseholdStore householdStore;
   private final CanonicalJobHelper canonicalJobHelper;
 
-  public RMAdapterServiceImpl(
+  public RmAdapterServiceImpl(
       GatewayEventManager gatewayEventManager,
       GatewayActionProducer gatewayActionProducer,
-      HouseholdStore householdStore
-      // CanonicalJobHelper canonicalJobHelper
+      HouseholdStore householdStore,
+      CanonicalJobHelper canonicalJobHelper
   ) {
     this.gatewayEventManager = gatewayEventManager;
     this.gatewayActionProducer = gatewayActionProducer;
     this.householdStore = householdStore;
-    this.canonicalJobHelper = new CanonicalJobHelper();
+    this.canonicalJobHelper = canonicalJobHelper;
   }
 
   public void sendJobRequest(ActionInstruction actionInstruction) throws GatewayException {

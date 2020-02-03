@@ -16,10 +16,9 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.converter.CometConverter;
+import uk.gov.ons.census.fwmt.jobservice.service.converter.CometConverter;
 import uk.gov.ons.census.fwmt.jobservice.helper.FieldWorkerJobRequestBuilder;
-import uk.gov.ons.census.fwmt.jobservice.rest.client.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.service.impl.JobServiceImpl;
+import uk.gov.ons.census.fwmt.jobservice.service.comet.CometRestClient;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -40,7 +39,7 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET
 public class JobServiceImplTest {
 
   @InjectMocks
-  private JobServiceImpl jobServiceImpl;
+  private JobService jobService;
 
   @Mock
   private GatewayEventManager gatewayEventManager;
@@ -72,7 +71,7 @@ public class JobServiceImplTest {
     when(cometConverter.convert(any(CreateFieldWorkerJobRequest.class))).thenReturn(caseRequest);
     when(restClient.sendRequest(any(CaseRequest.class), anyString())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
-    jobServiceImpl.createJob(jobRequest);
+    jobService.createJob(jobRequest);
 
     // Then
     Mockito.verify(gatewayEventManager).triggerEvent(anyString(), eq(COMET_CREATE_SENT), anyString(), anyString());
@@ -93,7 +92,7 @@ public class JobServiceImplTest {
     when(restClient.sendRequest(any(CasePauseRequest.class), anyString()))
         .thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
-    jobServiceImpl.cancelJob(jobRequest);
+    jobService.cancelJob(jobRequest);
 
     // Then
     Mockito.verify(gatewayEventManager).triggerEvent(anyString(), eq(COMET_CANCEL_SENT));
@@ -125,7 +124,7 @@ public class JobServiceImplTest {
     when(cometConverter.convertUpdate(any(UpdateFieldWorkerJobRequest.class), any(ModelCase.class)))
         .thenReturn(caseRequest);
 
-    jobServiceImpl.convertAndSendUpdate(jobRequest);
+    jobService.updateJob(jobRequest);
 
     // Then
     Mockito.verify(gatewayEventManager).triggerEvent(anyString(), eq(COMET_UPDATE_SENT));

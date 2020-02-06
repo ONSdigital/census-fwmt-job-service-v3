@@ -40,11 +40,11 @@ public class CanonicalJobHelper {
   }
 
   public CreateFieldWorkerJobRequest newCreateJob(ActionInstruction actionInstruction) throws GatewayException {
-    String country = "";
     CreateFieldWorkerJobRequest createJobRequest = new CreateFieldWorkerJobRequest();
     ActionRequest actionRequest = actionInstruction.getActionRequest();
     ActionAddress actionAddress = actionRequest.getAddress();
     ActionContact actionContact = actionRequest.getContact();
+    String country = "";
     if (!actionInstruction.getActionRequest().getSurveyName().equals("CCS")) {
       country = actionAddress.getOa().substring(0, 1);
     }

@@ -25,7 +25,7 @@ import java.util.List;
 import static uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest.TypeEnum.CCS;
 import static uk.gov.ons.census.fwmt.jobservice.utils.JobServiceUtils.setAddress;
 
-@Component("CCS")
+//@Component("CCS")
 public class CcsIntConverter implements CometConverter {
 
   private final CcsOutcomeStore ccsOutcomeStore;

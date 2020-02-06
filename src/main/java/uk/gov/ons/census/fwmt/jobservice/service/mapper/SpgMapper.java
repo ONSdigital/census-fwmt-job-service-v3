@@ -1,90 +1,95 @@
 package uk.gov.ons.census.fwmt.jobservice.service.mapper;
 
-import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
-import uk.gov.ons.census.fwmt.common.data.modelcase.Contact;
-import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
-import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.jobservice.dto.rm.FieldworkFollowup;
-import uk.gov.ons.census.fwmt.jobservice.dto.tm.PutCase;
+import uk.gov.ons.census.fwmt.jobservice.dto.tm.Address;
+import uk.gov.ons.census.fwmt.jobservice.dto.tm.CaseType;
+import uk.gov.ons.census.fwmt.jobservice.dto.tm.Contact;
+import uk.gov.ons.census.fwmt.jobservice.dto.tm.Geography;
+import uk.gov.ons.census.fwmt.jobservice.dto.tm.Location;
+import uk.gov.ons.census.fwmt.jobservice.dto.tm.PutCaseRequest;
 
 import java.util.List;
 
-public final class SpgMapper {
+@Slf4j
+@Service
+public class SpgMapper {
 
-  private SpgMapper() {
+  public SpgMapper() {
   }
 
-  public static PutCase map(FieldworkFollowup in) {
-    PutCase out = new PutCase();
+  public PutCaseRequest map(FieldworkFollowup in) {
+    PutCaseRequest.PutCaseRequestBuilder out = PutCaseRequest.builder();
 
-    out.setReference(in.getCaseRef());
-    out.setType(PutCase.TypeEnum.CE);
-    out.setCategory("Not applicable");
-    out.setEstabType(in.getEstabType());
-    out.setRequiredOfficer(in.getFieldOfficerId());
-    out.setCoordCode(in.getFieldCoordinatorId());
+    out.reference(in.getCaseRef());
+    out.type(CaseType.CE);
+    out.category("Not applicable");
+    out.estabType(in.getEstabType());
+    out.requiredOfficer(in.getFieldOfficerId());
+    out.coordCode(in.getFieldCoordinatorId());
 
-    Contact outContact = new Contact();
-    out.setContact(outContact);
-    outContact.setOrganisationName(in.getOrganisationName());
-    outContact.setName(in.getForename() + " " + in.getSurname());
-    outContact.setPhone(in.getPhoneNumber());
+    Contact.ContactBuilder outContact = Contact.builder();
+    outContact.organisationName(in.getOrganisationName());
+    outContact.name(in.getForename() + " " + in.getSurname());
+    outContact.phone(in.getPhoneNumber());
+    out.contact(outContact.build());
 
-    Address outAddress = new Address();
-    out.setAddress(outAddress);
+    Address.AddressBuilder outAddress = Address.builder();
     try {
-      outAddress.setUprn(Long.valueOf(in.getUprn()));
+      outAddress.uprn(Long.valueOf(in.getUprn()));
     } catch (NumberFormatException e) {
       // TODO proper error handling
     }
-    outAddress.setLines(List.of(
+    outAddress.lines(List.of(
         in.getAddressLine1(),
         in.getAddressLine2(),
         in.getAddressLine3()
     ));
-    outAddress.setTown(in.getTownName());
-    outAddress.setPostcode(in.getPostcode());
+    outAddress.town(in.getTownName());
+    outAddress.postcode(in.getPostcode());
+    out.address(outAddress.build());
 
-    Geography outGeography = new Geography();
-    outAddress.setGeography(outGeography);
-    outGeography.setOa(in.getOa());
+    Geography.GeographyBuilder outGeography = Geography.builder();
+    outGeography.oa(in.getOa());
+    outAddress.geography(outGeography.build());
 
-    Location outLocation = new Location();
-    out.setLocation(outLocation);
+    Location.LocationBuilder outLocation = Location.builder();
     try {
-      outLocation.setLat(Float.valueOf(in.getLatitude()));
-      outLocation.set_long(Float.valueOf(in.getLongitude()));
+      outLocation.lat(Float.valueOf(in.getLatitude()));
+      outLocation._long(Float.valueOf(in.getLongitude()));
     } catch (NumberFormatException e) {
       // TODO proper error handling
     }
+    out.location(outLocation.build());
 
-    out.setUaa(in.getUaa());
-    out.setSai(false);
+    out.uaa(in.getUaa());
+    out.sai(false);
 
     if (in.getAddressLevel().equals("U")) {
       // SPG Unit
       if (in.getHandDeliver()) {
         // SPG Unit Deliver
-        out.setSurveyType("SPG Unit-D");
+        out.surveyType("SPG Unit-D");
       } else {
         // SPG Unit Followup
-        out.setSurveyType("SPG Unit-F");
+        out.surveyType("SPG Unit-F");
       }
     } else if (in.getAddressLevel().equals("E")) {
       // SPG Site
       if (in.getSecureEstablishment()) {
         // SPG Secure Site
-        out.setSurveyType("SPG SECURE SITE");
+        out.surveyType("SPG SECURE SITE");
       } else {
         // SPG Site
-        out.setSurveyType("SPG SITE");
+        out.surveyType("SPG SITE");
       }
     } else {
       // Unknown
       // TODO proper error handling
     }
 
-    return out;
+    return out.build();
   }
 
 }

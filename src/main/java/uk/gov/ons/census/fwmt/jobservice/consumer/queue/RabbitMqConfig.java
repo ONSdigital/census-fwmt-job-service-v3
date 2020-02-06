@@ -35,7 +35,7 @@ public class RabbitMqConfig {
       @Value("${rabbitmq.hostname}") String hostname,
       @Value("${rabbitmq.port}") int port,
       @Value("${rabbitmq.virtualHost}") String virtualHost,
-      @Value("${rabbitmq.initialinterval}") int initialInterval,
+      @Value("${rabbitmq.initialInterval}") int initialInterval,
       @Value("${rabbitmq.multiplier}") double multiplier,
       @Value("${rabbitmq.maxInterval}") int maxInterval) {
     this.username = username;

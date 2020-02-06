@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 
 @Slf4j
-@Component
+//@Component
 public class ProcessRmFieldDlq {
 
   private final RabbitTemplate rabbitTemplate;

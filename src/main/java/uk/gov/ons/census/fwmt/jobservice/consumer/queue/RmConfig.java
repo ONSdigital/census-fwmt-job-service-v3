@@ -16,24 +16,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class RmConfig {
 
-  private final String actionFieldQueueName;
-  private final String actionFieldDLQName;
+  private final String inputQueue;
+  private final String inputDlq;
   private final AmqpAdmin amqpAdmin;
 
   public RmConfig(
-      @Value("${rabbitmq.rmQueue}") String actionFieldQueueName,
-      @Value("${rabbitmq.rmDeadLetter}") String actionFieldDLQName,
+      @Value("${rabbitmq.queues.rm.input}") String inputQueue,
+      @Value("${rabbitmq.queues.rm.dlq}") String inputDlq,
       AmqpAdmin amqpAdmin) {
-    this.actionFieldQueueName = actionFieldQueueName;
-    this.actionFieldDLQName = actionFieldDLQName;
+    this.inputQueue = inputQueue;
+    this.inputDlq = inputDlq;
     this.amqpAdmin = amqpAdmin;
   }
 
   @Bean(name = "RM")
   public Queue queue() {
-    Queue queue = QueueBuilder.durable(actionFieldQueueName)
+    Queue queue = QueueBuilder.durable(inputQueue)
         .withArgument("x-dead-letter-exchange", "")
-        .withArgument("x-dead-letter-routing-key", actionFieldDLQName)
+        .withArgument("x-dead-letter-routing-key", inputDlq)
         .build();
     queue.setAdminsThatShouldDeclare(amqpAdmin);
     return queue;
@@ -41,7 +41,7 @@ public class RmConfig {
 
   @Bean(name = "RM.DLQ")
   public Queue deadLetterQueue() {
-    Queue queue = QueueBuilder.durable(actionFieldDLQName).build();
+    Queue queue = QueueBuilder.durable(inputDlq).build();
     queue.setAdminsThatShouldDeclare(amqpAdmin);
     return queue;
   }
@@ -60,7 +60,7 @@ public class RmConfig {
     Advice[] adviceChain = {retryOperationsInterceptor};
     container.setAdviceChain(adviceChain);
     container.setConnectionFactory(connectionFactory);
-    container.setQueueNames(actionFieldQueueName);
+    container.setQueueNames(inputQueue);
     container.setMessageListener(messageListenerAdapter);
     return container;
   }

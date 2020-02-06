@@ -12,7 +12,7 @@ import static uk.gov.ons.census.fwmt.jobservice.consumer.message.GatewayActionsQ
 import static uk.gov.ons.census.fwmt.jobservice.consumer.message.GatewayActionsQueueConfig.GATEWAY_ACTIONS_QUEUE;
 
 @Slf4j
-@Component
+//@Component
 public class ProcessGatewayActionsDlq {
 
   private final RabbitTemplate rabbitTemplate;

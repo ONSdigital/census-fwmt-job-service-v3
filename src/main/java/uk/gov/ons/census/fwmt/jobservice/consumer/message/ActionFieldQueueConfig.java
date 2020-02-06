@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
-@Configuration
+//@Configuration
 public class ActionFieldQueueConfig {
 
   public final String actionFieldQueueName;

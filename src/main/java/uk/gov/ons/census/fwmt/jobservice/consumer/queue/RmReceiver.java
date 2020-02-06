@@ -1,66 +1,50 @@
 package uk.gov.ons.census.fwmt.jobservice.consumer.queue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
-import uk.gov.ons.census.fwmt.jobservice.service.RmAdapterService;
-import uk.gov.ons.ctp.response.action.message.instruction.ActionInstruction;
+import uk.gov.ons.census.fwmt.jobservice.dto.rm.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @Component
 public class RmReceiver {
-  private final RmAdapterService rmAdapterService;
+  private final JobService jobService;
   private final GatewayEventManager gatewayEventManager;
   private final JAXBContext jaxbContext;
+  private final Unmarshaller unmarshaller;
+  private final ObjectMapper objectMapper;
 
-  public RmReceiver(
-      RmAdapterService rmAdapterService,
-      GatewayEventManager gatewayEventManager) throws JAXBException {
-    this.rmAdapterService = rmAdapterService;
+  public RmReceiver(JobService jobService, GatewayEventManager gatewayEventManager) throws JAXBException {
+    this.jobService = jobService;
     this.gatewayEventManager = gatewayEventManager;
-    this.jaxbContext = JAXBContext.newInstance(ActionInstruction.class);
+    this.jaxbContext = JAXBContext.newInstance(FieldworkFollowup.class);
+    this.unmarshaller = jaxbContext.createUnmarshaller();
+    this.objectMapper = new ObjectMapper();
+    //this.unmarshaller.setProperty(, "application/json");
   }
 
-  public void receiveMessage(String message) throws GatewayException {
+  public void receiveMessage(String message) throws GatewayException, JsonProcessingException {
+    //StreamSource source = new StreamSource(new StringReader(message));
+
+    FieldworkFollowup fieldworkFollowup;
     try {
-      // TODO This should be moved to Queue Config, but can't get it to work
-      Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-      ByteArrayInputStream input = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
-      JAXBElement<ActionInstruction> rmActionInstruction = unmarshaller
-          .unmarshal(new StreamSource(input), ActionInstruction.class);
-      // ================================================================
-
-      triggerEvent(rmActionInstruction.getValue());
-      rmAdapterService.sendJobRequest(rmActionInstruction.getValue());
-    } catch (JAXBException e) {
-      String msg = "Failed to unmarshal XML message.";
-      gatewayEventManager.triggerErrorEvent(this.getClass(), e, msg, "<UNKNOWN_CASE_ID>",
-          GatewayEventsConfig.FAILED_TO_UNMARSHALL_ACTION_INSTRUCTION);
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, msg, e);
+      //fieldworkFollowup = unmarshaller.unmarshal(source, FieldworkFollowup.class).getValue();
+      fieldworkFollowup = objectMapper.readValue(message, FieldworkFollowup.class);
+    } catch (JsonProcessingException e) {
+      // TODO proper error handling
+      throw e;
     }
+
+    jobService.handleMessage(fieldworkFollowup);
   }
 
-  private void triggerEvent(ActionInstruction actionInstruction) {
-    if (actionInstruction.getActionRequest() != null) {
-      gatewayEventManager.triggerEvent(actionInstruction.getActionRequest().getCaseId(),
-          GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref",
-          actionInstruction.getActionRequest().getCaseRef());
-    } else if (actionInstruction.getActionCancel() != null) {
-      gatewayEventManager
-          .triggerEvent(actionInstruction.getActionCancel().getCaseId(), GatewayEventsConfig.RM_CANCEL_REQUEST_RECEIVED,
-              "Case Ref", actionInstruction.getActionCancel().getCaseRef());
-    } else if (actionInstruction.getActionUpdate() != null) {
-      gatewayEventManager.triggerEvent(actionInstruction.getActionUpdate().getCaseId(),
-          GatewayEventsConfig.RM_UPDATE_REQUEST_RECEIVED);
-    }
-  }
 }
 

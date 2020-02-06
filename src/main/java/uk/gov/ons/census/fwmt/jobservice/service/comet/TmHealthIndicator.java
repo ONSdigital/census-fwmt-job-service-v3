@@ -1,6 +1,7 @@
 package uk.gov.ons.census.fwmt.jobservice.service.comet;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
@@ -27,15 +28,17 @@ public class TmHealthIndicator extends AbstractHealthIndicator {
       GatewayEventManager gatewayEventManager,
       @Value("${totalmobile.baseUrl}") String tmBaseUrl,
       @Value("${totalmobile.healthcheckPath}") String healthcheckPath,
-      @Value("TM Anon") RestTemplate restTemplate) {
+      RestTemplateBuilder restTemplateBuilder
+      //@Qualifier("TM Anon") RestTemplate restTemplate
+  ) {
     this.gatewayEventManager = gatewayEventManager;
     this.swaggerUrl = tmBaseUrl + healthcheckPath;
-    this.restTemplate = restTemplate;
+    this.restTemplate = restTemplateBuilder.build();
   }
 
   @Bean(name = "TM Anon")
-  public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-    return restTemplateBuilder.build();
+  public RestTemplate restTemplate() {
+    return restTemplate;
   }
 
   @Override protected void doHealthCheck(Health.Builder builder) {

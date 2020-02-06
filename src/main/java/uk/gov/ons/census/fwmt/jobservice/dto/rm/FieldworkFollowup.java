@@ -1,6 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.dto.rm;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 // This class is set to mirror uk.gov.ons.census.fwmtadapter.model.dto.DFieldworkFollowup from census-rm-fieldwork-adapter
 // https://github.com/ONSdigital/census-rm-fieldwork-adapter/blob/master/src/main/java/uk/gov/ons/census/fwmtadapter/model/dto/FieldworkFollowup.java
@@ -15,6 +18,9 @@ import lombok.Data;
 //  uaa
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class FieldworkFollowup {
 
   private String addressLine1;

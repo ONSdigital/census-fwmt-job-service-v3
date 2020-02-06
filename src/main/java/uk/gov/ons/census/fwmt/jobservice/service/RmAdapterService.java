@@ -15,7 +15,7 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CANON
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.INVALID_ACTION_INSTRUCTION;
 
 @Slf4j
-@Service
+//@Service
 public class RmAdapterService {
 
   private final GatewayEventManager gatewayEventManager;

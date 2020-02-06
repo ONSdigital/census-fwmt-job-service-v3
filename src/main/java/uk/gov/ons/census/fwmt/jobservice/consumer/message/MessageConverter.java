@@ -10,7 +10,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import java.io.IOException;
 
 @Slf4j
-@Component
+//@Component
 public class MessageConverter {
 
   private final ObjectMapper mapper;

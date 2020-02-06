@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Slf4j
-@Component
+//@Component
 public class GatewayActionProducer {
 
   private final GatewayEventManager gatewayEventManager;

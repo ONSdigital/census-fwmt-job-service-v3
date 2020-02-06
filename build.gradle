@@ -2,14 +2,17 @@ import com.github.spotbugs.SpotBugsTask
 
 buildscript {
     ext {
-        springBootVersion = '2.1.0.RELEASE'
+        springVersion = '5.2.3.RELEASE'
+        springBootVersion = '2.2.4.RELEASE'
     }
+
     repositories {
         mavenCentral()
         jcenter()
     }
+
     dependencies {
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE'
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:latest.release'
         classpath 'org.ajoberstar:gradle-git:1.4.2'
     }
@@ -25,8 +28,8 @@ plugins {
     id 'eclipse'
 
     // Frameworks
-    id 'org.springframework.boot' version '2.1.0.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.6.RELEASE'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 
     // Build Tools
     id 'jacoco'
@@ -65,16 +68,6 @@ configurations {
     integrationTestAnnotationProcessor.extendsFrom testAnnotationProcessor
 }
 
-springBoot {
-    buildInfo {
-        properties {
-            additional = [
-                    'Git-Commit': grgit.head().getAbbreviatedId(8)
-            ]
-        }
-    }
-}
-
 task genJaxb {
     ext.sourcesDir = "${buildDir}/generated-sources/jaxb"
     ext.classesDir = "${buildDir}/classes/jaxb"
@@ -84,8 +77,7 @@ task genJaxb {
 
     doLast() {
         project.ant {
-            taskdef name: 'xjc', classname: 'com.sun.tools.xjc.XJCTask',
-                    classpath: configurations.jaxb.asPath
+            taskdef name: 'xjc', classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath
             mkdir(dir: sourcesDir)
             mkdir(dir: classesDir)
 
@@ -94,8 +86,7 @@ task genJaxb {
                 schema(dir: schema, includes: '**/*.xsd')
             }
 
-            javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true,
-                    debugLevel: 'lines,vars,source',
+            javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true, debugLevel: 'lines,vars,source',
                     classpath: configurations.jaxb.asPath) {
                 src(path: sourcesDir)
                 include(name: "**/*.java")
@@ -113,8 +104,8 @@ task genJaxb {
 
 dependencyManagement {
     dependencies {
-        dependency 'org.springframework:spring-core:4.0.3.RELEASE'
-        dependency 'org.springframework.boot:spring-boot:2.2.4.RELEASE'
+        dependency "org.springframework:spring-core:${springVersion}"
+        dependency "org.springframework.boot:spring-boot:${springBootVersion}"
     }
 }
 
@@ -139,7 +130,7 @@ dependencies {
 
     // General Libraries
     compile('com.google.guava:guava:27.0.1-jre')
-    compile('org.apache.commons:commons-lang3')
+    //    compile('org.apache.commons:commons-lang3')
 
     // Aspects
     compile('org.aspectj:aspectjweaver')
@@ -152,23 +143,20 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-web-services')
 
-    // this dependency is required to fix spring-boot-starter-web-services (and saaj-impl),
-    // which depend on an old non-existent version
-    compile('org.jvnet.mimepull:mimepull')
-
     // Spring
     compile('org.springframework.retry:spring-retry')
     compile('org.springframework:spring-aop')
-    compile('org.springframework.data:spring-data-redis:2.2.4.RELEASE')
+    compile('org.springframework.data:spring-data-redis')
+    //compile('org.springframework.data:spring-data-redis:2.2.4.RELEASE')
 
     // Data Formats
     compile('org.apache.commons:commons-csv:1.6')
     compile('org.yaml:snakeyaml')
     compile('org.json:json:20180813')
     compile('com.fasterxml.jackson.core:jackson-databind')
-    compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
-    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
-    compile('com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4')
+    //    compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
+    //    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
+    //    compile('com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4')
 
     // Data mapping
     compile('ma.glasnost.orika:orika-core:1.5.4')
@@ -194,23 +182,28 @@ dependencies {
     testImplementation('org.junit.jupiter:junit-jupiter-api')
     testCompile('org.junit.jupiter:junit-jupiter-params')
     testCompile('org.junit.jupiter:junit-jupiter-engine')
-    //    testCompile('junit:junit')
 
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude module: 'android-json'
         exclude module: 'junit'
+        exclude module: 'junit-vintage-engine'
     }
-//    testCompile('org.apache.commons:commons-lang3')
 
     testCompile('org.mockito:mockito-core')
     testCompile('org.mockito:mockito-junit-jupiter')
-    testCompile('org.powermock:powermock-core:1.7.4')
-    testCompile('org.powermock:powermock-api-mockito2:1.7.4')
-    testCompile('org.powermock:powermock-module-junit4:1.7.4')
 
-//    integrationTestCompile('org.assertj:assertj-core')
+    //    integrationTestCompile('org.assertj:assertj-core')
 
     integrationTestRuntime('uk.gov.ons.fwmt:fwmt-service-mocks:1.0.1-SNAPSHOT')
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat = 'Full'
+        showStandardStreams = true
+    }
 }
 
 sourceSets {
@@ -229,6 +222,16 @@ artifactory {
             repoKey = 'libs-snapshot-local'
             username = System.getenv('ARTIFACTORY_USERNAME')
             password = System.getenv('ARTIFACTORY_PASSWORD')
+        }
+    }
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            additional = [
+                    'Git-Commit': grgit.head().getAbbreviatedId(8)
+            ]
         }
     }
 }

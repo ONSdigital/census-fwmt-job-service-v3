@@ -1,14 +1,16 @@
 package uk.gov.ons.census.fwmt.jobservice.service.mapper;
 
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.jobservice.dto.rm.FieldworkFollowup;
-import uk.gov.ons.census.fwmt.jobservice.dto.tm.PutCase;
+import uk.gov.ons.census.fwmt.jobservice.dto.tm.PutCaseRequest;
 
-public final class TopLevelMapper {
+@Service
+public class TopLevelMapper {
 
-  private TopLevelMapper() {
+  public TopLevelMapper() {
   }
 
-  public static PutCase map(FieldworkFollowup in) {
+  public PutCaseRequest map(FieldworkFollowup in) {
     return null;
   }
 

@@ -3,14 +3,13 @@ package uk.gov.ons.census.fwmt.jobservice.consumer.message;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.canonical.v1.CancelFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.canonical.v1.UpdateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
-import uk.gov.ons.census.fwmt.jobservice.service.JobService;
+import uk.gov.ons.census.fwmt.jobservice.service.JobServiceOld;
 
 import java.io.IOException;
 
@@ -19,20 +18,20 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CANON
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CANONICAL_UPDATE_RECEIVED;
 
 @Slf4j
-@Component
+//@Component
 public class GatewayActionsReceiver {
 
-  private final JobService jobService;
+  private final JobServiceOld jobServiceOld;
   private final GatewayEventManager gatewayEventManager;
   private final ObjectMapper jsonObjectMapper;
   private final MessageConverter messageConverter;
 
   public GatewayActionsReceiver(
-      JobService jobService,
+      JobServiceOld jobServiceOld,
       GatewayEventManager gatewayEventManager,
       //ObjectMapper jsonObjectMapper,
       MessageConverter messageConverter) {
-    this.jobService = jobService;
+    this.jobServiceOld = jobServiceOld;
     this.gatewayEventManager = gatewayEventManager;
     this.jsonObjectMapper = new ObjectMapper();
     this.messageConverter = messageConverter;
@@ -60,21 +59,21 @@ public class GatewayActionsReceiver {
           .convertMessageToDTO(CreateFieldWorkerJobRequest.class,
               messageToString);
       gatewayEventManager.triggerEvent(String.valueOf(fwmtCreateJobRequest.getCaseId()), CANONICAL_CREATE_JOB_RECEIVED);
-      jobService.createJob(fwmtCreateJobRequest);
+      jobServiceOld.createJob(fwmtCreateJobRequest);
       break;
     case "Cancel":
       CancelFieldWorkerJobRequest fwmtCancelJobRequest = messageConverter
           .convertMessageToDTO(CancelFieldWorkerJobRequest.class,
               messageToString);
       gatewayEventManager.triggerEvent(String.valueOf(fwmtCancelJobRequest.getCaseId()), CANONICAL_CANCEL_RECEIVED);
-      jobService.cancelJob(fwmtCancelJobRequest);
+      jobServiceOld.cancelJob(fwmtCancelJobRequest);
       break;
     case "Update":
       UpdateFieldWorkerJobRequest fwmtUpdateJobRequest = messageConverter
           .convertMessageToDTO(UpdateFieldWorkerJobRequest.class,
               messageToString);
       gatewayEventManager.triggerEvent(String.valueOf(fwmtUpdateJobRequest.getCaseId()), CANONICAL_UPDATE_RECEIVED);
-      jobService.updateJob(fwmtUpdateJobRequest);
+      jobServiceOld.updateJob(fwmtUpdateJobRequest);
       break;
     default:
       String errorMsg = "Invalid Canonical Action.";

@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import uk.gov.ons.census.fwmt.jobservice.consumer.message.GatewayActionsReceiver;
 
-@Configuration
+//@Configuration
 public class GatewayActionsQueueConfig {
 
   public static final String GATEWAY_ACTIONS_QUEUE = "Gateway.Actions";

@@ -3,6 +3,7 @@ package uk.gov.ons.census.fwmt.jobservice.service.comet;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -42,7 +43,7 @@ public class CometRestClient {
   private AuthenticationResult auth;
 
   public CometRestClient(
-      RestTemplate restTemplate,
+      @Qualifier("TM") RestTemplate restTemplate,
       GatewayEventManager gatewayEventManager,
       @Value("${totalmobile.baseUrl}") String baseUrl,
       @Value("${totalmobile.operation.case.create.path}") String tmPath,

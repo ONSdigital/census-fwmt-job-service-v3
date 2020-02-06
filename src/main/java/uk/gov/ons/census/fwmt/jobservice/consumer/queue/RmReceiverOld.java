@@ -1,6 +1,5 @@
-package uk.gov.ons.census.fwmt.jobservice.consumer.message;
+package uk.gov.ons.census.fwmt.jobservice.consumer.queue;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -17,16 +16,12 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
 //@Component
-@Slf4j
-public class ActionInstructionReceiver {
-
+public class RmReceiverOld {
   private final RmAdapterService rmAdapterService;
   private final GatewayEventManager gatewayEventManager;
   private final JAXBContext jaxbContext;
 
-  public ActionInstructionReceiver(
-      RmAdapterService rmAdapterService,
-      GatewayEventManager gatewayEventManager) throws JAXBException {
+  public RmReceiverOld(RmAdapterService rmAdapterService, GatewayEventManager gatewayEventManager) throws JAXBException {
     this.rmAdapterService = rmAdapterService;
     this.gatewayEventManager = gatewayEventManager;
     this.jaxbContext = JAXBContext.newInstance(ActionInstruction.class);
@@ -66,3 +61,4 @@ public class ActionInstructionReceiver {
     }
   }
 }
+

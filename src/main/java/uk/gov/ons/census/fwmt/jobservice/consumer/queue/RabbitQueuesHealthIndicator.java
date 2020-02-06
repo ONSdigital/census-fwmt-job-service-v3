@@ -28,11 +28,11 @@ public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
   private RabbitAdmin rabbitAdmin;
 
   public RabbitQueuesHealthIndicator(
-      @Value("${rabbitmq.inboundQueue}") String inboundQueue,
-      @Value("${rabbitmq.inboundDLQ}") String inboundDLQ,
+      @Value("${rabbitmq.queues.rm.input}") String inputQueue,
+      @Value("${rabbitmq.queues.rm.dlq}") String inputDlq,
       @Qualifier("connectionFactory") ConnectionFactory connectionFactory,
       GatewayEventManager gatewayEventManager) {
-    this.queues = Arrays.asList(inboundQueue, inboundDLQ);
+    this.queues = Arrays.asList(inputQueue, inputDlq);
     this.connectionFactory = connectionFactory;
     this.gatewayEventManager = gatewayEventManager;
     this.rabbitAdmin = null;

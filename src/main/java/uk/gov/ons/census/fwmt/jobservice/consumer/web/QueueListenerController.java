@@ -8,7 +8,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.consumer.message.ProcessGatewayActionsDlq;
 import uk.gov.ons.census.fwmt.jobservice.consumer.message.ProcessRmFieldDlq;
 
-@Controller
+//@Controller
 public class QueueListenerController {
 
   // job service v3 only

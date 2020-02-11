@@ -34,4 +34,4 @@ To run:
 ![](docs/tm-canonical-update.png "tm - canonical - update - mapping")
 
 ## Copyright
-Copyright (C) 2020 Crown Copyright (Office for National Statistics)
+Copyright(C) 2020 Crown Copyright (Office for National Statistics)

@@ -1,41 +1,60 @@
 package uk.gov.ons.census.fwmt.jobservice.service;
 
-import lombok.extern.slf4j.Slf4j;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK ;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_SENT;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.dto.rm.FieldworkFollowup;
-import uk.gov.ons.census.fwmt.jobservice.dto.tm.PutCaseRequest;
-import uk.gov.ons.census.fwmt.jobservice.service.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.service.mapper.SpgMapper;
+import uk.gov.ons.census.fwmt.jobservice.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.comet.converter.CometConverterUtils;
 
 @Slf4j
 @Service
 public class JobService {
 
-  private final SpgMapper spgMapper;
-  private final CometRestClient cometRestClient;
-  private final GatewayEventManager gatewayEventManager;
+  @Autowired
+  private CometConverterUtils cometConverterUtils;
 
-  public JobService(SpgMapper spgMapper, CometRestClient cometRestClient, GatewayEventManager gatewayEventManager) {
-    this.spgMapper = spgMapper;
-    this.cometRestClient = cometRestClient;
-    this.gatewayEventManager = gatewayEventManager;
+  @Autowired
+  private CometRestClient cometRestClient;
+
+  @Autowired
+  private GatewayEventManager gatewayEventManager;
+
+  private static final List<HttpStatus> validResponses = List.of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
+
+
+  public void createFieldworkerJob(FieldworkFollowup ffu) throws GatewayException {
+    CaseRequest putCase = cometConverterUtils.buildPutCaseRequest(ffu);
+    gatewayEventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
+    ResponseEntity<Void> response = cometRestClient.sendRequest(putCase, ffu.getCaseId());
+    validateResponse(response, ffu.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+    gatewayEventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_ACK, "Case Ref", ffu.getCaseRef(), "Response Code", response.getStatusCode().name());
   }
 
-  public void handleMessage(FieldworkFollowup fieldworkFollowup) throws GatewayException {
-    PutCaseRequest putCase = map(fieldworkFollowup);
-
-    cometRestClient.sendRequest(putCase, fieldworkFollowup.getCaseId());
-  }
-
-  public PutCaseRequest map(FieldworkFollowup fieldworkFollowup) {
-    if (fieldworkFollowup.getAddressType().equals("SPG")) {
-      return spgMapper.map(fieldworkFollowup);
-    } else {
-      // TODO proper error handling
-      return null;
+  private void validateResponse(ResponseEntity<Void> response, String caseId, String verb, String errorCode)
+      throws GatewayException {
+    if (!isValidResponse(response)) {
+      String msg =
+          "Unable to " + verb + " FieldWorkerJobRequest: HTTP_STATUS:" + response.getStatusCode() + ":" + response
+              .getStatusCodeValue();
+      gatewayEventManager.triggerErrorEvent(this.getClass(), msg, String.valueOf(caseId), errorCode);
+      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, msg);
     }
   }
 
+  private boolean isValidResponse(ResponseEntity<Void> response) {
+    return validResponses.contains(response.getStatusCode());
+  }
 }

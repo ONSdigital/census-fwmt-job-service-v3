@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: v1
+      author: Simon Diaz
+      comment: Create initial FWMT-G Tables
+      changes:
+        - sqlFile:
+            path: initial_table.sql
+            relativeToChangelogFile: true
+            splitStatements: false

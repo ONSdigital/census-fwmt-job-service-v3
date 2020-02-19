@@ -1,12 +1,10 @@
 package uk.gov.ons.census.fwmt.jobservice.spg;
 
-import org.springframework.stereotype.Component;
-import uk.gov.ons.census.fwmt.jobservice.dto.rm.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 
-@Component
-public class SpgRequestBuilder {
+public final class SpgRequestBuilder {
 
-  public FieldworkFollowup makeUnitDeliver() {
+  public static FieldworkFollowup makeUnitDeliver() {
     FieldworkFollowup fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("U");
@@ -15,7 +13,7 @@ public class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public FieldworkFollowup makeUnitFollowup() {
+  public static FieldworkFollowup makeUnitFollowup() {
     FieldworkFollowup fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("U");
@@ -24,7 +22,7 @@ public class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public FieldworkFollowup makeSite() {
+  public static FieldworkFollowup makeSite() {
     FieldworkFollowup fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("E");
@@ -33,7 +31,7 @@ public class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public FieldworkFollowup makeSecureSite() {
+  public static FieldworkFollowup makeSecureSite() {
     FieldworkFollowup fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("E");
@@ -42,10 +40,10 @@ public class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public FieldworkFollowup makeBase() {
+  public static FieldworkFollowup makeBase() {
     return FieldworkFollowup.builder()
         .actionInstruction("CREATE")
-        //.surveyName("Census"); // Not needed, but still in formal diagrams
+        .surveyName("Census") // Not needed, but still in formal diagrams
         .addressType("SPG")
 
         .caseId("exampleCaseId")

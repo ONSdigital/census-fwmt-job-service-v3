@@ -53,12 +53,8 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 repositories {
-    mavenCentral()
     mavenLocal()
-    if (!project.hasProperty('omitSDCArtifactory')) {
-        maven { url 'http://artifactory-sdc.onsdigital.uk/artifactory/libs-release' }
-        maven { url 'http://artifactory-sdc.onsdigital.uk/artifactory/libs-snapshot' }
-    }
+    mavenCentral()
 }
 
 configurations {
@@ -77,9 +73,9 @@ dependencyManagement {
 
 dependencies {
     // Custom Libraries
-    compile('uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.16-RELEASE')
-    compile('uk.gov.ons.census.fwmt:census-fwmt-events:1.0.20-SNAPSHOT')
-    compile('uk.gov.ons.census.fwmt:census-fwmt-common:1.0.47-SNAPSHOT')
+    compile('uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.18-SNAPSHOT')
+    compile('uk.gov.ons.census.fwmt:census-fwmt-events:1.0.22-SNAPSHOT')
+    compile('uk.gov.ons.census.fwmt:census-fwmt-common:1.0.50-SNAPSHOT')
 
     // General Libraries
     compile('com.google.guava:guava:27.0.1-jre')

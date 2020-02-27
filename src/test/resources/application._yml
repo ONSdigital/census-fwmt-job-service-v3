@@ -1,5 +1,5 @@
 server:
-  port: 8025
+  port: 8000
 
 spring:
   application:
@@ -11,23 +11,8 @@ spring:
     user:
       name: "user"
       password: "password"
-  datasource:
-    url: jdbc:postgresql://localhost/postgres?currentSchema=fwmtg
-    driver-class-name: org.postgresql.Driver
-    schema: classpath:/schema.sql
-    continue-on-error: false
-    username: postgres
-    password: postgres
-    initialization-mode: always      
-  liquibase:
-    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=fwmtg
-    default-schema: fwmtg
-    change-log: classpath:db/changelog/db.changelog-master.yml
-    user: postgres
-    password: postgres
-#    enabled: false
 
-    
+
     
 management:
   # Place /info and /health in the root
@@ -38,6 +23,7 @@ management:
   health:
     rabbit:
       enabled: false
+
 logging:
   profile: DEV
   level:
@@ -53,7 +39,7 @@ rabbitmq:
   username: "guest"
   password: "guest"
   hostname: "localhost"
-  port: 5672   
+  port: 5672
   virtualHost: "/"
   initialInterval: 5000
   multiplier: 3.0
@@ -70,9 +56,6 @@ redis:
   port: 6379
   password: "password"
   database: 2
-
-
-
 
 totalmobile:
   username: "user"
@@ -99,8 +82,6 @@ fwmt:
       duration: 5
     ohs:
       duration: 5
-      
-      
 
 eq:
   url: "https://fieldservice-ENV_NAME.census-gcp.onsdigital.uk/launch/"

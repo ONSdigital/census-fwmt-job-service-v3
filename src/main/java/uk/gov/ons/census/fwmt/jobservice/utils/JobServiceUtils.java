@@ -1,16 +1,18 @@
 package uk.gov.ons.census.fwmt.jobservice.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.ons.census.fwmt.canonical.v1.CreateFieldWorkerJobRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public final class JobServiceUtils {

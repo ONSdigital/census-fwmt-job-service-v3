@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.comet.converter.spg;
+package uk.gov.ons.census.fwmt.jobservice.converter.spg;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

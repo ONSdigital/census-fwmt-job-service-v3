@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.rm.message;
+package uk.gov.ons.census.fwmt.jobservice.rm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

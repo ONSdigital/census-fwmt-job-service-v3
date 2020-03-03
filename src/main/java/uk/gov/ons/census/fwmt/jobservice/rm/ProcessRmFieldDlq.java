@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.rm.message;
+package uk.gov.ons.census.fwmt.jobservice.rm;
 
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
@@ -12,7 +12,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 
 @Slf4j
 @Component
-public class ProcessRmFieldDLQ {
+public class ProcessRmFieldDlq {
 
   @Autowired
   private RabbitTemplate rabbitTemplate;
@@ -21,24 +21,24 @@ public class ProcessRmFieldDLQ {
   private AmqpAdmin amqpAdmin;
 
   @Value("${rabbitmq.queues.rm.input}")
-  private String RM_Q;
+  private String rmQ;
 
   @Autowired
   @Value("${rabbitmq.queues.rm.dlq}")
-  private String RM_DLQ;
+  private String rmDlq;
 
 
-  public void processDLQ() throws GatewayException {
+  public void processDlq() throws GatewayException {
     int messageCount;
     Message message;
 
     try {
-      messageCount = (int) amqpAdmin.getQueueProperties(RM_DLQ).get("QUEUE_MESSAGE_COUNT");
+      messageCount = (int) amqpAdmin.getQueueProperties(rmDlq).get("QUEUE_MESSAGE_COUNT");
 
       for (int i = 0; i < messageCount; i++) {
-        message = rabbitTemplate.receive(RM_DLQ);
+        message = rabbitTemplate.receive(rmDlq);
 
-        rabbitTemplate.send(RM_Q, message);
+        rabbitTemplate.send(rmQ, message);
       }
     } catch (NullPointerException e) {
       throw new GatewayException(GatewayException.Fault.BAD_REQUEST, "No messages in queue");

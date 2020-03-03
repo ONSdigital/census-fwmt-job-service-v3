@@ -17,7 +17,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.comet.converter.CometConverterUtils;
+import uk.gov.ons.census.fwmt.jobservice.converter.CometConverterUtils;
 
 @Slf4j
 @Service

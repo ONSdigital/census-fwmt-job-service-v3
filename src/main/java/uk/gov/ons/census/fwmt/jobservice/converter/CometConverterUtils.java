@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.comet.converter;
+package uk.gov.ons.census.fwmt.jobservice.converter;
 
 import java.util.List;
 

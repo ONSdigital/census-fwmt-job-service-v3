@@ -6,20 +6,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.jobservice.rm.message.ProcessRmFieldDLQ;
+import uk.gov.ons.census.fwmt.jobservice.rm.ProcessRmFieldDlq;
 
 //@Controller
 public class QueueListenerController {
 
   @Autowired
-  private ProcessRmFieldDLQ processRMFieldDLQ;
+  private ProcessRmFieldDlq processRMFieldDLQ;
 
   @Autowired
   private SimpleMessageListenerContainer simpleMessageListenerContainer;
 
   @GetMapping("/processDLQ")
   public ResponseEntity<String> startDLQProcessor() throws GatewayException {
-    processRMFieldDLQ.processDLQ();
+    processRMFieldDLQ.processDlq();
     return ResponseEntity.ok("DLQ listener started.");
   }
 

@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.rm.message;
+package uk.gov.ons.census.fwmt.jobservice.rm;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +71,8 @@ public class RabbitMqConfig {
     return new RabbitAdmin(connectionFactory());
   }
 
+  // TODO: It doesn't seem right that these qualifiers are appended with the kind of class they are. 'JS' would do, if they are about Javascript
+  // TODO: It looks like this is used elsewhere. Should this be in a more general config?
   @Bean("JS_MC")
   public MessageConverter jsonMessageConverter(@Qualifier("JS_CM") DefaultClassMapper classMapper) {
     Jackson2JsonMessageConverter jsonMessageConverter = new Jackson2JsonMessageConverter();
@@ -78,6 +80,7 @@ public class RabbitMqConfig {
     return jsonMessageConverter;
   }
 
+  // TODO: It doesn't seem right that these qualifiers are appended with the kind of class they are. 'JS' would do, if they are about Javascript
   @Bean("JS_CM")
   public DefaultClassMapper classMapper() {
     DefaultClassMapper classMapper = new DefaultClassMapper();

@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.comet.converter.spg;
+package uk.gov.ons.census.fwmt.jobservice.converter.spg;
 
 import java.util.List;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.rm.message;
+package uk.gov.ons.census.fwmt.jobservice.rm;
 
 import org.aopalliance.aop.Advice;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -30,7 +30,6 @@ public class RmConfig {
   private AmqpAdmin amqpAdmin;
 
   @Bean(name = "RM_Q")
-//  @Bean
   public Queue queue() {
     Queue queue = QueueBuilder.durable(inputQueue)
         .withArgument("x-dead-letter-exchange", "")
@@ -41,21 +40,20 @@ public class RmConfig {
   }
 
   @Bean(name = "RM_DLQ")
-//  @Bean
   public Queue deadLetterQueue() {
     Queue queue = QueueBuilder.durable(inputDlq).build();
     queue.setAdminsThatShouldDeclare(amqpAdmin);
     return queue;
   }
 
+  // TODO: This doesn't need to be suffixed with a type
   @Bean(name = "RM_LA")
-//  @Bean
   public MessageListenerAdapter listenerAdapter(RmReceiver receiver) {
     return new MessageListenerAdapter(receiver, "receiveMessage");
   }
 
+  // TODO: This doesn't need to be suffixed with a type
   @Bean(name = "RM_C")
-//  @Bean
   public SimpleMessageListenerContainer container(
       ConnectionFactory connectionFactory,
       @Qualifier("RM_LA") MessageListenerAdapter listenerAdapter,

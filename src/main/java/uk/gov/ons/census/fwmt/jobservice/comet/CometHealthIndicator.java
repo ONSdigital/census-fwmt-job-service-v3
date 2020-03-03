@@ -18,13 +18,13 @@ import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 
 @Slf4j
 @Component
-public class TmHealthIndicator extends AbstractHealthIndicator {
+public class CometHealthIndicator extends AbstractHealthIndicator {
 
   private final GatewayEventManager gatewayEventManager;
   private final String swaggerUrl;
   private final RestTemplate restTemplate;
 
-  public TmHealthIndicator(
+  public CometHealthIndicator(
       GatewayEventManager gatewayEventManager,
       @Value("${totalmobile.baseUrl}") String tmBaseUrl,
       @Value("${totalmobile.healthcheckPath}") String healthcheckPath,
@@ -50,6 +50,7 @@ public class TmHealthIndicator extends AbstractHealthIndicator {
         gatewayEventManager.triggerEvent("<N/A>", TM_SERVICE_UP, "response code", responseCode.toString());
       } else {
         builder.down().build();
+        // TODO why is this commented out?
 //        gatewayEventManager.triggerErrorEvent(this.getClass(), null, "Cannot reach TM", "<NA>",
 //            TM_SERVICE_DOWN, "url", swaggerUrl, "Response Code", responseCode.toString());
       }

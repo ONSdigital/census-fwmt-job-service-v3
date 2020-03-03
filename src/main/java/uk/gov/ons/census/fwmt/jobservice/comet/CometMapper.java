@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.config;
+package uk.gov.ons.census.fwmt.jobservice.comet;
 
 import org.springframework.stereotype.Component;
 

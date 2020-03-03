@@ -10,10 +10,11 @@
 *.zip
 *.tar.gz
 *.rar
-# # ignore mac files
+
+# ignore mac files
 .DS_Store
 
-# # ignore idea storage
+# ignore idea storage
 .idea/
 *.iml
 *.iws
@@ -22,7 +23,7 @@ out/
 build
 target/
 
-#Eclipse files
+# Eclipse files
 .metadata
 bin/
 tmp/

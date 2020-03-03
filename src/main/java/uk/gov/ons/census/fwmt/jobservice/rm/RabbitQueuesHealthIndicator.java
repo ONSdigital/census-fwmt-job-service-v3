@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.rm.message;
+package uk.gov.ons.census.fwmt.jobservice.rm;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RABBIT_QUEUE_DOWN;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RABBIT_QUEUE_UP;

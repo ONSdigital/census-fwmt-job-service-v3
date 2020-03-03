@@ -44,8 +44,8 @@ plugins {
 }
 
 description = 'census-fwmt-job-service-v4'
-version = '4.0.0-SNAPSHOT'
 group = 'uk.gov.ons.census.fwmt'
+version = rootProject.file('version.txt').text.trim()
 
 mainClassName = 'uk.gov.ons.census.fwmt.jobservice.Application'
 
@@ -54,6 +54,22 @@ targetCompatibility = 11
 
 repositories {
     mavenLocal()
+
+    maven {
+        url 'https://ons.jfrog.io/ons/libs-releases-virtual'
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+    maven {
+        url 'https://ons.jfrog.io/ons/libs-snapshots-virtual'
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+
     mavenCentral()
 }
 
@@ -73,85 +89,86 @@ dependencyManagement {
 
 dependencies {
     // Custom Libraries
-    compile('uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.18-SNAPSHOT')
-    compile('uk.gov.ons.census.fwmt:census-fwmt-events:1.0.22-SNAPSHOT')
-    compile('uk.gov.ons.census.fwmt:census-fwmt-common:1.0.50-SNAPSHOT')
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.18-SNAPSHOT'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.22-SNAPSHOT'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.0.50-SNAPSHOT'
 
     // General Libraries
-    compile('com.google.guava:guava:27.0.1-jre')
-    //    compile('org.apache.commons:commons-lang3')
+    compile 'com.google.guava:guava:27.0.1-jre'
+    //    compile 'org.apache.commons:commons-lang3'
 
     // Aspects
-    compile('org.aspectj:aspectjweaver')
+    compile 'org.aspectj:aspectjweaver'
 
     // Spring Boot
-    compile('org.springframework.boot:spring-boot-starter')
-    compile('org.springframework.boot:spring-boot-starter-security')
-    compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile('org.springframework.boot:spring-boot-starter-amqp')
-    compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.springframework.boot:spring-boot-starter-web-services')
+    compile 'org.springframework.boot:spring-boot-starter'
+    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-amqp'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-web-services'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-
-    implementation 'org.liquibase:liquibase-core'
-    runtimeOnly 'org.postgresql:postgresql'
-
-
     // Spring
-        compile 'org.springframework:spring-jdbc:5.0.3.RELEASE'
-
-    compile('org.springframework.retry:spring-retry')
-    compile('org.springframework:spring-aop')
-    compile('org.springframework.data:spring-data-redis')
-    //compile('org.springframework.data:spring-data-redis:2.2.4.RELEASE')
+    compile 'org.springframework:spring-jdbc:5.0.3.RELEASE'
+    compile 'org.springframework.retry:spring-retry'
+    compile 'org.springframework:spring-aop'
+    compile 'org.springframework.data:spring-data-redis'
+    //compile 'org.springframework.data:spring-data-redis:2.2.4.RELEASE'
 
     // Data Formats
-    compile('org.apache.commons:commons-csv:1.6')
-    compile('org.yaml:snakeyaml')
-    compile('org.json:json:20180813')
-    compile('com.fasterxml.jackson.core:jackson-databind')
-    //    compile('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
-    //    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
-    //    compile('com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4')
+    compile 'org.apache.commons:commons-csv:1.6'
+    compile 'org.yaml:snakeyaml'
+    compile 'org.json:json:20180813'
+    compile 'com.fasterxml.jackson.core:jackson-databind'
+    // compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    // compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    // compile 'com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4'
 
     // Data mapping
-    compile('ma.glasnost.orika:orika-core:1.5.4')
+    compile 'ma.glasnost.orika:orika-core:1.5.4'
 
     // Networking
     compile('org.apache.httpcomponents:httpclient') {
-        exclude(module: 'commons-logging')
+        exclude module: 'commons-logging'
     }
-    compile('org.jsoup:jsoup:1.11.3')
-    compile('redis.clients:jedis:3.2.0')
-    compile('com.rabbitmq:amqp-client')
-    compile('com.microsoft.azure:adal4j:1.6.0')
+    compile 'org.jsoup:jsoup:1.11.3'
+    compile 'redis.clients:jedis:3.2.0'
+    compile 'com.rabbitmq:amqp-client'
+    compile 'com.microsoft.azure:adal4j:1.6.0'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Data Store Setup
+    implementation 'org.liquibase:liquibase-core'
 
     // Documentation
-    compile('io.springfox:springfox-swagger2:2.9.2')
-    compile('io.springfox:springfox-swagger-ui:2.9.2')
+    compile 'io.springfox:springfox-swagger2:2.9.2'
+    compile 'io.springfox:springfox-swagger-ui:2.9.2'
 
     // Meta
-    compile('org.projectlombok:lombok')
-    annotationProcessor('org.projectlombok:lombok')
-    //    testAnnotationProcessor('org.projectlombok:lombok')
+    compile 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // testAnnotationProcessor 'org.projectlombok:lombok'
 
-    testImplementation('org.junit.jupiter:junit-jupiter-api')
-    testCompile('org.junit.jupiter:junit-jupiter-params')
-    testCompile('org.junit.jupiter:junit-jupiter-engine')
+    // Testing Framework
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testCompile 'org.junit.jupiter:junit-jupiter-params'
+    testCompile 'org.junit.jupiter:junit-jupiter-engine'
 
+    // Spring Boot
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude module: 'android-json'
         exclude module: 'junit'
         exclude module: 'junit-vintage-engine'
     }
 
-    testCompile('org.mockito:mockito-core')
-    testCompile('org.mockito:mockito-junit-jupiter')
+    // Mocking Objects
+    testCompile 'org.mockito:mockito-core'
+    testCompile 'org.mockito:mockito-junit-jupiter'
 
-    //    integrationTestCompile('org.assertj:assertj-core')
+    // integrationTestCompile 'org.assertj:assertj-core'
 
-    integrationTestRuntime('uk.gov.ons.fwmt:fwmt-service-mocks:1.0.1-SNAPSHOT')
+    integrationTestRuntime 'uk.gov.ons.fwmt:fwmt-service-mocks:1.0.1-SNAPSHOT'
 }
 
 test {
@@ -173,12 +190,15 @@ sourceSets {
 }
 
 artifactory {
-    contextUrl = System.getenv('ARTIFACTORY_URL')
+    contextUrl = 'https://ons.jfrog.io/ons/'
     publish {
         repository {
-            repoKey = 'libs-snapshot-local'
-            username = System.getenv('ARTIFACTORY_USERNAME')
-            password = System.getenv('ARTIFACTORY_PASSWORD')
+            repoKey = 'libs-releases-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+            publishBuildInfo = false
         }
     }
 }

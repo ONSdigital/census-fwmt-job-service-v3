@@ -17,14 +17,13 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.converter.CometConverterUtils;
 
 @Slf4j
 @Service
 public class JobService {
 
   @Autowired
-  private CometConverterUtils cometConverterUtils;
+  private ConverterService converterService;
 
   @Autowired
   private CometRestClient cometRestClient;
@@ -36,7 +35,7 @@ public class JobService {
 
 
   public void createFieldworkerJob(FieldworkFollowup ffu) throws GatewayException {
-    CaseRequest putCase = cometConverterUtils.buildPutCaseRequest(ffu);
+    CaseRequest putCase = converterService.buildPutCaseRequest(ffu);
     gatewayEventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
     ResponseEntity<Void> response = cometRestClient.sendRequest(putCase, ffu.getCaseId());
     validateResponse(response, ffu.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);

@@ -18,9 +18,7 @@ public class CometRestClientResponseErrorHandler implements ResponseErrorHandler
 
   @Override
   public boolean hasError(ClientHttpResponse httpResponse) throws IOException {
-    return (
-        httpResponse.getStatusCode().series() == CLIENT_ERROR
-            || httpResponse.getStatusCode().series() == SERVER_ERROR);
+    return httpResponse.getStatusCode().is4xxClientError() || httpResponse.getStatusCode().is5xxServerError();
   }
 
   @Override

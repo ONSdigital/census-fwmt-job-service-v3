@@ -98,3 +98,6 @@ fwmt:
       
 eq:
   url: "https://fieldservice-ENV_NAME.census-gcp.onsdigital.uk/launch/"
+
+spg:
+  followUpDate: 0

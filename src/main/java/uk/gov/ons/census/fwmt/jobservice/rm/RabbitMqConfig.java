@@ -3,13 +3,19 @@ package uk.gov.ons.census.fwmt.jobservice.rm;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.aopalliance.aop.Advice;
 import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +42,9 @@ public class RabbitMqConfig {
   private final double multiplier;
   private final int maxInterval;
 
+  public final String inputQueue;
+  public final String inputDlq;
+
   public RabbitMqConfig(
       @Value("${rabbitmq.username}") String username,
       @Value("${rabbitmq.password}") String password,
@@ -44,7 +53,9 @@ public class RabbitMqConfig {
       @Value("${rabbitmq.virtualHost}") String virtualHost,
       @Value("${rabbitmq.initialInterval}") int initialInterval,
       @Value("${rabbitmq.multiplier}") double multiplier,
-      @Value("${rabbitmq.maxInterval}") int maxInterval) {
+      @Value("${rabbitmq.maxInterval}") int maxInterval,
+      @Value("${rabbitmq.queues.rm.input}") String inputQueue,
+      @Value("${rabbitmq.queues.rm.dlq}") String inputDlq) {
     this.username = username;
     this.password = password;
     this.hostname = hostname;
@@ -53,6 +64,8 @@ public class RabbitMqConfig {
     this.initialInterval = initialInterval;
     this.multiplier = multiplier;
     this.maxInterval = maxInterval;
+    this.inputQueue = inputQueue;
+    this.inputDlq = inputDlq;
   }
 
   @Bean
@@ -115,5 +128,48 @@ public class RabbitMqConfig {
     retryTemplate.registerListener(new DefaultListenerSupport());
 
     return retryTemplate;
+  }
+
+  @Bean(name = "RM_Q")
+  public Queue queue() {
+    Queue queue = QueueBuilder.durable(inputQueue)
+        .withArgument("x-dead-letter-exchange", "")
+        .withArgument("x-dead-letter-routing-key", inputDlq)
+        .build();
+    queue.setAdminsThatShouldDeclare(amqpAdmin());
+    return queue;
+  }
+
+  @Bean(name = "RM_DLQ")
+  public Queue deadLetterQueue() {
+    Queue queue = QueueBuilder.durable(inputDlq).build();
+    queue.setAdminsThatShouldDeclare(amqpAdmin());
+    return queue;
+  }
+
+  // TODO: This doesn't need to be suffixed with a type
+  @Bean(name = "RM_LA")
+  public MessageListenerAdapter listenerAdapter(RmReceiver receiver) {
+    return new MessageListenerAdapter(receiver, "receiveMessage");
+  }
+
+  // TODO: This doesn't need to be suffixed with a type
+  @Bean(name = "RM_C")
+  public SimpleMessageListenerContainer container(
+      ConnectionFactory connectionFactory,
+      @Qualifier("RM_LA") MessageListenerAdapter listenerAdapter,
+      @Qualifier("JS_MC") MessageConverter jsonMessageConverter,
+      RetryOperationsInterceptor retryOperationsInterceptor) {
+
+    listenerAdapter.setMessageConverter(jsonMessageConverter);
+
+    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+    Advice[] adviceChain = {retryOperationsInterceptor};
+    container.setAdviceChain(adviceChain);
+    container.setConnectionFactory(connectionFactory);
+    container.setQueueNames(inputQueue);
+    container.setMessageListener(listenerAdapter);
+
+    return container;
   }
 }

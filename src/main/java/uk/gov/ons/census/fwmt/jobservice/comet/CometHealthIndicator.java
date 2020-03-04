@@ -3,7 +3,6 @@ package uk.gov.ons.census.fwmt.jobservice.comet;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_DOWN;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_UP;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -26,13 +25,11 @@ public class CometHealthIndicator extends AbstractHealthIndicator {
 
   public CometHealthIndicator(
       GatewayEventManager gatewayEventManager,
-      @Value("${totalmobile.baseUrl}") String tmBaseUrl,
-      @Value("${totalmobile.healthcheckPath}") String healthcheckPath,
-      RestTemplateBuilder restTemplateBuilder
-      //@Qualifier("TM Anon") RestTemplate restTemplate
+      RestTemplateBuilder restTemplateBuilder,
+      CometConfig cometConfig
   ) {
     this.gatewayEventManager = gatewayEventManager;
-    this.swaggerUrl = tmBaseUrl + healthcheckPath;
+    this.swaggerUrl = cometConfig.baseUrl + cometConfig.healthCheckPath;
     this.restTemplate = restTemplateBuilder.build();
   }
 

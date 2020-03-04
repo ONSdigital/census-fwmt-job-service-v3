@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,14 +31,10 @@ public class CometRestClient {
   private final RestTemplate restTemplate;
   private final GatewayEventManager gatewayEventManager;
 
-  // O365 credentials for authentication w/o login prompt
-
-  // Azure Directory OAUTH 2.0 AUTHORIZATION ENDPOINT
-  private final String authority;
-  private final String resource;
+  // cached endpoint, to avoid repeated string concats of baseUrl + caseCreatePath
   private final String cometURL;
-  private final String clientID;
-  private final String clientSecret;
+
+  private final CometConfig cometConfig;
 
   // temporary store for authentication result
   private AuthenticationResult auth;
@@ -47,19 +42,11 @@ public class CometRestClient {
   public CometRestClient(
       @Qualifier("TM") RestTemplate restTemplate,
       GatewayEventManager gatewayEventManager,
-      @Value("${totalmobile.baseUrl}") String baseUrl,
-      @Value("${totalmobile.operation.case.create.path}") String tmPath,
-      @Value("${totalmobile.comet.clientID}") String clientID,
-      @Value("${totalmobile.comet.clientSecret}") String clientSecret,
-      @Value("${totalmobile.comet.resource}") String resource,
-      @Value("${totalmobile.comet.authority}") String authority) {
+      CometConfig cometConfig) {
     this.restTemplate = restTemplate;
     this.gatewayEventManager = gatewayEventManager;
-    this.cometURL = baseUrl + tmPath;
-    this.clientID = clientID;
-    this.clientSecret = clientSecret;
-    this.resource = resource;
-    this.authority = authority;
+    this.cometConfig = cometConfig;
+    this.cometURL = cometConfig.baseUrl + cometConfig.caseCreatePath;
     this.auth = null;
   }
 
@@ -74,10 +61,10 @@ public class CometRestClient {
   private void auth() throws GatewayException {
     ExecutorService service = Executors.newFixedThreadPool(1);
     try {
-      AuthenticationContext context = new AuthenticationContext(authority, false, service);
-      ClientCredential cc = new ClientCredential(clientID, clientSecret);
+      AuthenticationContext context = new AuthenticationContext(cometConfig.authority, false, service);
+      ClientCredential cc = new ClientCredential(cometConfig.clientId, cometConfig.clientSecret);
 
-      Future<AuthenticationResult> future = context.acquireToken(resource, cc, null);
+      Future<AuthenticationResult> future = context.acquireToken(cometConfig.resource, cc, null);
       this.auth = future.get();
     } catch (MalformedURLException | InterruptedException | ExecutionException e) {
       String errorMsg = "Failed to Authenticate with Totalmobile";
@@ -91,7 +78,7 @@ public class CometRestClient {
 
   public <A> ResponseEntity<Void> sendRequest(A caseRequest, String caseId) throws GatewayException {
     String basePathway = cometURL + caseId;
-    if ((!isAuthed() || isExpired()) && !clientID.isEmpty() && !clientSecret.isEmpty())
+    if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
       auth();
     HttpHeaders httpHeaders = new HttpHeaders();
     if (isAuthed())
@@ -106,7 +93,7 @@ public class CometRestClient {
 
   public ModelCase getCase(String caseId) throws GatewayException {
     String basePathway = cometURL + caseId;
-    if ((!isAuthed() || isExpired()) && !clientID.isEmpty() && !clientSecret.isEmpty())
+    if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
       auth();
     HttpHeaders httpHeaders = new HttpHeaders();
     if (isAuthed())

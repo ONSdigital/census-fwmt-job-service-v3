@@ -3,8 +3,6 @@ package uk.gov.ons.census.fwmt.jobservice.rm;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,31 +12,24 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 @Component
 public class ProcessRmFieldDlq {
 
-  @Autowired
   private RabbitTemplate rabbitTemplate;
-
-  @Autowired
   private AmqpAdmin amqpAdmin;
+  private RabbitMqConfig config;
 
-  @Value("${rabbitmq.queues.rm.input}")
-  private String rmQ;
-
-  @Autowired
-  @Value("${rabbitmq.queues.rm.dlq}")
-  private String rmDlq;
-
+  public ProcessRmFieldDlq(RabbitTemplate rabbitTemplate, AmqpAdmin amqpAdmin, RabbitMqConfig config) {
+    this.rabbitTemplate = rabbitTemplate;
+    this.amqpAdmin = amqpAdmin;
+    this.config = config;
+  }
 
   public void processDlq() throws GatewayException {
-    int messageCount;
-    Message message;
-
     try {
-      messageCount = (int) amqpAdmin.getQueueProperties(rmDlq).get("QUEUE_MESSAGE_COUNT");
+      int messageCount = (int) amqpAdmin.getQueueProperties(config.inputDlq).get("QUEUE_MESSAGE_COUNT");
 
       for (int i = 0; i < messageCount; i++) {
-        message = rabbitTemplate.receive(rmDlq);
+        Message message = rabbitTemplate.receive(config.inputDlq);
 
-        rabbitTemplate.send(rmQ, message);
+        rabbitTemplate.send(config.inputQueue, message);
       }
     } catch (NullPointerException e) {
       throw new GatewayException(GatewayException.Fault.BAD_REQUEST, "No messages in queue");

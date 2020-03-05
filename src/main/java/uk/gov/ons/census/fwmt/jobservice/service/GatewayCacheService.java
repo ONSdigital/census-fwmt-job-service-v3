@@ -2,7 +2,7 @@ package uk.gov.ons.census.fwmt.jobservice.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
+import uk.gov.ons.census.fwmt.common.gatewaycache.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.repository.GatewayCacheRepository;
 
 /**

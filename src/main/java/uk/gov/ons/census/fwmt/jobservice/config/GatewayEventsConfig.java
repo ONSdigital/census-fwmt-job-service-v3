@@ -1,20 +1,17 @@
 package uk.gov.ons.census.fwmt.jobservice.config;
 
+import com.godaddy.logging.LoggingConfigs;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.Application;
+
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.function.Function;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import com.godaddy.logging.LoggingConfigs;
-
-import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.Application;
 
 @Configuration
 public class GatewayEventsConfig {
@@ -28,7 +25,7 @@ public class GatewayEventsConfig {
   public static final String COMET_UPDATE_ACK = "COMET_UPDATE_ACK";
   public static final String TM_SERVICE_UP = "TM_SERVICE_UP";
   public static final String RABBIT_QUEUE_UP = "RABBIT_QUEUE_UP";
-//  public static final String REDIS_SERVICE_UP = "REDIS_SERVICE_UP";
+  //  public static final String REDIS_SERVICE_UP = "REDIS_SERVICE_UP";
 
   public static final String FAILED_TM_AUTHENTICATION = "FAILED_TM_AUTHENTICATION";
   public static final String FAILED_TO_CREATE_TM_JOB = "FAILED_TO_CREATE_TM_JOB";
@@ -36,7 +33,7 @@ public class GatewayEventsConfig {
   public static final String FAILED_TO_UPDATE_TM_JOB = "FAILED_TO_UPDATE_TM_JOB";
   public static final String TM_SERVICE_DOWN = "TM_SERVICE_DOWN";
   public static final String RABBIT_QUEUE_DOWN = "RABBIT_QUEUE_DOWN";
-//  public static final String REDIS_SERVICE_DOWN = "REDIS_SERVICE_DOWN";
+  //  public static final String REDIS_SERVICE_DOWN = "REDIS_SERVICE_DOWN";
 
   // from the rm adapter
   public static final String RM_CREATE_REQUEST_RECEIVED = "RM_CREATE_REQUEST_RECEIVED";

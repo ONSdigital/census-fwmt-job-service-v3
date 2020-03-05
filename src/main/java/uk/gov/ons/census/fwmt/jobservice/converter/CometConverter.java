@@ -2,8 +2,8 @@ package uk.gov.ons.census.fwmt.jobservice.converter;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.gatewaycache.GatewayCache;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
-import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 
 public interface CometConverter {
   CaseRequest.CaseRequestBuilder convert(

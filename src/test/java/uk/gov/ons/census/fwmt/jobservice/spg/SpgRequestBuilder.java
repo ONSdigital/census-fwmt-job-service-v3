@@ -54,9 +54,6 @@ public final class SpgRequestBuilder {
         .fieldCoordinatorId("exampleCoordinatorId")
 
         .organisationName("exampleOrgName")
-        .forename("exampleForename")
-        .surname("exampleSurname")
-        .phoneNumber("examplePhoneNumber")
 
         .uprn("1")
         .addressLine1("exampleAddr1")

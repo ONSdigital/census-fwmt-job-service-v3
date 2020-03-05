@@ -1,19 +1,17 @@
 package uk.gov.ons.census.fwmt.jobservice.controller;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.NonNull;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class RestLogger implements ClientHttpRequestInterceptor {
@@ -33,7 +31,6 @@ public class RestLogger implements ClientHttpRequestInterceptor {
         response.getStatusCode(),
         response.getHeaders(),
         CharStreams.toString(new InputStreamReader(response.getBody(), Charsets.UTF_8)));
-
 
     return response;
   }

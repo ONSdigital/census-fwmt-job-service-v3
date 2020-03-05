@@ -1,8 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.comet;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_DOWN;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_UP;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -11,9 +9,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
+
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_DOWN;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_UP;
 
 @Slf4j
 @Component
@@ -48,8 +48,8 @@ public class CometHealthIndicator extends AbstractHealthIndicator {
       } else {
         builder.down().build();
         // TODO why is this commented out?
-//        gatewayEventManager.triggerErrorEvent(this.getClass(), null, "Cannot reach TM", "<NA>",
-//            TM_SERVICE_DOWN, "url", swaggerUrl, "Response Code", responseCode.toString());
+        //        gatewayEventManager.triggerErrorEvent(this.getClass(), null, "Cannot reach TM", "<NA>",
+        //            TM_SERVICE_DOWN, "url", swaggerUrl, "Response Code", responseCode.toString());
       }
 
     } catch (Exception e) {

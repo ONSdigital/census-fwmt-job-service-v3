@@ -1,10 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.rm;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -22,7 +21,8 @@ public class RmReceiver {
   private GatewayEventManager gatewayEventManager;
 
   public void receiveMessage(FieldworkFollowup ffu) throws GatewayException, JsonProcessingException {
-    gatewayEventManager.triggerEvent(ffu.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref", ffu.getCaseRef());
+    gatewayEventManager
+        .triggerEvent(ffu.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref", ffu.getCaseRef());
     jobService.createFieldworkerJob(ffu);
   }
 

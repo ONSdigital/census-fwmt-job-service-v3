@@ -2,21 +2,18 @@ package uk.gov.ons.census.fwmt.jobservice.converter.spg;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest.Type;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Contact;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.gatewaycache.GatewayCache;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.jobservice.converter.CometConverter;
-import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.SpgFollowUpSchedulingService;
 import uk.gov.ons.census.fwmt.jobservice.spg.SpgRequestBuilder;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,15 +32,6 @@ class SpgSiteConverterTest {
         new SpgCreateSecureSiteConverter()
     );
     this.converter = new SpgCreateConverter(selectors);
-  }
-
-  @TestConfiguration
-  static class Configuration {
-    @Bean
-    public List<CometConverter> spgSelectors() {
-
-      return List.of();
-    }
   }
 
   @Test
@@ -107,18 +95,24 @@ class SpgSiteConverterTest {
   @Test
   void confirm_valid_spgRequest_creates_valid_TM_request() throws GatewayException {
     FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
-    GatewayCache cache = GatewayCache.builder().build();
+    GatewayCache cache = GatewayCache.builder()
+        .managerTitle("Mx")
+        .managerFirstname("exampleForename")
+        .managerSurname("exampleSurname")
+        .contactPhoneNumber("examplePhoneNumber")
+        .build();
+
     CaseRequest actualTMRequest = converter.convert(ffu, cache, CaseRequest.builder()).build();
 
     Contact contact = Contact.builder()
-        .name("exampleForename exampleSurname")
+        .name("Mx exampleForename exampleSurname")
         .organisationName("exampleOrgName")
         .phone("examplePhoneNumber")
-        .email(null).build();
+        .email(null)
+        .build();
 
-    String[] lines = {"exampleAddr1", "exampleAddr2", "exampleAddr3"};
     Address address = Address.builder()
-        .lines(Arrays.asList(lines))
+        .lines(List.of("exampleAddr1", "exampleAddr2", "exampleAddr3"))
         .town("exampleTown")
         .postcode("examplePostcode").build();
 

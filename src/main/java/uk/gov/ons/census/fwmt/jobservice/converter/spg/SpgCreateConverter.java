@@ -1,5 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.converter.spg;
 
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
@@ -9,13 +10,14 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.Contact;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.gatewaycache.GatewayCache;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.jobservice.converter.CometConverter;
 import uk.gov.ons.census.fwmt.jobservice.converter.ConverterUtils;
-import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Qualifier("Toplevel")
 public final class SpgCreateConverter implements CometConverter {
@@ -38,8 +40,15 @@ public final class SpgCreateConverter implements CometConverter {
 
     Contact.ContactBuilder outContact = Contact.builder();
     outContact.organisationName(ffu.getOrganisationName());
-    outContact.name(ffu.getForename() + " " + ffu.getSurname());
-    outContact.phone(ffu.getPhoneNumber());
+    if (cache != null) {
+      List<String> fields = Lists
+          .newArrayList(cache.getManagerTitle(), cache.getManagerFirstname(), cache.getManagerSurname());
+      String name = fields.stream().filter(Objects::nonNull).collect(Collectors.joining(" "));
+      outContact.name(name);
+      if (cache.getContactPhoneNumber() != null) {
+        outContact.phone(cache.getContactPhoneNumber());
+      }
+    }
     out.contact(outContact.build());
 
     Address.AddressBuilder outAddress = Address.builder();

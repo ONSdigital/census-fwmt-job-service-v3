@@ -1,12 +1,13 @@
-package uk.gov.ons.census.fwmt.jobservice.controller;
+package uk.gov.ons.census.fwmt.jobservice.http;
 
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.jobservice.rm.ProcessRmFieldDlq;
+import uk.gov.ons.census.fwmt.jobservice.service.ProcessRmFieldDlq;
 
 @Controller
 public class QueueListenerController {
@@ -15,6 +16,7 @@ public class QueueListenerController {
   private ProcessRmFieldDlq processRMFieldDLQ;
 
   @Autowired
+  @Qualifier("RM")
   private SimpleMessageListenerContainer simpleMessageListenerContainer;
 
   @GetMapping("/processDLQ")

@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.controller;
+package uk.gov.ons.census.fwmt.jobservice.http;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;

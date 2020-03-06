@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.comet;
+package uk.gov.ons.census.fwmt.jobservice.health;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;

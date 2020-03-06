@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.rm;
+package uk.gov.ons.census.fwmt.jobservice.health;
 
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -7,6 +7,7 @@ import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.config.RabbitMqConfig;
 
 import java.util.Arrays;
 import java.util.List;

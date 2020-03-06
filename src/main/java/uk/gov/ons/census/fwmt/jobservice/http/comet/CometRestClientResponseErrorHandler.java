@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.comet;
+package uk.gov.ons.census.fwmt.jobservice.http.comet;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.ClientHttpResponse;
@@ -24,5 +24,4 @@ public class CometRestClientResponseErrorHandler implements ResponseErrorHandler
     log.error(message);
     throw new RuntimeException(message);
   }
-
 }

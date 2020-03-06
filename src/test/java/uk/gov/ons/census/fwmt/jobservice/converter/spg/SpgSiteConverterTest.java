@@ -8,9 +8,9 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest.Type;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Contact;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.gatewaycache.GatewayCache;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.jobservice.converter.CometConverter;
+import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.SpgFollowUpSchedulingService;
 import uk.gov.ons.census.fwmt.jobservice.spg.SpgRequestBuilder;
 

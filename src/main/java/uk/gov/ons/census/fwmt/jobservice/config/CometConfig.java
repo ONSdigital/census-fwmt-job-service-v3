@@ -5,7 +5,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.fwmt.jobservice.comet.CometRestClientResponseErrorHandler;
+import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClientResponseErrorHandler;
 
 @Configuration
 public class CometConfig {
@@ -41,11 +41,5 @@ public class CometConfig {
     this.clientSecret = clientSecret;
     this.resource = resource;
     this.authority = authority;
-  }
-
-  @Bean(name = "TM")
-  public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-    return restTemplateBuilder.errorHandler(new CometRestClientResponseErrorHandler())
-        .basicAuthentication(userName, password).build();
   }
 }

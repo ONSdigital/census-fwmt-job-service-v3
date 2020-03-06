@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.rm;
+package uk.gov.ons.census.fwmt.jobservice.config;
 
 import org.aopalliance.aop.Advice;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -24,6 +24,7 @@ import uk.gov.ons.census.fwmt.common.retry.DefaultListenerSupport;
 import uk.gov.ons.census.fwmt.common.retry.GatewayMessageRecover;
 import uk.gov.ons.census.fwmt.common.retry.GatewayRetryPolicy;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmReceiver;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,17 +82,16 @@ public class RabbitMqConfig {
     return new RabbitAdmin(connectionFactory());
   }
 
-  // TODO: It doesn't seem right that these qualifiers are appended with the kind of class they are. 'JS' would do, if they are about Javascript
-  // TODO: It looks like this is used elsewhere. Should this be in a more general config?
-  @Bean("JS_MC")
-  public MessageConverter jsonMessageConverter(@Qualifier("JS_CM") DefaultClassMapper classMapper) {
+  @Bean
+  @Qualifier("JS")
+  public MessageConverter jsonMessageConverter() {
     Jackson2JsonMessageConverter jsonMessageConverter = new Jackson2JsonMessageConverter();
-    jsonMessageConverter.setClassMapper(classMapper);
+    jsonMessageConverter.setClassMapper(classMapper());
     return jsonMessageConverter;
   }
 
-  // TODO: It doesn't seem right that these qualifiers are appended with the kind of class they are. 'JS' would do, if they are about Javascript
-  @Bean("JS_CM")
+  @Bean
+  @Qualifier("JS")
   public DefaultClassMapper classMapper() {
     DefaultClassMapper classMapper = new DefaultClassMapper();
     Map<String, Class<?>> idClassMapping = new HashMap<>();
@@ -102,10 +102,10 @@ public class RabbitMqConfig {
   }
 
   @Bean
-  public RetryOperationsInterceptor interceptor(@Qualifier("retryTemplate") RetryOperations retryOperations) {
+  public RetryOperationsInterceptor interceptor() {
     RetryOperationsInterceptor interceptor = new RetryOperationsInterceptor();
     interceptor.setRecoverer(new GatewayMessageRecover());
-    interceptor.setRetryOperations(retryOperations);
+    interceptor.setRetryOperations(retryTemplate());
     return interceptor;
   }
 
@@ -127,7 +127,8 @@ public class RabbitMqConfig {
     return retryTemplate;
   }
 
-  @Bean(name = "RM_Q")
+  @Bean
+  @Qualifier("RM")
   public Queue queue() {
     Queue queue = QueueBuilder.durable(inputQueue)
         .withArgument("x-dead-letter-exchange", "")
@@ -137,7 +138,8 @@ public class RabbitMqConfig {
     return queue;
   }
 
-  @Bean(name = "RM_DLQ")
+  @Bean
+  @Qualifier("RM")
   public Queue deadLetterQueue() {
     Queue queue = QueueBuilder.durable(inputDlq).build();
     queue.setAdminsThatShouldDeclare(amqpAdmin());
@@ -145,17 +147,19 @@ public class RabbitMqConfig {
   }
 
   // TODO: This doesn't need to be suffixed with a type
-  @Bean(name = "RM_LA")
+  @Bean
+  @Qualifier("RM")
   public MessageListenerAdapter listenerAdapter(RmReceiver receiver) {
     return new MessageListenerAdapter(receiver, "receiveMessage");
   }
 
   // TODO: This doesn't need to be suffixed with a type
-  @Bean(name = "RM_C")
+  @Bean
+  @Qualifier("RM")
   public SimpleMessageListenerContainer container(
       ConnectionFactory connectionFactory,
-      @Qualifier("RM_LA") MessageListenerAdapter listenerAdapter,
-      @Qualifier("JS_MC") MessageConverter jsonMessageConverter,
+      @Qualifier("RM") MessageListenerAdapter listenerAdapter,
+      @Qualifier("JS") MessageConverter jsonMessageConverter,
       RetryOperationsInterceptor retryOperationsInterceptor) {
 
     listenerAdapter.setMessageConverter(jsonMessageConverter);

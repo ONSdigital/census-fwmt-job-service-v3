@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class SpgFollowUpSchedulingService {
-  @Value("spg.followUpDate")
+  @Value("${spg.followUpDate}")
   Long followUpDate;
   private boolean inFollowUp = false;
 

@@ -1,9 +1,10 @@
-package uk.gov.ons.census.fwmt.jobservice.comet;
+package uk.gov.ons.census.fwmt.jobservice.http.comet;
 
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,12 +40,13 @@ public class CometRestClient {
   private AuthenticationResult auth;
 
   public CometRestClient(
-      @Qualifier("TM") RestTemplate restTemplate,
-      GatewayEventManager gatewayEventManager,
-      CometConfig cometConfig) {
-    this.restTemplate = restTemplate;
-    this.gatewayEventManager = gatewayEventManager;
+      CometConfig cometConfig,
+      RestTemplateBuilder restTemplateBuilder,
+      GatewayEventManager gatewayEventManager) {
     this.cometConfig = cometConfig;
+    this.restTemplate = restTemplateBuilder.errorHandler(new CometRestClientResponseErrorHandler())
+        .basicAuthentication(cometConfig.userName, cometConfig.password).build();
+    this.gatewayEventManager = gatewayEventManager;
     this.cometURL = cometConfig.baseUrl + cometConfig.caseCreatePath;
     this.auth = null;
   }

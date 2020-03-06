@@ -19,4 +19,8 @@ public class GatewayCacheService {
   public GatewayCache getById(String caseId) {
     return repository.findByCaseId(caseId);
   }
+
+  public void save(GatewayCache cache) {
+    repository.save(cache);
+  }
 }

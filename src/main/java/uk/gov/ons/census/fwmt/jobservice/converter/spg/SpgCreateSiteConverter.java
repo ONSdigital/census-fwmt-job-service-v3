@@ -12,6 +12,7 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 public class SpgCreateSiteConverter implements CometConverter {
   public CaseRequest.CaseRequestBuilder convert(
       FieldworkFollowup ingest, GatewayCache gco, CaseRequest.CaseRequestBuilder out) {
+    // after TM, create Cache, existsInFwmt=true,
     return out.surveyType(CaseRequest.SurveyType.SPG_Site);
   }
 

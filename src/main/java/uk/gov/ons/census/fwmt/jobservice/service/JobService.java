@@ -9,6 +9,7 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 
 import java.util.List;
@@ -30,12 +31,21 @@ public class JobService {
   private CometRestClient cometRestClient;
   @Autowired
   private GatewayEventManager gatewayEventManager;
+  @Autowired
+  private GatewayCacheService gatewayCacheService;
 
   public void createFieldworkerJob(FieldworkFollowup ffu) throws GatewayException {
     CaseRequest putCase = converterService.buildPutCaseRequest(ffu);
     gatewayEventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
     ResponseEntity<Void> response = cometRestClient.sendRequest(putCase, ffu.getCaseId());
     validateResponse(response, ffu.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+    GatewayCache cache = gatewayCacheService.getById(ffu.getCaseId());
+    // update the cache with existsInFwmt=true
+    if (cache == null) {
+      gatewayCacheService.save(GatewayCache.builder().caseId(ffu.getCaseId()).existsInFwmt(true).build());
+    } else {
+      gatewayCacheService.save(cache.toBuilder().existsInFwmt(true).build());
+    }
     gatewayEventManager
         .triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_ACK, "Case Ref", ffu.getCaseRef(), "Response Code",
             response.getStatusCode().name());

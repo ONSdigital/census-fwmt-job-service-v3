@@ -43,6 +43,7 @@ public final class SpgRequestBuilder {
   public static FieldworkFollowup makeBase() {
     return FieldworkFollowup.builder()
         .actionInstruction("CREATE")
+        // TODO: Are you sure this can be re-enabled?
         .surveyName("Census") // Not needed, but still in formal diagrams
         .addressType("SPG")
 
@@ -53,9 +54,6 @@ public final class SpgRequestBuilder {
         .fieldCoordinatorId("exampleCoordinatorId")
 
         .organisationName("exampleOrgName")
-        .forename("exampleForename")
-        .surname("exampleSurname")
-        .phoneNumber("examplePhoneNumber")
 
         .uprn("1")
         .addressLine1("exampleAddr1")

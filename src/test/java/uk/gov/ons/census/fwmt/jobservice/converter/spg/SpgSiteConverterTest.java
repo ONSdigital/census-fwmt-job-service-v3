@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SpgSiteConverterTest {
-  private final SpgCreateConverter converter;
+  private final SpgCreateCommon converter;
 
   public SpgSiteConverterTest() {
     SpgFollowUpSchedulingService spgFollowUpSchedulingService = Mockito.mock(SpgFollowUpSchedulingService.class);
@@ -31,7 +31,7 @@ class SpgSiteConverterTest {
         new SpgCreateSiteConverter(),
         new SpgCreateSecureSiteConverter()
     );
-    this.converter = new SpgCreateConverter(selectors);
+    this.converter = new SpgCreateCommon(selectors);
   }
 
   @Test

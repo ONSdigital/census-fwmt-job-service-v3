@@ -9,7 +9,6 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.SpgFollowUpSchedulingService;
 
 @Component
-@Qualifier("SPG")
 public class SpgCreateUnitFollowupConverter implements CometConverter {
 
   private final SpgFollowUpSchedulingService followUpService;
@@ -18,13 +17,22 @@ public class SpgCreateUnitFollowupConverter implements CometConverter {
     this.followUpService = spgFollowUpSchedulingService;
   }
 
+  @Override
   public CaseRequest.CaseRequestBuilder convert(
       FieldworkFollowup ingest, GatewayCache gco, CaseRequest.CaseRequestBuilder out) {
     return out.surveyType(CaseRequest.SurveyType.SPG_Unit_F);
   }
 
+  @Override
   public Boolean isValid(FieldworkFollowup ffu, GatewayCache gco) {
-    return ffu.getAddressLevel().equals("U")
-        && (!ffu.getHandDeliver() || (followUpService.isInFollowUp() && (gco != null) && gco.delivered));
+    try {
+      return ffu.getActionInstruction().equals("CREATE")
+          && ffu.getSurveyName().equals("Census")
+          && ffu.getAddressType().equals("SPG")
+          && ffu.getAddressLevel().equals("U")
+          && (!ffu.getHandDeliver() || (followUpService.isInFollowUp() && gco.delivered));
+    } catch (NullPointerException e) {
+      return false;
+    }
   }
 }

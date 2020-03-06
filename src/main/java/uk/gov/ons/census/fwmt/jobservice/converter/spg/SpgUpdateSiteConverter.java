@@ -8,23 +8,21 @@ import uk.gov.ons.census.fwmt.jobservice.converter.CometConverter;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 
 @Component
-public class SpgCreateSiteConverter implements CometConverter {
+public class SpgUpdateSiteConverter implements CometConverter {
   @Override
   public CaseRequest.CaseRequestBuilder convert(
       FieldworkFollowup ingest, GatewayCache gco, CaseRequest.CaseRequestBuilder out) {
-    return out.surveyType(CaseRequest.SurveyType.SPG_Site);
+    return out;
   }
 
   @Override
   public Boolean isValid(FieldworkFollowup ffu, GatewayCache gco) {
-    // TODO this is existsInFwmt, not existsInField
     try {
-      return ffu.getActionInstruction().equals("CREATE")
+      return ffu.getActionInstruction().equals("UPDATE")
           && ffu.getSurveyName().equals("Census")
           && ffu.getAddressType().equals("SPG")
           && ffu.getAddressLevel().equals("E")
-          && !ffu.getSecureEstablishment()
-          && !gco.existsInFwmt;
+          && gco.existsInFwmt;
     } catch (NullPointerException e) {
       return false;
     }

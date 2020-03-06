@@ -9,6 +9,7 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.converter.ConverterUtils;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 
 import java.util.List;
@@ -24,12 +25,16 @@ public class JobService {
   private static final List<HttpStatus> validResponses = List
       .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
 
-  @Autowired
-  private ConverterService converterService;
-  @Autowired
-  private CometRestClient cometRestClient;
-  @Autowired
-  private GatewayEventManager gatewayEventManager;
+  private final ConverterService converterService;
+  private final CometRestClient cometRestClient;
+  private final GatewayEventManager gatewayEventManager;
+
+  public JobService(ConverterService converterService, CometRestClient cometRestClient,
+      GatewayEventManager gatewayEventManager) {
+    this.converterService = converterService;
+    this.cometRestClient = cometRestClient;
+    this.gatewayEventManager = gatewayEventManager;
+  }
 
   public void createFieldworkerJob(FieldworkFollowup ffu) throws GatewayException {
     CaseRequest putCase = converterService.buildPutCaseRequest(ffu);
@@ -44,9 +49,9 @@ public class JobService {
   private void validateResponse(ResponseEntity<Void> response, String caseId, String verb, String errorCode)
       throws GatewayException {
     if (!isValidResponse(response)) {
-      String msg =
-          "Unable to " + verb + " FieldWorkerJobRequest: HTTP_STATUS:" + response.getStatusCode() + ":" + response
-              .getStatusCodeValue();
+      String code = response.getStatusCode().toString();
+      String value = Integer.toString(response.getStatusCodeValue());
+      String msg = "Unable to " + verb + " FieldWorkerJobRequest: HTTP_STATUS:" + code + ":" + value;
       gatewayEventManager.triggerErrorEvent(this.getClass(), msg, String.valueOf(caseId), errorCode);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, msg);
     }

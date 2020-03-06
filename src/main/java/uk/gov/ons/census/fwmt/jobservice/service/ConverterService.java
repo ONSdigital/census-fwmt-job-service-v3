@@ -18,7 +18,7 @@ import java.util.List;
 public class ConverterService {
 
   @Autowired
-  @Qualifier("Toplevel")
+  @Qualifier("TopLevel")
   private List<CometConverter> selectors;
 
   @Autowired

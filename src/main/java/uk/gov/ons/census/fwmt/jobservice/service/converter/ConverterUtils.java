@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.converter;
+package uk.gov.ons.census.fwmt.jobservice.service.converter;
 
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
@@ -36,13 +36,13 @@ public class ConverterUtils {
     }
   }
 
-  public static Optional<CometConverter> maybeGetConverter(
-      FieldworkFollowup ffu, GatewayCache cache, List<CometConverter> selectors) {
+  public static <T> Optional<CometConverter<T>> maybeGetConverter(
+      FieldworkFollowup ffu, GatewayCache cache, List<CometConverter<T>> selectors) {
     return selectors.stream().filter(s -> s.isValid(ffu, cache)).findFirst();
   }
 
-  public static CometConverter getConverter(FieldworkFollowup ffu, GatewayCache cache, List<CometConverter> selectors)
-      throws GatewayException {
+  public static <T> CometConverter<T> getConverter(
+      FieldworkFollowup ffu, GatewayCache cache, List<CometConverter<T>> selectors) throws GatewayException {
     return maybeGetConverter(ffu, cache, selectors).orElseThrow(() -> noConverter(ffu, cache));
   }
 

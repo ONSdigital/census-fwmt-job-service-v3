@@ -62,6 +62,11 @@ public final class SpgCreateCommon {
     outLocation._long(ConverterUtils.parseFloat(ffu.getLongitude()));
     out.location(outLocation.build());
 
+    if (cache != null) {
+      out.description(cache.getCareCodes());
+      out.specialInstructions(cache.getAccessInfo());
+    }
+
     out.uaa(ffu.getUaa());
     out.sai(false);
 

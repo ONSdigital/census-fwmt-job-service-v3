@@ -10,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "gateway_cache")
 public class GatewayCache {

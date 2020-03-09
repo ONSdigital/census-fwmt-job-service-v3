@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -9,7 +8,7 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.converter.ConverterUtils;
+import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 
 import java.util.List;
@@ -27,21 +26,30 @@ public class JobService {
 
   private final ConverterService converterService;
   private final CometRestClient cometRestClient;
-  private final GatewayEventManager gatewayEventManager;
+  private final GatewayEventManager eventManager;
+  private final GatewayCacheService cacheService;
 
   public JobService(ConverterService converterService, CometRestClient cometRestClient,
-      GatewayEventManager gatewayEventManager) {
+      GatewayEventManager eventManager, GatewayCacheService cacheService) {
     this.converterService = converterService;
     this.cometRestClient = cometRestClient;
-    this.gatewayEventManager = gatewayEventManager;
+    this.eventManager = eventManager;
+    this.cacheService = cacheService;
   }
 
   public void createFieldworkerJob(FieldworkFollowup ffu) throws GatewayException {
     CaseRequest putCase = converterService.buildPutCaseRequest(ffu);
-    gatewayEventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
     ResponseEntity<Void> response = cometRestClient.sendRequest(putCase, ffu.getCaseId());
     validateResponse(response, ffu.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
-    gatewayEventManager
+    GatewayCache cache = cacheService.getById(ffu.getCaseId());
+    // update the cache with existsInFwmt=true
+    if (cache == null) {
+      cacheService.save(GatewayCache.builder().caseId(ffu.getCaseId()).existsInFwmt(true).build());
+    } else {
+      cacheService.save(cache.toBuilder().existsInFwmt(true).build());
+    }
+    eventManager
         .triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_ACK, "Case Ref", ffu.getCaseRef(), "Response Code",
             response.getStatusCode().name());
   }
@@ -52,7 +60,7 @@ public class JobService {
       String code = response.getStatusCode().toString();
       String value = Integer.toString(response.getStatusCodeValue());
       String msg = "Unable to " + verb + " FieldWorkerJobRequest: HTTP_STATUS:" + code + ":" + value;
-      gatewayEventManager.triggerErrorEvent(this.getClass(), msg, String.valueOf(caseId), errorCode);
+      eventManager.triggerErrorEvent(this.getClass(), msg, String.valueOf(caseId), errorCode);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, msg);
     }
   }

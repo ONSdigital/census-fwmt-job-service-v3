@@ -27,8 +27,10 @@ public class SpgUpdateRouter implements Router<Void> {
 
   public SpgUpdateRouter(RoutingValidator routingValidator, CometRestClient cometRestClient,
       GatewayEventManager eventManager, SpgCreateRouter createRouter) {
-    this.router = new RouterList<>(List.of(new SpgUpdateUnitRouter(createRouter), new SpgUpdateSiteRouter()),
-        eventManager);
+    this.router = new RouterList<>(List.of(
+        new SpgUpdateUnitRouter(createRouter, eventManager),
+        new SpgUpdateSiteRouter()
+    ), eventManager);
     this.routingValidator = routingValidator;
     this.cometRestClient = cometRestClient;
     this.eventManager = eventManager;
@@ -36,13 +38,13 @@ public class SpgUpdateRouter implements Router<Void> {
 
   @Override
   public Void routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
-    CaseReopenCreateRequest request = router.route(ffu, cache);
+    CaseReopenCreateRequest request = router.route(ffu, cache, eventManager);
 
     eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_UPDATE_SENT, "Case Ref", ffu.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendRequest(request, ffu.getCaseId());
 
-    routingValidator.validateResponse(response, ffu.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
+    routingValidator.validateResponseCode(response, ffu.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
     eventManager
         .triggerEvent(String.valueOf(ffu.getCaseId()), COMET_UPDATE_ACK, "Case Ref", ffu.getCaseRef(), "Response Code",

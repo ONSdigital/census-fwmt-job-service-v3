@@ -16,7 +16,7 @@ public class RoutingValidator {
     this.eventManager = eventManager;
   }
 
-  public void validateResponse(ResponseEntity<Void> response, String caseId, String verb, String errorCode)
+  public void validateResponseCode(ResponseEntity<Void> response, String caseId, String verb, String errorCode)
       throws GatewayException {
     if (!validResponses.contains(response.getStatusCode())) {
       String code = response.getStatusCode().toString();

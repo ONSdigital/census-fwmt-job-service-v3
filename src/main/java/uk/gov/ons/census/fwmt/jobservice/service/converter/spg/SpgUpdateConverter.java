@@ -12,8 +12,7 @@ public final class SpgUpdateConverter {
 
   public static CaseReopenCreateRequest.CaseReopenCreateRequestBuilder convertCommon(FieldworkFollowup ffu,
       GatewayCache cache, CaseReopenCreateRequest.CaseReopenCreateRequestBuilder builder) {
-    builder.id(ffu.getCaseId());
-    return builder;
+    return builder.id(ffu.getCaseId());
   }
 
   public static CaseReopenCreateRequest convertSite(FieldworkFollowup ffu, GatewayCache cache) {

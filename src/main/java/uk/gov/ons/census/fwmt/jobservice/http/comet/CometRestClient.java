@@ -11,7 +11,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CasePauseRequest;
+import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -82,14 +84,25 @@ public class CometRestClient {
     if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
       auth();
     HttpHeaders httpHeaders = new HttpHeaders();
-    if (isAuthed())
+    if (isAuthed()) {
       httpHeaders.setBearerAuth(auth.getAccessToken());
-    if (caseRequest.getClass().equals(CasePauseRequest.class)) {
-      basePathway = basePathway + "/pause";
     }
 
-    HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
-    return restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);
+    if (caseRequest instanceof CaseCreateRequest) {
+      HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
+      return restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);
+
+    } else if (caseRequest instanceof CasePauseRequest) {
+      HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
+      return restTemplate.exchange(basePathway + "/pause", HttpMethod.PUT, body, Void.class);
+
+    } else if (caseRequest instanceof CaseReopenCreateRequest) {
+      HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
+      return restTemplate.exchange(basePathway + "/reopen", HttpMethod.POST, body, Void.class);
+
+    } else {
+      return null;
+    }
   }
 
   public ModelCase getCase(String caseId) throws GatewayException {

@@ -19,9 +19,13 @@ public class RouterList<T> implements Router<T> {
     this.eventManager = eventManager;
   }
 
+  public T route(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
+    return getRouter(ffu, cache).route(ffu, cache, eventManager);
+  }
+
   @Override
   public T routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
-    return getRouter(ffu, cache).route(ffu, cache);
+    return getRouter(ffu, cache).routeUnsafe(ffu, cache);
   }
 
   @Override

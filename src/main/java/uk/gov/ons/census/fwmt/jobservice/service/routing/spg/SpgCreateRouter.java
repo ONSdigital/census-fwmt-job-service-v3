@@ -45,13 +45,13 @@ public class SpgCreateRouter implements Router<Void> {
 
   @Override
   public Void routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest request = router.route(ffu, cache);
+    CaseCreateRequest request = router.route(ffu, cache, eventManager);
 
     eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendRequest(request, ffu.getCaseId());
 
-    routingValidator.validateResponse(response, ffu.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+    routingValidator.validateResponseCode(response, ffu.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
 
     // Save the new cache object
     GatewayCache newCache = cacheService.getById(ffu.getCaseId());

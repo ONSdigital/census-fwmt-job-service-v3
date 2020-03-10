@@ -8,14 +8,13 @@ import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import java.util.List;
 
 public class RoutingValidator {
+  private static final List<HttpStatus> validResponses = List
+      .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
   private final GatewayEventManager eventManager;
 
   public RoutingValidator(GatewayEventManager eventManager) {
     this.eventManager = eventManager;
   }
-
-  private static final List<HttpStatus> validResponses = List
-      .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
 
   public void validateResponse(ResponseEntity<Void> response, String caseId, String verb, String errorCode)
       throws GatewayException {

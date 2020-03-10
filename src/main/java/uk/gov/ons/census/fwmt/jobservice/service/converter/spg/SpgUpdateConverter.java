@@ -2,7 +2,6 @@ package uk.gov.ons.census.fwmt.jobservice.service.converter.spg;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.SurveyType;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 
@@ -18,7 +17,7 @@ public final class SpgUpdateConverter {
   }
 
   public static CaseReopenCreateRequest convertSite(FieldworkFollowup ffu, GatewayCache cache) {
-    return null;
+    return SpgUpdateConverter.convertCommon(ffu, cache, CaseReopenCreateRequest.builder()).build();
   }
 
   public static CaseReopenCreateRequest convertUnit(FieldworkFollowup ffu, GatewayCache cache) {

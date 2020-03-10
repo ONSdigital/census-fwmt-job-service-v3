@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;

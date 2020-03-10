@@ -1,19 +1,18 @@
-package uk.gov.ons.census.fwmt.jobservice.service.converter.spg;
+package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
-import org.springframework.stereotype.Component;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseRequest;
+import org.springframework.beans.factory.annotation.Qualifier;
+import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.CometConverter;
+import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgCreateConverter;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.Router;
 
-@Component
-public class SpgCreateUnitDeliverConverter implements CometConverter<CaseRequest> {
+@Qualifier("SPG Create")
+public class SpgCreateUnitDeliverRouter implements Router<CaseCreateRequest> {
   @Override
-  public CaseRequest convert(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
-    return SpgCreateCommon.convert(ffu, cache, CaseRequest.builder())
-        .surveyType(CaseRequest.SurveyType.SPG_Unit_D)
-        .build();
+  public CaseCreateRequest routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
+    return SpgCreateConverter.convertUnitDeliver(ffu, cache);
   }
 
   @Override

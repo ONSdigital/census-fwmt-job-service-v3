@@ -2,6 +2,7 @@ package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
@@ -21,6 +22,7 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
 @Qualifier("SPG")
+@Service
 public class SpgCreateRouter implements Router<Void> {
   private final RouterList<CaseCreateRequest> router;
   private final RoutingValidator routingValidator;

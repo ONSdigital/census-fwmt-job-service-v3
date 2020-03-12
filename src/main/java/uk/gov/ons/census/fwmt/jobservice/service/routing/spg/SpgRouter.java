@@ -1,6 +1,7 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
 import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -11,6 +12,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RouterList;
 import java.util.List;
 
 @Primary
+@Service
 public class SpgRouter implements Router<Void> {
   private final RouterList<Void> router;
 

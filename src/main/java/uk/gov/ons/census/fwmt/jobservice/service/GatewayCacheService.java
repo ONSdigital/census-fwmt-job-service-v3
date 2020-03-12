@@ -14,13 +14,17 @@ import uk.gov.ons.census.fwmt.jobservice.repository.GatewayCacheRepository;
 @Slf4j
 @Service
 public class GatewayCacheService {
-  GatewayCacheRepository repository;
+  public final GatewayCacheRepository repository;
+
+  public GatewayCacheService(GatewayCacheRepository repository) {
+    this.repository = repository;
+  }
 
   public GatewayCache getById(String caseId) {
     return repository.findByCaseId(caseId);
   }
 
-  public void save(GatewayCache cache) {
-    repository.save(cache);
+  public GatewayCache save(GatewayCache cache) {
+    return repository.save(cache);
   }
 }

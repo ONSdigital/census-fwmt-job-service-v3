@@ -146,14 +146,12 @@ public class RabbitMqConfig {
     return queue;
   }
 
-  // TODO: This doesn't need to be suffixed with a type
   @Bean
   @Qualifier("RM")
   public MessageListenerAdapter listenerAdapter(RmReceiver receiver) {
     return new MessageListenerAdapter(receiver, "receiveMessage");
   }
 
-  // TODO: This doesn't need to be suffixed with a type
   @Bean
   @Qualifier("RM")
   public SimpleMessageListenerContainer container(

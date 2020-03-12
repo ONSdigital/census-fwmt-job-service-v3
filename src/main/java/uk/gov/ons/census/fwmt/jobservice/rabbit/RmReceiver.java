@@ -19,9 +19,14 @@ public class RmReceiver {
   @Autowired
   private GatewayEventManager gatewayEventManager;
 
+  public RmReceiver(JobService jobService, GatewayEventManager gatewayEventManager) {
+    this.jobService = jobService;
+    this.gatewayEventManager = gatewayEventManager;
+  }
+
   public void receiveMessage(FieldworkFollowup ffu) throws GatewayException {
     gatewayEventManager
         .triggerEvent(ffu.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref", ffu.getCaseRef());
-    jobService.createFieldworkerJob(ffu);
+    jobService.process(ffu);
   }
 }

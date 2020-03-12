@@ -20,7 +20,7 @@ public class SpgFollowUpSchedulingService {
     return inFollowUp;
   }
 
-  @Scheduled(cron = "* 0 * * * *")
+  @Scheduled(cron = "0 0 * * * *")
   public void checkTimeDate() {
     long unixTime = System.currentTimeMillis() / 1000L;
     log.info("The time is now {}", unixTime);

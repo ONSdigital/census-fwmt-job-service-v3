@@ -1,6 +1,7 @@
 package uk.gov.ons.census.fwmt.jobservice.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;

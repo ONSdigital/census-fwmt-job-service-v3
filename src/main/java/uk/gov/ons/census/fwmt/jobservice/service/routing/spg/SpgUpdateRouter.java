@@ -57,6 +57,7 @@ public class SpgUpdateRouter implements Router<Void> {
 
   @Override
   public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
+    // relies on the validation of: SpgRouter
     return ffu.getActionInstruction().equals("UPDATE")
         && ffu.getSurveyName().equals("Census")
         && ffu.getAddressType().equals("SPG");

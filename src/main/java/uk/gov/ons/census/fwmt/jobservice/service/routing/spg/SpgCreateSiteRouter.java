@@ -21,10 +21,8 @@ public class SpgCreateSiteRouter implements Router<CaseCreateRequest> {
   public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
     // TODO this is existsInFwmt, not existsInField
     try {
-      return ffu.getActionInstruction().equals("CREATE")
-          && ffu.getSurveyName().equals("Census")
-          && ffu.getAddressType().equals("SPG")
-          && ffu.getAddressLevel().equals("E")
+      // relies on the validation of: SpgRouter, SpgCreateRouter
+      return ffu.getAddressLevel().equals("E")
           && !ffu.getSecureEstablishment()
           && !cache.existsInFwmt;
     } catch (NullPointerException e) {

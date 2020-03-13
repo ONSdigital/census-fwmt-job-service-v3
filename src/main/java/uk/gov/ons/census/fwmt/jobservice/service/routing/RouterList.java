@@ -44,7 +44,7 @@ public class RouterList<T> implements Router<T> {
   private GatewayException noRouter(FieldworkFollowup ffu, GatewayCache cache) {
     String ffuDetail = ffu.toRoutingString();
     String cacheDetail = (cache == null) ? "null" : cache.toRoutingString();
-    String msg = this.getClass().getName() + " is unable to route the following message: " +
+    String msg = this.getClass().getSimpleName() + " is unable to route the following message: " +
         ffuDetail + " with " + cacheDetail;
     eventManager.triggerErrorEvent(this.getClass(), msg, String.valueOf(ffu.getCaseId()), ROUTING_FAILED);
     return new GatewayException(GatewayException.Fault.VALIDATION_FAILED, msg, ffu, cache);

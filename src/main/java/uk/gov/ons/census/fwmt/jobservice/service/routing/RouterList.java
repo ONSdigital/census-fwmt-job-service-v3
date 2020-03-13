@@ -42,9 +42,10 @@ public class RouterList<T> implements Router<T> {
   }
 
   private GatewayException noRouter(FieldworkFollowup ffu, GatewayCache cache) {
-    String ffMsg = "FieldworkFollowup(actionInstruction=%s, surveyName=%s, addressType=%s, addressLevel=%s, secureEstablishment=%s)";
-    String gcMsg = "GatewayCache(caseId, existsInField, delivered)";
-    String msg = "No router found for " + ffMsg + " and " + gcMsg;
+    String ffuDetail = ffu.toRoutingString();
+    String cacheDetail = (cache == null) ? "null" : cache.toRoutingString();
+    String msg = this.getClass().getName() + " is unable to route the following message: " +
+        ffuDetail + " with " + cacheDetail;
     eventManager.triggerErrorEvent(this.getClass(), msg, String.valueOf(ffu.getCaseId()), ROUTING_FAILED);
     return new GatewayException(GatewayException.Fault.VALIDATION_FAILED, msg, ffu, cache);
   }

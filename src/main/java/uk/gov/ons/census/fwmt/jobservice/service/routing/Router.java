@@ -29,7 +29,8 @@ public interface Router<T> {
     } else {
       String ffuDetail = ffu.toRoutingString();
       String cacheDetail = (cache == null) ? "null" : cache.toRoutingString();
-      String msg = "Unable to route message: " + ffuDetail + " with " + cacheDetail;
+      String msg = this.getClass().getName() + " is unable to route the following message: " +
+          ffuDetail + " with " + cacheDetail;
       eventManager.triggerErrorEvent(this.getClass(), msg, String.valueOf(ffu.getCaseId()), ROUTING_FAILED);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, msg, ffu, cache);
     }

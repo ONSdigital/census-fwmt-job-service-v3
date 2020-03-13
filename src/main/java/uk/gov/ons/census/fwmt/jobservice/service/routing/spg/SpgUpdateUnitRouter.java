@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
-import com.sun.jdi.request.EventRequestManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;

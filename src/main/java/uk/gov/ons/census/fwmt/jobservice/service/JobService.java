@@ -15,9 +15,6 @@ import java.util.List;
 @Service
 public class JobService {
 
-  private static final List<HttpStatus> validResponses = List
-      .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
-
   private final GatewayCacheService cacheService;
   private final SpgRouter router;
   private final GatewayEventManager eventManager;

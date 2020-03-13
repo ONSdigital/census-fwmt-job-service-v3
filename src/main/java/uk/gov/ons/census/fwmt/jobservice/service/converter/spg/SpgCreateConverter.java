@@ -58,7 +58,7 @@ public final class SpgCreateConverter {
       builder.specialInstructions(cache.getAccessInfo());
     }
 
-    builder.uaa(ffu.getUaa());
+    builder.uaa((ffu.getUaa() != null) ? ffu.getUaa() : false);
     builder.sai(false);
 
     return builder;

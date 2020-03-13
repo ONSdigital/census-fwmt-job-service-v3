@@ -21,7 +21,7 @@ public class JobService {
       .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
 
   private final GatewayCacheService cacheService;
-  private final Router<Void> router;
+  private final SpgRouter router;
   private final GatewayEventManager eventManager;
 
   public JobService(GatewayCacheService cacheService, SpgRouter router, GatewayEventManager eventManager) {

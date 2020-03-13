@@ -95,7 +95,8 @@ public class RabbitMqConfig {
   public DefaultClassMapper classMapper() {
     DefaultClassMapper classMapper = new DefaultClassMapper();
     Map<String, Class<?>> idClassMapping = new HashMap<>();
-    idClassMapping.put("uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup", FieldworkFollowup.class);
+    //idClassMapping.put("uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup", FieldworkFollowup.class);
+    idClassMapping.put("uk.gov.ons.census.fwmtadapter.model.dto.fwmt.FwmtActionInstruction", FieldworkFollowup.class);
     classMapper.setIdClassMapping(idClassMapping);
     classMapper.setTrustedPackages("*");
     return classMapper;

@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
-import com.sun.jdi.request.EventRequestManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
@@ -36,10 +35,8 @@ public class SpgUpdateUnitRouter implements Router<CaseReopenCreateRequest> {
   @Override
   public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
     try {
-      return ffu.getActionInstruction().equals("UPDATE")
-          && ffu.getSurveyName().equals("Census")
-          && ffu.getAddressType().equals("SPG")
-          && ffu.getAddressLevel().equals("U")
+      // relies on the validation of: SpgRouter, SpgUpdateRouter
+      return ffu.getAddressLevel().equals("U")
           && (ffu.getUaa() || ffu.getBlankQreReturned())
           && cache.existsInFwmt;
     } catch (NullPointerException e) {

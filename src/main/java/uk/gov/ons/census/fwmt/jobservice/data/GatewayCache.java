@@ -31,24 +31,10 @@ public class GatewayCache {
   @Column(name = "access_info")
   public final String accessInfo;
 
-  //@Deprecated
-  //@Column(name = "manager_title")
-  //public final String managerTitle;
-  //
-  //@Deprecated
-  //@Column(name = "manager_firstname")
-  //public final String managerFirstname;
-  //
-  //@Deprecated
-  //@Column(name = "manager_surname")
-  //public final String managerSurname;
-  //
-  //@Deprecated
-  //@JsonProperty("contactPhoneNo")
-  //@Column(name = "contact_phone_number")
-  //public final String contactPhoneNumber;
-
-  //public final String preferredName;
-  //public final String address1;
-  //public final String address2;
+  // display only the details related to request routing
+  public String toRoutingString() {
+    return "GatewayCache(" +
+        "existsInFwmt=" + this.existsInFwmt + ", " +
+        "delivered=" + this.delivered + ")";
+  }
 }

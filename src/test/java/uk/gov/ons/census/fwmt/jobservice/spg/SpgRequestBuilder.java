@@ -44,7 +44,7 @@ public final class SpgRequestBuilder {
     return FieldworkFollowup.builder()
         .actionInstruction("CREATE")
         // TODO: Are you sure this can be re-enabled?
-        .surveyName("Census") // Not needed, but still in formal diagrams
+        .surveyName("CENSUS") // Not needed, but still in formal diagrams
         .addressType("SPG")
 
         .caseId("exampleCaseId")

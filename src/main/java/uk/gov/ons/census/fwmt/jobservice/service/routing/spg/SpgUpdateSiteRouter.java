@@ -20,10 +20,8 @@ public class SpgUpdateSiteRouter implements Router<CaseReopenCreateRequest> {
   @Override
   public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
     try {
-      return ffu.getActionInstruction().equals("UPDATE")
-          && ffu.getSurveyName().equals("Census")
-          && ffu.getAddressType().equals("SPG")
-          && ffu.getAddressLevel().equals("E")
+      // relies on the validation of: SpgRouter, SpgUpdateRouter
+      return ffu.getAddressLevel().equals("E")
           && cache.existsInFwmt;
     } catch (NullPointerException e) {
       return false;

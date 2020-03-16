@@ -20,10 +20,8 @@ public class SpgCreateUnitDeliverRouter implements Router<CaseCreateRequest> {
   @Override
   public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
     try {
-      return ffu.getActionInstruction().equals("CREATE")
-          && ffu.getSurveyName().equals("Census")
-          && ffu.getAddressType().equals("SPG")
-          && ffu.getAddressLevel().equals("U")
+      // relies on the validation of: SpgRouter, SpgCreateRouter
+      return ffu.getAddressLevel().equals("U")
           && ffu.getHandDeliver()
           && !cache.existsInFwmt
           && !cache.delivered;

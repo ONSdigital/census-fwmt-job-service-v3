@@ -12,12 +12,18 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
+import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.SpgFollowUpSchedulingService;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RouterList;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateSecureSiteRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateSiteRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateUnitDeliverRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateUnitFollowupRouter;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgRouter;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgUpdateRouter;
 import uk.gov.ons.census.fwmt.jobservice.spg.SpgRequestBuilder;
 
 import java.util.List;
@@ -27,17 +33,24 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SpgSiteConverterTest {
-  private final RouterList<CaseCreateRequest> router;
+  // We use this entry to test routing, starting from the top level
+  private final SpgRouter router;
 
   public SpgSiteConverterTest() {
+    // mocks
+    CometRestClient cometRestClient = Mockito.mock(CometRestClient.class);
+    GatewayCacheService gatewayCacheService = Mockito.mock(GatewayCacheService.class);
     SpgFollowUpSchedulingService spgFollowUpSchedulingService = Mockito.mock(SpgFollowUpSchedulingService.class);
     GatewayEventManager eventManager = Mockito.mock(GatewayEventManager.class);
-    router = new RouterList<>(List.of(
-        new SpgCreateSiteRouter(),
-        new SpgCreateSecureSiteRouter(),
-        new SpgCreateUnitDeliverRouter(),
-        new SpgCreateUnitFollowupRouter(spgFollowUpSchedulingService)
-    ), eventManager);
+
+    // routing equipment
+    RoutingValidator routingValidator = new RoutingValidator(eventManager);
+    SpgCreateRouter createRouter = new SpgCreateRouter(routingValidator, cometRestClient, eventManager,
+        gatewayCacheService, spgFollowUpSchedulingService);
+    SpgUpdateRouter updateRouter = new SpgUpdateRouter(routingValidator, cometRestClient, eventManager, createRouter);
+
+    // core routers
+    router = new SpgRouter(createRouter, updateRouter, eventManager);
   }
 
   @Test
@@ -101,10 +114,9 @@ class SpgSiteConverterTest {
   @Test
   void confirm_valid_spgRequest_creates_valid_TM_request() throws GatewayException {
     FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
-    GatewayCache cache = GatewayCache.builder()
-        .build();
+    GatewayCache cache = GatewayCache.builder().build();
 
-    CaseCreateRequest actualTMRequest = router.route(ffu, cache);
+    CaseCreateRequest actualTmRequest = SpgCreateConverter.convertSite(ffu, cache);
 
     Contact contact = Contact.builder()
         //.name("Mx exampleForename exampleSurname")
@@ -133,6 +145,6 @@ class SpgSiteConverterTest {
         .location(location)
         .build();
 
-    assertEquals(expectedTMRequest, actualTMRequest);
+    assertEquals(expectedTMRequest, actualTmRequest);
   }
 }

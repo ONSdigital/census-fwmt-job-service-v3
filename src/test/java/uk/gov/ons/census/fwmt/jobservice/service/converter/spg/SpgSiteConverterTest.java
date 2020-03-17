@@ -5,7 +5,9 @@ import org.mockito.Mockito;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseType;
+import uk.gov.ons.census.fwmt.common.data.modelcase.CeCaseExtension;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Contact;
+import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
 import uk.gov.ons.census.fwmt.common.data.modelcase.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
@@ -15,13 +17,8 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.SpgFollowUpSchedulingService;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.RouterList;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateRouter;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateSecureSiteRouter;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateSiteRouter;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateUnitDeliverRouter;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateUnitFollowupRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgUpdateRouter;
 import uk.gov.ons.census.fwmt.jobservice.spg.SpgRequestBuilder;
@@ -128,7 +125,9 @@ class SpgSiteConverterTest {
     Address address = Address.builder()
         .lines(List.of("exampleAddr1", "exampleAddr2", "exampleAddr3"))
         .town("exampleTown")
-        .postcode("examplePostcode").build();
+        .postcode("examplePostcode")
+        .geography(Geography.builder().oa("exampleOa").build())
+        .build();
 
     Location location = Location.builder().lat(2.0f)._long(3.0f).build();
 
@@ -143,6 +142,12 @@ class SpgSiteConverterTest {
         .contact(contact)
         .address(address)
         .location(location)
+        .ce(CeCaseExtension.builder()
+            .ce1Complete(false)
+            .deliveryRequired(false)
+            .expectedResponses(0)
+            .actualResponses(0)
+            .build())
         .build();
 
     assertEquals(expectedTMRequest, actualTmRequest);

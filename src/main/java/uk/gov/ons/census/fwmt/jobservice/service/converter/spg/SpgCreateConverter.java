@@ -3,6 +3,7 @@ package uk.gov.ons.census.fwmt.jobservice.service.converter.spg;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseType;
+import uk.gov.ons.census.fwmt.common.data.modelcase.CeCaseExtension;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Contact;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
@@ -30,28 +31,36 @@ public final class SpgCreateConverter {
     builder.requiredOfficer(ffu.getFieldOfficerId());
     builder.coordCode(ffu.getFieldCoordinatorId());
 
-    Contact.ContactBuilder outContact = Contact.builder();
-    outContact.organisationName(ffu.getOrganisationName());
-    builder.contact(outContact.build());
+    Contact outContact = Contact.builder().organisationName(ffu.getOrganisationName()).build();
+    builder.contact(outContact);
 
-    Address.AddressBuilder outAddress = Address.builder();
-    outAddress.lines(List.of(
-        ffu.getAddressLine1(),
-        Objects.toString(ffu.getAddressLine2(), ""),
-        Objects.toString(ffu.getAddressLine3(), "")
-    ));
-    outAddress.town(ffu.getTownName());
-    outAddress.postcode(ffu.getPostcode());
-    builder.address(outAddress.build());
+    Geography outGeography = Geography.builder().oa(ffu.getOa()).build();
 
-    Geography.GeographyBuilder outGeography = Geography.builder();
-    outGeography.oa(ffu.getOa());
-    outAddress.geography(outGeography.build());
+    Address outAddress = Address.builder()
+        .lines(List.of(
+            ffu.getAddressLine1(),
+            Objects.toString(ffu.getAddressLine2(), ""),
+            Objects.toString(ffu.getAddressLine3(), "")
+        ))
+        .town(ffu.getTownName())
+        .postcode(ffu.getPostcode())
+        .geography(outGeography)
+        .build();
+    builder.address(outAddress);
 
-    Location.LocationBuilder outLocation = Location.builder();
-    outLocation.lat(ConverterUtils.parseFloat(ffu.getLatitude()));
-    outLocation._long(ConverterUtils.parseFloat(ffu.getLongitude()));
-    builder.location(outLocation.build());
+    Location outLocation = Location.builder()
+        .lat(ConverterUtils.parseFloat(ffu.getLatitude()))
+        ._long(ConverterUtils.parseFloat(ffu.getLongitude()))
+        .build();
+    builder.location(outLocation);
+
+    CeCaseExtension ceCaseExtension = CeCaseExtension.builder()
+        .ce1Complete(false)
+        .deliveryRequired(false)
+        .expectedResponses(0)
+        .actualResponses(0)
+        .build();
+    builder.ce(ceCaseExtension);
 
     if (cache != null) {
       builder.description(cache.getCareCodes());

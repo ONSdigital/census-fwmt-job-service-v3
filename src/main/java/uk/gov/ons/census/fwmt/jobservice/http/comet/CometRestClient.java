@@ -88,15 +88,16 @@ public class CometRestClient {
     }
 
     if (caseRequest instanceof CaseCreateRequest) {
-      HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
+      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
+      System.out.println(body);
       return restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);
 
     } else if (caseRequest instanceof CasePauseRequest) {
-      HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
+      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
       return restTemplate.exchange(basePathway + "/pause", HttpMethod.PUT, body, Void.class);
 
     } else if (caseRequest instanceof CaseReopenCreateRequest) {
-      HttpEntity<?> body = new HttpEntity<>(caseRequest, httpHeaders);
+      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
       return restTemplate.exchange(basePathway + "/reopen", HttpMethod.POST, body, Void.class);
 
     } else {

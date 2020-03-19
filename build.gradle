@@ -109,11 +109,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Spring
-    compile 'org.springframework:spring-jdbc:5.0.3.RELEASE'
+    compile 'org.springframework:spring-jdbc'
     compile 'org.springframework.retry:spring-retry'
     compile 'org.springframework:spring-aop'
     compile 'org.springframework.data:spring-data-redis'
-    //compile 'org.springframework.data:spring-data-redis:2.2.4.RELEASE'
+    //compile 'org.springframework.data:spring-data-redis'
 
     // Data Formats
     compile 'org.apache.commons:commons-csv:1.6'

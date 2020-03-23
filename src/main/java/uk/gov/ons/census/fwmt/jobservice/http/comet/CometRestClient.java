@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
+import uk.gov.ons.census.fwmt.common.data.modelcase.CasePause;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
@@ -33,12 +34,20 @@ public class CometRestClient {
   private final GatewayEventManager gatewayEventManager;
 
   // cached endpoint, to avoid repeated string concats of baseUrl + caseCreatePath
-  private final String cometURL;
+  private final String cometUrl;
 
   private final CometConfig cometConfig;
 
   // temporary store for authentication result
   private AuthenticationResult auth;
+
+  // derived values
+  private final transient String basePath;
+  private final transient String createPath;
+  private final transient String closePath;
+  private final transient String deletePath;
+  private final transient String pausePath;
+  private final transient String reopenPath;
 
   public CometRestClient(
       CometConfig cometConfig,
@@ -48,8 +57,15 @@ public class CometRestClient {
     this.restTemplate = restTemplateBuilder.errorHandler(new CometRestClientResponseErrorHandler())
         .basicAuthentication(cometConfig.userName, cometConfig.password).build();
     this.gatewayEventManager = gatewayEventManager;
-    this.cometURL = cometConfig.baseUrl + cometConfig.caseCreatePath;
+    this.cometUrl = cometConfig.baseUrl + cometConfig.caseCreatePath;
     this.auth = null;
+
+    this.basePath = cometUrl + "{}";
+    this.createPath = cometUrl + "{}";
+    this.closePath = cometUrl + "{}";
+    this.deletePath = cometUrl + "{}";
+    this.pausePath = cometUrl + "{}";
+    this.reopenPath = cometUrl + "{}";
   }
 
   private boolean isAuthed() {
@@ -78,8 +94,54 @@ public class CometRestClient {
     }
   }
 
+  private HttpHeaders makeAuthHeader() throws GatewayException {
+    if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
+      auth();
+    HttpHeaders httpHeaders = new HttpHeaders();
+    if (isAuthed()) {
+      httpHeaders.setBearerAuth(auth.getAccessToken());
+    }
+    return httpHeaders;
+  }
+
+  public ResponseEntity<Void> sendCreate(CaseCreateRequest request, String caseId) throws GatewayException {
+    HttpHeaders httpHeaders = makeAuthHeader();
+    HttpEntity<CaseCreateRequest> body = new HttpEntity<>(request, httpHeaders);
+    String path = createPath.replace("{}", caseId);
+    return restTemplate.exchange(path, HttpMethod.PUT, body, Void.class);
+  }
+
+  public ResponseEntity<Void> sendPause(CasePauseRequest request, String caseId) throws GatewayException {
+    HttpHeaders httpHeaders = makeAuthHeader();
+    HttpEntity<CasePauseRequest> body = new HttpEntity<>(request, httpHeaders);
+    String path = pausePath.replace("{}", caseId);
+    return restTemplate.exchange(path, HttpMethod.PUT, body, Void.class);
+  }
+
+  public ResponseEntity<Void> sendReopen(CaseReopenCreateRequest request, String caseId) throws GatewayException {
+    HttpHeaders httpHeaders = makeAuthHeader();
+    HttpEntity<CaseReopenCreateRequest> body = new HttpEntity<>(request, httpHeaders);
+    String path = reopenPath.replace("{}", caseId);
+    return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
+  }
+
+  public ResponseEntity<Void> sendClose(String caseId) throws GatewayException {
+    HttpHeaders httpHeaders = makeAuthHeader();
+    HttpEntity<CaseReopenCreateRequest> body = new HttpEntity<>(httpHeaders);
+    String path = closePath.replace("{}", caseId);
+    return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
+  }
+
+  public ResponseEntity<Void> sendDelete(String caseId) throws GatewayException {
+    HttpHeaders httpHeaders = makeAuthHeader();
+    HttpEntity<CaseReopenCreateRequest> body = new HttpEntity<>(httpHeaders);
+    String path = deletePath.replace("{}", caseId);
+    return restTemplate.exchange(path, HttpMethod.DELETE, body, Void.class);
+  }
+
+  @Deprecated
   public <A> ResponseEntity<Void> sendRequest(A caseRequest, String caseId) throws GatewayException {
-    String basePathway = cometURL + caseId;
+    String basePathway = cometUrl + caseId;
     if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
       auth();
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -106,7 +168,7 @@ public class CometRestClient {
   }
 
   public ModelCase getCase(String caseId) throws GatewayException {
-    String basePathway = cometURL + caseId;
+    String basePathway = cometUrl + caseId;
     if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
       auth();
     HttpHeaders httpHeaders = new HttpHeaders();

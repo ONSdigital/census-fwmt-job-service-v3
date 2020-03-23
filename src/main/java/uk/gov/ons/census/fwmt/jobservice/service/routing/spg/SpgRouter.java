@@ -16,8 +16,9 @@ import java.util.List;
 public class SpgRouter implements Router<Void> {
   private final RouterList<Void> router;
 
-  public SpgRouter(SpgCreateRouter createRouter, SpgUpdateRouter updateRouter, GatewayEventManager eventManager) {
-    this.router = new RouterList<>(List.of(createRouter, updateRouter), eventManager);
+  public SpgRouter(SpgCreateRouter createRouter, SpgUpdateRouter updateRouter, SpgCancelRouter cancelRouter,
+      GatewayEventManager eventManager) {
+    this.router = new RouterList<>(List.of(createRouter, updateRouter, cancelRouter), eventManager);
   }
 
   @Override

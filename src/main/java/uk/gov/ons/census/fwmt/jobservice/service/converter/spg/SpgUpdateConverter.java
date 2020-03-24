@@ -10,17 +10,17 @@ public final class SpgUpdateConverter {
   private SpgUpdateConverter() {
   }
 
-  public static CaseReopenCreateRequest.CaseReopenCreateRequestBuilder convertCommon(FieldworkFollowup ffu,
-      GatewayCache cache, CaseReopenCreateRequest.CaseReopenCreateRequestBuilder builder) {
-    return builder.id(ffu.getCaseId());
+  private static CaseReopenCreateRequest.CaseReopenCreateRequestBuilder convertCommon(FieldworkFollowup ffu,
+      GatewayCache cache) {
+    return CaseReopenCreateRequest.builder().id(ffu.getCaseId());
   }
 
   public static CaseReopenCreateRequest convertSite(FieldworkFollowup ffu, GatewayCache cache) {
-    return SpgUpdateConverter.convertCommon(ffu, cache, CaseReopenCreateRequest.builder()).build();
+    return SpgUpdateConverter.convertCommon(ffu, cache).build();
   }
 
   public static CaseReopenCreateRequest convertUnit(FieldworkFollowup ffu, GatewayCache cache) {
-    return SpgUpdateConverter.convertCommon(ffu, cache, CaseReopenCreateRequest.builder())
+    return SpgUpdateConverter.convertCommon(ffu, cache)
         .surveyType(SurveyType.SPG_Unit_F)
         .uaa(ffu.getUaa())
         .blankFormReturned(ffu.getBlankQreReturned())

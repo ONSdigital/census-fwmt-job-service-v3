@@ -44,7 +44,7 @@ public class SpgUpdateRouter implements Router<Void> {
 
     eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_UPDATE_SENT, "Case Ref", ffu.getCaseRef());
 
-    ResponseEntity<Void> response = cometRestClient.sendRequest(request, ffu.getCaseId());
+    ResponseEntity<Void> response = cometRestClient.sendReopen(request, ffu.getCaseId());
 
     routingValidator.validateResponseCode(response, ffu.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 

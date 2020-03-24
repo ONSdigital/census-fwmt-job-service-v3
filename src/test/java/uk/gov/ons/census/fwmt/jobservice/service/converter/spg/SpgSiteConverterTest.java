@@ -18,6 +18,7 @@ import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.SpgFollowUpSchedulingService;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCancelRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgUpdateRouter;
@@ -45,9 +46,10 @@ class SpgSiteConverterTest {
     SpgCreateRouter createRouter = new SpgCreateRouter(routingValidator, cometRestClient, eventManager,
         gatewayCacheService, spgFollowUpSchedulingService);
     SpgUpdateRouter updateRouter = new SpgUpdateRouter(routingValidator, cometRestClient, eventManager, createRouter);
+    SpgCancelRouter cancelRouter = new SpgCancelRouter(routingValidator, cometRestClient, eventManager);
 
     // core routers
-    router = new SpgRouter(createRouter, updateRouter, eventManager);
+    router = new SpgRouter(createRouter, updateRouter, cancelRouter, eventManager);
   }
 
   @Test

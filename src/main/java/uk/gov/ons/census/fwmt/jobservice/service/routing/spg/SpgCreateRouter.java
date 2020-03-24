@@ -51,7 +51,7 @@ public class SpgCreateRouter implements Router<Void> {
 
     eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
 
-    ResponseEntity<Void> response = cometRestClient.sendRequest(request, ffu.getCaseId());
+    ResponseEntity<Void> response = cometRestClient.sendCreate(request, ffu.getCaseId());
 
     routingValidator.validateResponseCode(response, ffu.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
 

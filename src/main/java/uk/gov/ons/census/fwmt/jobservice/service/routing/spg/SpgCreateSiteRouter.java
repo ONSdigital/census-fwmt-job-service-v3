@@ -24,7 +24,7 @@ public class SpgCreateSiteRouter implements Router<CaseCreateRequest> {
       // relies on the validation of: SpgRouter, SpgCreateRouter
       return ffu.getAddressLevel().equals("E")
           && !ffu.getSecureEstablishment()
-          && !cache.existsInFwmt;
+          && (cache == null || !cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;
     }

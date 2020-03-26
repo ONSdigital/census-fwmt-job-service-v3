@@ -37,8 +37,7 @@ public class SpgUpdateUnitRouter implements Router<CaseReopenCreateRequest> {
     try {
       // relies on the validation of: SpgRouter, SpgUpdateRouter
       return ffu.getAddressLevel().equals("U")
-          && (ffu.getUaa() || ffu.getBlankQreReturned())
-          && cache.existsInFwmt;
+          && (ffu.getUaa() || (ffu.getBlankQreReturned() && cache.existsInFwmt));
     } catch (NullPointerException e) {
       return false;
     }

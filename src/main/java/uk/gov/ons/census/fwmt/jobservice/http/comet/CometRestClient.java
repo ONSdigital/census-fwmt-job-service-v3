@@ -62,10 +62,10 @@ public class CometRestClient {
 
     this.basePath = cometUrl + "{}";
     this.createPath = cometUrl + "{}";
-    this.closePath = cometUrl + "{}";
+    this.closePath = cometUrl + "{}/close";
     this.deletePath = cometUrl + "{}";
     this.pausePath = cometUrl + "{}";
-    this.reopenPath = cometUrl + "{}";
+    this.reopenPath = cometUrl + "{}/reopen";
   }
 
   private boolean isAuthed() {

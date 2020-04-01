@@ -127,14 +127,14 @@ public class CometRestClient {
 
   public ResponseEntity<Void> sendClose(String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
-    HttpEntity<CaseReopenCreateRequest> body = new HttpEntity<>(httpHeaders);
+    HttpEntity<Void> body = new HttpEntity<>(httpHeaders);
     String path = closePath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
   }
 
   public ResponseEntity<Void> sendDelete(String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
-    HttpEntity<CaseReopenCreateRequest> body = new HttpEntity<>(httpHeaders);
+    HttpEntity<Void> body = new HttpEntity<>(httpHeaders);
     String path = deletePath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.DELETE, body, Void.class);
   }

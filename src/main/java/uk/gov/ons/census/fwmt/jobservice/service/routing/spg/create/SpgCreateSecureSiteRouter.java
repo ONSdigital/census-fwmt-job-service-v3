@@ -1,24 +1,18 @@
-package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
+package uk.gov.ons.census.fwmt.jobservice.service.routing.spg.create;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
+
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgCreateConverter;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.Router;
 
 @Qualifier("SPG Create")
 @Service
-public class SpgCreateSecureSiteRouter implements Router<CaseCreateRequest> {
+public class SpgCreateSecureSiteRouter implements SpgCreateRouter {
   @Override
-  public CaseCreateRequest routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
-    return SpgCreateConverter.convertSecureSite(ffu, cache);
-  }
-
-  @Override
-  public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
+  public boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
     // TODO this is existsInFwmt, not existsInField
     //try {
     //// relies on the validation of: SpgRouter, SpgCreateRouter
@@ -30,5 +24,11 @@ public class SpgCreateSecureSiteRouter implements Router<CaseCreateRequest> {
     //}
     // For the time being, this is disabled, and thus false.
     return false;
+  }
+
+  @Override
+  public void route(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
+    SpgCreateConverter.convertSecureSite(ffu, cache);
+
   }
 }

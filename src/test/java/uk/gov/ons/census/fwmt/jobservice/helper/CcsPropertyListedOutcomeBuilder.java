@@ -1,12 +1,12 @@
 package uk.gov.ons.census.fwmt.jobservice.helper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import uk.gov.ons.census.fwmt.common.data.ccs.Address;
 import uk.gov.ons.census.fwmt.common.data.ccs.CCSPropertyListingOutcome;
 import uk.gov.ons.census.fwmt.common.data.ccs.CareCode;
 import uk.gov.ons.census.fwmt.common.data.ccs.CeDetails;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CcsPropertyListedOutcomeBuilder {
 

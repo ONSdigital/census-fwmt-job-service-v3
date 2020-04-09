@@ -1,12 +1,13 @@
 package uk.gov.ons.census.fwmt.jobservice.spg;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.CeCaseExtension;
-import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 
 public final class SpgRequestBuilder {
 
-  public static FieldworkFollowup makeUnitDeliver() {
-    FieldworkFollowup fieldworkFollowup = makeBase();
+  public static FwmtActionInstruction makeUnitDeliver() {
+    FwmtActionInstruction fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("U");
     fieldworkFollowup.setHandDeliver(true);
@@ -14,8 +15,8 @@ public final class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public static FieldworkFollowup makeUnitFollowup() {
-    FieldworkFollowup fieldworkFollowup = makeBase();
+  public static FwmtActionInstruction makeUnitFollowup() {
+    FwmtActionInstruction fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("U");
     fieldworkFollowup.setHandDeliver(false);
@@ -23,8 +24,8 @@ public final class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public static FieldworkFollowup makeSite() {
-    FieldworkFollowup fieldworkFollowup = makeBase();
+  public static FwmtActionInstruction makeSite() {
+    FwmtActionInstruction fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("E");
     fieldworkFollowup.setSecureEstablishment(false);
@@ -32,8 +33,8 @@ public final class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public static FieldworkFollowup makeSecureSite() {
-    FieldworkFollowup fieldworkFollowup = makeBase();
+  public static FwmtActionInstruction makeSecureSite() {
+    FwmtActionInstruction fieldworkFollowup = makeBase();
 
     fieldworkFollowup.setAddressLevel("E");
     fieldworkFollowup.setSecureEstablishment(true);
@@ -41,9 +42,9 @@ public final class SpgRequestBuilder {
     return fieldworkFollowup;
   }
 
-  public static FieldworkFollowup makeBase() {
-    return FieldworkFollowup.builder()
-        .actionInstruction("CREATE")
+  public static FwmtActionInstruction makeBase() {
+    return FwmtActionInstruction.builder()
+        .actionInstruction(ActionInstructionType.CREATE)
         // TODO: Are you sure this can be re-enabled?
         .surveyName("CENSUS") // Not needed, but still in formal diagrams
         .addressType("SPG")
@@ -64,9 +65,9 @@ public final class SpgRequestBuilder {
         .postcode("examplePostcode")
         .oa("exampleOa")
 
-        .latitude("2")
-        .longitude("3")
-        .uaa(false)
+        .latitude(2d)
+        .longitude(3d)
+        .undeliveredAsAddress(false)
 
         .build();
   }

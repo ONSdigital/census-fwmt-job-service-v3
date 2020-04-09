@@ -5,7 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
@@ -21,8 +22,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 
 @Qualifier("SPG")
 @Service
-public class SpgUpdateRouter implements Router<Void> {
-  private final RouterList<CaseReopenCreateRequest> router;
+public class SpgUpdateRouter implements Router<FwmtActionInstruction, Void> {
+  private final RouterList<FwmtActionInstruction, CaseReopenCreateRequest> router;
   private final RoutingValidator routingValidator;
   private final CometRestClient cometRestClient;
   private final GatewayEventManager eventManager;
@@ -39,7 +40,7 @@ public class SpgUpdateRouter implements Router<Void> {
   }
 
   @Override
-  public Void routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
+  public Void routeUnsafe(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     CaseReopenCreateRequest request = router.route(ffu, cache, eventManager);
 
     eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_UPDATE_SENT, "Case Ref", ffu.getCaseRef());
@@ -56,10 +57,10 @@ public class SpgUpdateRouter implements Router<Void> {
   }
 
   @Override
-  public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
+  public Boolean isValid(FwmtActionInstruction ffu, GatewayCache cache) {
     try {
       // relies on the validation of: SpgRouter
-      return ffu.getActionInstruction().equals("UPDATE")
+      return ffu.getActionInstruction() == ActionInstructionType.UPDATE
           && ffu.getSurveyName().equals("CENSUS")
           && ffu.getAddressType().equals("SPG")
           && router.isValid(ffu, cache);

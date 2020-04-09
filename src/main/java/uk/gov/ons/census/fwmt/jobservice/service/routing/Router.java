@@ -1,7 +1,8 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing;
 
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtSuperInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 
@@ -22,8 +23,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTI
  * @param <T>
  */
 
-public interface Router<T> {
-  default T route(FieldworkFollowup ffu, GatewayCache cache, GatewayEventManager eventManager) throws GatewayException {
+public interface Router<I extends FwmtSuperInstruction, O> {
+  default O route(I ffu, GatewayCache cache, GatewayEventManager eventManager) throws GatewayException {
     if (isValid(ffu, cache)) {
       return routeUnsafe(ffu, cache);
     } else {
@@ -37,7 +38,7 @@ public interface Router<T> {
   }
 
   // skip initial checks
-  T routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException;
+  O routeUnsafe(I ffu, GatewayCache cache) throws GatewayException;
 
-  Boolean isValid(FieldworkFollowup ffu, GatewayCache cache);
+  Boolean isValid(I ffu, GatewayCache cache);
 }

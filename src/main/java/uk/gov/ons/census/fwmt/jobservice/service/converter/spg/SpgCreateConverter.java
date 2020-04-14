@@ -9,7 +9,7 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
 import uk.gov.ons.census.fwmt.common.data.modelcase.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ConverterUtils;
 
@@ -22,7 +22,7 @@ public final class SpgCreateConverter {
   }
 
   public static CaseCreateRequest.CaseCreateRequestBuilder convertCommon(
-      FieldworkFollowup ffu, GatewayCache cache, CaseCreateRequest.CaseCreateRequestBuilder builder)
+      FwmtActionInstruction ffu, GatewayCache cache, CaseCreateRequest.CaseCreateRequestBuilder builder)
       throws GatewayException {
     builder.reference(ffu.getCaseRef());
     builder.type(CaseType.CE);
@@ -49,8 +49,8 @@ public final class SpgCreateConverter {
     builder.address(outAddress);
 
     Location outLocation = Location.builder()
-        .lat(ConverterUtils.parseFloat(ffu.getLatitude()))
-        ._long(ConverterUtils.parseFloat(ffu.getLongitude()))
+        .lat(ffu.getLatitude().floatValue())
+        ._long(ffu.getLongitude().floatValue())
         .build();
     builder.location(outLocation);
 
@@ -67,32 +67,32 @@ public final class SpgCreateConverter {
       builder.specialInstructions(cache.getAccessInfo());
     }
 
-    builder.uaa((ffu.getUaa() != null) ? ffu.getUaa() : false);
+    builder.uaa((ffu.getUndeliveredAsAddress() != null) ? ffu.getUndeliveredAsAddress() : false);
     builder.sai(false);
 
     return builder;
   }
 
-  public static CaseCreateRequest convertSecureSite(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
+  public static CaseCreateRequest convertSecureSite(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
         .surveyType(SurveyType.SPG_Secure_Site)
         .build();
   }
 
-  public static CaseCreateRequest convertSite(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
+  public static CaseCreateRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
         .surveyType(SurveyType.SPG_Site)
         .build();
   }
 
-  public static CaseCreateRequest convertUnitDeliver(FieldworkFollowup ffu, GatewayCache cache)
+  public static CaseCreateRequest convertUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache)
       throws GatewayException {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
         .surveyType(SurveyType.SPG_Unit_D)
         .build();
   }
 
-  public static CaseCreateRequest convertUnitFollowup(FieldworkFollowup ffu, GatewayCache cache)
+  public static CaseCreateRequest convertUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache)
       throws GatewayException {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
         .surveyType(SurveyType.SPG_Unit_F)

@@ -11,7 +11,7 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
 import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
 import uk.gov.ons.census.fwmt.common.data.modelcase.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
@@ -20,7 +20,6 @@ import uk.gov.ons.census.fwmt.jobservice.service.SpgFollowUpSchedulingService;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCancelRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgCreateRouter;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgRouter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.spg.SpgUpdateRouter;
 import uk.gov.ons.census.fwmt.jobservice.spg.SpgRequestBuilder;
 
@@ -32,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SpgSiteConverterTest {
   // We use this entry to test routing, starting from the top level
-  private final SpgRouter router;
+  private final SpgCreateRouter router;
 
   public SpgSiteConverterTest() {
     // mocks
@@ -45,23 +44,23 @@ class SpgSiteConverterTest {
     RoutingValidator routingValidator = new RoutingValidator(eventManager);
     SpgCreateRouter createRouter = new SpgCreateRouter(routingValidator, cometRestClient, eventManager,
         gatewayCacheService, spgFollowUpSchedulingService);
-    SpgUpdateRouter updateRouter = new SpgUpdateRouter(routingValidator, cometRestClient, eventManager, createRouter);
-    SpgCancelRouter cancelRouter = new SpgCancelRouter(routingValidator, cometRestClient, eventManager);
+    //SpgUpdateRouter updateRouter = new SpgUpdateRouter(routingValidator, cometRestClient, eventManager, createRouter);
+    //SpgCancelRouter cancelRouter = new SpgCancelRouter(routingValidator, cometRestClient, eventManager);
 
     // core routers
-    router = new SpgRouter(createRouter, updateRouter, cancelRouter, eventManager);
+    router = createRouter;
   }
 
   @Test
   void confirm_valid_spgRequest_can_be_converted() {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
     GatewayCache cache = GatewayCache.builder().build();
     assertTrue(router.isValid(ffu, cache));
   }
 
   @Test
   void confirm_spgRequest_with_nulls_returns_false() {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
     ffu.setActionInstruction(null);
     ffu.setSurveyName(null);
     ffu.setAddressType(null);
@@ -73,15 +72,15 @@ class SpgSiteConverterTest {
 
   @Test
   void confirm_spgRequest_with_invalid_actionInstruction_returns_false() {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
-    ffu.setActionInstruction("nonsense");
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
+    ffu.setActionInstruction(null);
     GatewayCache cache = GatewayCache.builder().build();
     assertFalse(router.isValid(ffu, cache));
   }
 
   @Test
   void confirm_spgRequest_with_invalid_surveyName_returns_false() {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
     ffu.setSurveyName("nonsense");
     GatewayCache cache = GatewayCache.builder().build();
     assertFalse(router.isValid(ffu, cache));
@@ -89,7 +88,7 @@ class SpgSiteConverterTest {
 
   @Test
   void confirm_spgRequest_with_invalid_addressType_returns_false() {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
     ffu.setAddressType("nonsense");
     GatewayCache cache = GatewayCache.builder().build();
     assertFalse(router.isValid(ffu, cache));
@@ -97,7 +96,7 @@ class SpgSiteConverterTest {
 
   @Test
   void confirm_spgRequest_with_invalid_addressLevel_returns_false() {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
     ffu.setAddressLevel("nonsense");
     GatewayCache cache = GatewayCache.builder().build();
     assertFalse(router.isValid(ffu, cache));
@@ -105,14 +104,14 @@ class SpgSiteConverterTest {
 
   @Test
   void confirm_spgRequest_with_invalid_secureEstablishment_returns_false() {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSecureSite();
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSecureSite();
     GatewayCache cache = GatewayCache.builder().build();
     assertFalse(router.isValid(ffu, cache));
   }
 
   @Test
   void confirm_valid_spgRequest_creates_valid_TM_request() throws GatewayException {
-    FieldworkFollowup ffu = SpgRequestBuilder.makeSite();
+    FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
     GatewayCache cache = GatewayCache.builder().build();
 
     CaseCreateRequest actualTmRequest = SpgCreateConverter.convertSite(ffu, cache);

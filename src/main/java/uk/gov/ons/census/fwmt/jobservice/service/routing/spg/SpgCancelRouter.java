@@ -4,7 +4,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.rm.dto.FieldworkFollowup;
+import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
@@ -20,8 +21,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 
 @Qualifier("SPG")
 @Service
-public class SpgCancelRouter implements Router<Void> {
-  private final RouterList<ResponseEntity<Void>> router;
+public class SpgCancelRouter implements Router<FwmtCancelActionInstruction, Void> {
+  private final RouterList<FwmtCancelActionInstruction, ResponseEntity<Void>> router;
   private final RoutingValidator routingValidator;
   private final GatewayEventManager eventManager;
 
@@ -36,25 +37,25 @@ public class SpgCancelRouter implements Router<Void> {
   }
 
   @Override
-  public Void routeUnsafe(FieldworkFollowup ffu, GatewayCache cache) throws GatewayException {
+  public Void routeUnsafe(FwmtCancelActionInstruction ffu, GatewayCache cache) throws GatewayException {
     // TODO is this even right? It's saying it's sent before it runs the send - in all code
-    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CANCEL_SENT, "Case Ref", ffu.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CANCEL_SENT, "Case Ref", "N/A");
 
     ResponseEntity<Void> response = router.route(ffu, cache, eventManager);
 
     routingValidator.validateResponseCode(response, ffu.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB);
 
     eventManager
-        .triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CANCEL_ACK, "Case Ref", ffu.getCaseRef(), "Response Code",
+        .triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CANCEL_ACK, "Case Ref", "N/A", "Response Code",
             response.getStatusCode().name());
     return null;
   }
 
   @Override
-  public Boolean isValid(FieldworkFollowup ffu, GatewayCache cache) {
+  public Boolean isValid(FwmtCancelActionInstruction ffu, GatewayCache cache) {
     try {
       // relies on the validation of: SpgRouter
-      return ffu.getActionInstruction().equals("CANCEL")
+      return ffu.getActionInstruction() == ActionInstructionType.CANCEL
           && ffu.getSurveyName().equals("CENSUS")
           && ffu.getAddressType().equals("SPG")
           && router.isValid(ffu, cache);

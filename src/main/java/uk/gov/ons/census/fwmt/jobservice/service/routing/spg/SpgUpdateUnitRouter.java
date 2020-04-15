@@ -38,7 +38,7 @@ public class SpgUpdateUnitRouter implements Router<FwmtActionInstruction, CaseRe
     try {
       // relies on the validation of: SpgRouter, SpgUpdateRouter
       return ffu.getAddressLevel().equals("U")
-          && (ffu.getUndeliveredAsAddress() || (ffu.getBlankFormReturned() && cache.existsInFwmt));
+          && (ffu.getUndeliveredAsAddress() || cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;
     }

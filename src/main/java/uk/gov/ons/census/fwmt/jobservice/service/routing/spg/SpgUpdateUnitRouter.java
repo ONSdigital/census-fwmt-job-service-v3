@@ -24,7 +24,7 @@ public class SpgUpdateUnitRouter implements Router<FwmtActionInstruction, CaseRe
 
   @Override
   public CaseReopenCreateRequest routeUnsafe(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
-    if (ffu.getUndeliveredAsAddress() && cache == null) {
+    if (ffu.isUndeliveredAsAddress() && cache == null) {
       // re-run as CREATE
       createRouter.route(ffu.toBuilder().actionInstruction(ActionInstructionType.CREATE).build(), null, eventManager);
       return null;
@@ -38,7 +38,7 @@ public class SpgUpdateUnitRouter implements Router<FwmtActionInstruction, CaseRe
     try {
       // relies on the validation of: SpgRouter, SpgUpdateRouter
       return ffu.getAddressLevel().equals("U")
-          && (ffu.getUndeliveredAsAddress() || cache.existsInFwmt);
+          && (ffu.isUndeliveredAsAddress() || cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;
     }

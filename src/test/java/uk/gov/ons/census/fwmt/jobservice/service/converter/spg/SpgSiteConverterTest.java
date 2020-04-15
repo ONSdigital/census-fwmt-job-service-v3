@@ -65,7 +65,7 @@ class SpgSiteConverterTest {
     ffu.setSurveyName(null);
     ffu.setAddressType(null);
     ffu.setAddressLevel(null);
-    ffu.setSecureEstablishment(null);
+    ffu.setSecureEstablishment(false);
     GatewayCache cache = GatewayCache.builder().build();
     assertFalse(router.isValid(ffu, cache));
   }

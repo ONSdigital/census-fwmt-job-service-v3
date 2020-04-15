@@ -22,8 +22,8 @@ public final class SpgUpdateConverter {
   public static CaseReopenCreateRequest convertUnit(FwmtActionInstruction ffu, GatewayCache cache) {
     return SpgUpdateConverter.convertCommon(ffu, cache)
         .surveyType(SurveyType.SPG_Unit_F)
-        .uaa(ffu.getUndeliveredAsAddress())
-        .blankFormReturned(ffu.getBlankFormReturned())
+        .uaa(ffu.isUndeliveredAsAddress())
+        .blankFormReturned(ffu.isBlankFormReturned())
         .build();
   }
 }

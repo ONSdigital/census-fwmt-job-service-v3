@@ -67,7 +67,7 @@ public final class SpgCreateConverter {
       builder.specialInstructions(cache.getAccessInfo());
     }
 
-    builder.uaa((ffu.getUndeliveredAsAddress() != null) ? ffu.getUndeliveredAsAddress() : false);
+    builder.uaa(ffu.isUndeliveredAsAddress());
     builder.sai(false);
 
     return builder;

@@ -30,7 +30,7 @@ public class SpgCreateUnitFollowupRouter implements Router<FwmtActionInstruction
     try {
       // relies on the validation of: SpgRouter, SpgCreateRouter
       return ffu.getAddressLevel().equals("U")
-          && (!ffu.isHandDeliver() || (followUpService.isInFollowUp() && cache.delivered));
+          && !ffu.isHandDeliver();
     } catch (NullPointerException e) {
       return false;
     }

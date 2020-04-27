@@ -20,15 +20,11 @@ public class SpgCreateSecureSiteRouter implements Router<FwmtActionInstruction, 
   @Override
   public Boolean isValid(FwmtActionInstruction ffu, GatewayCache cache) {
     // TODO this is existsInFwmt, not existsInField
-    //try {
-    //// relies on the validation of: SpgRouter, SpgCreateRouter
-    //  return ffu.getAddressLevel().equals("E")
-    //      && ffu.getSecureEstablishment()
-    //      && !cache.existsInFwmt;
-    //} catch (NullPointerException e) {
-    //  return false;
-    //}
-    // For the time being, this is disabled, and thus false.
-    return false;
+    try {
+    // relies on the validation of: SpgRouter, SpgCreateRouter
+      return ffu.getAddressLevel().equals("U");
+    } catch (NullPointerException e) {
+      return false;
+    }
   }
 }

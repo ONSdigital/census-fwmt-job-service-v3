@@ -29,8 +29,7 @@ public class SpgCreateUnitFollowupRouter implements Router<FwmtActionInstruction
   public Boolean isValid(FwmtActionInstruction ffu, GatewayCache cache) {
     try {
       // relies on the validation of: SpgRouter, SpgCreateRouter
-      return ffu.getAddressLevel().equals("U")
-          && (!ffu.isHandDeliver() || (followUpService.isInFollowUp() && cache.delivered));
+      return ffu.getAddressLevel().equals("U");
     } catch (NullPointerException e) {
       return false;
     }

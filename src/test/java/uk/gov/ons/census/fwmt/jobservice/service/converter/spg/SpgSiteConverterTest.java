@@ -103,13 +103,6 @@ class SpgSiteConverterTest {
   }
 
   @Test
-  void confirm_spgRequest_with_invalid_secureEstablishment_returns_false() {
-    FwmtActionInstruction ffu = SpgRequestBuilder.makeSecureSite();
-    GatewayCache cache = GatewayCache.builder().build();
-    assertFalse(router.isValid(ffu, cache));
-  }
-
-  @Test
   void confirm_valid_spgRequest_creates_valid_TM_request() throws GatewayException {
     FwmtActionInstruction ffu = SpgRequestBuilder.makeSite();
     GatewayCache cache = GatewayCache.builder().build();

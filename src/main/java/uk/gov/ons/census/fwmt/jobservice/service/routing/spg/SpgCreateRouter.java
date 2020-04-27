@@ -36,7 +36,6 @@ public class SpgCreateRouter implements Router<FwmtActionInstruction, Void> {
       SpgFollowUpSchedulingService schedulingService) {
     this.router = new RouterList<>(List.of(
         new SpgCreateSiteRouter(),
-        new SpgCreateSecureSiteRouter(),
         new SpgCreateUnitDeliverRouter(),
         new SpgCreateUnitFollowupRouter(schedulingService)
     ), eventManager);

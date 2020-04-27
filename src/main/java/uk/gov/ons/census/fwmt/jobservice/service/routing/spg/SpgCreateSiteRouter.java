@@ -23,7 +23,6 @@ public class SpgCreateSiteRouter implements Router<FwmtActionInstruction, CaseCr
     try {
       // relies on the validation of: SpgRouter, SpgCreateRouter
       return ffu.getAddressLevel().equals("E")
-          && !ffu.isSecureEstablishment()
           && (cache == null || !cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;

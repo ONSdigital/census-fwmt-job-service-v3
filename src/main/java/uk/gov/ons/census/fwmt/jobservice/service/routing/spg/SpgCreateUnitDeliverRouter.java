@@ -22,7 +22,8 @@ public class SpgCreateUnitDeliverRouter implements Router<FwmtActionInstruction,
     try {
       // relies on the validation of: SpgRouter, SpgCreateRouter
       return ffu.getAddressLevel().equals("U")
-          && ffu.isHandDeliver();
+          && ffu.isHandDeliver()
+          || (cache.existsInFwmt && cache.delivered);
     } catch (NullPointerException e) {
       return false;
     }

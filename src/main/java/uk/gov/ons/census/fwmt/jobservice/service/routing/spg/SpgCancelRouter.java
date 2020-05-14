@@ -16,7 +16,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 import java.util.List;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CANCEL_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CANCEL_SENT;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CANCEL_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
 @Qualifier("SPG")
@@ -39,7 +39,7 @@ public class SpgCancelRouter implements Router<FwmtCancelActionInstruction, Void
   @Override
   public Void routeUnsafe(FwmtCancelActionInstruction ffu, GatewayCache cache) throws GatewayException {
     // TODO is this even right? It's saying it's sent before it runs the send - in all code
-    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CANCEL_SENT, "Case Ref", "N/A");
+    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CANCEL_PRE_SENDING, "Case Ref", "N/A");
 
     ResponseEntity<Void> response = router.route(ffu, cache, eventManager);
 

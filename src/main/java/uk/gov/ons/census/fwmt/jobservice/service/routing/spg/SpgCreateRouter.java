@@ -19,7 +19,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 import java.util.List;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_SENT;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
 @Qualifier("SPG")
@@ -49,7 +49,7 @@ public class SpgCreateRouter implements Router<FwmtActionInstruction, Void> {
   public Void routeUnsafe(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     CaseCreateRequest request = router.route(ffu, cache, eventManager);
 
-    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_SENT, "Case Ref", ffu.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", ffu.getCaseRef(), "Survey Type", request.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(request, ffu.getCaseId());
 
@@ -64,9 +64,10 @@ public class SpgCreateRouter implements Router<FwmtActionInstruction, Void> {
       cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
     }
 
-    eventManager
+
+   eventManager
         .triggerEvent(String.valueOf(ffu.getCaseId()), COMET_CREATE_ACK, "Case Ref", ffu.getCaseRef(), "Response Code",
-            response.getStatusCode().name());
+            response.getStatusCode().name(), "Survey Type", request.getSurveyType().toString());
     return null;
   }
 

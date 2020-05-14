@@ -17,11 +17,11 @@ import java.util.function.Function;
 public class GatewayEventsConfig {
 
   // from the job service v3
-  public static final String COMET_CREATE_SENT = "COMET_CREATE_SENT";
+  public static final String COMET_CREATE_PRE_SENDING = "COMET_CREATE_PRE_SENDING";
   public static final String COMET_CREATE_ACK = "COMET_CREATE_ACK";
-  public static final String COMET_CANCEL_SENT = "COMET_CANCEL_SENT";
+  public static final String COMET_CANCEL_PRE_SENDING = "COMET_CANCEL_PRE_SENDING";
   public static final String COMET_CANCEL_ACK = "COMET_CANCEL_ACK";
-  public static final String COMET_UPDATE_SENT = "COMET_UPDATE_SENT";
+  public static final String COMET_UPDATE_PRE_SENDING = "COMET_UPDATE_PRE_SENDING";
   public static final String COMET_UPDATE_ACK = "COMET_UPDATE_ACK";
   public static final String TM_SERVICE_UP = "TM_SERVICE_UP";
   public static final String RABBIT_QUEUE_UP = "RABBIT_QUEUE_UP";
@@ -64,8 +64,8 @@ public class GatewayEventsConfig {
         // from the rm adapter
         RM_CREATE_REQUEST_RECEIVED, RM_UPDATE_REQUEST_RECEIVED, RM_CANCEL_REQUEST_RECEIVED,
         // from the job service v3
-        COMET_CREATE_SENT, COMET_CREATE_ACK, COMET_CANCEL_SENT, COMET_CANCEL_ACK,
-        COMET_UPDATE_SENT, COMET_UPDATE_ACK, TM_SERVICE_UP,
+        COMET_CREATE_PRE_SENDING, COMET_CREATE_ACK, COMET_CANCEL_PRE_SENDING, COMET_CANCEL_ACK,
+        COMET_UPDATE_PRE_SENDING, COMET_UPDATE_ACK, TM_SERVICE_UP,
     });
     gatewayEventManager.addErrorEventTypes(new String[] {
         // from both

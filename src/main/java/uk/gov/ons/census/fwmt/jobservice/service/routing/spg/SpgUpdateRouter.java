@@ -17,7 +17,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 import java.util.List;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_SENT;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_UPDATE_TM_JOB;
 
 @Qualifier("SPG")
@@ -43,7 +43,7 @@ public class SpgUpdateRouter implements Router<FwmtActionInstruction, Void> {
   public Void routeUnsafe(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     CaseReopenCreateRequest request = router.route(ffu, cache, eventManager);
 
-    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_UPDATE_SENT, "Case Ref", ffu.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(ffu.getCaseId()), COMET_UPDATE_PRE_SENDING, "Case Ref", ffu.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendReopen(request, ffu.getCaseId());
 

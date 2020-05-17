@@ -21,6 +21,8 @@ public class GatewayEventsConfig {
   public static final String COMET_CREATE_ACK = "COMET_CREATE_ACK";
   public static final String COMET_CANCEL_PRE_SENDING = "COMET_CANCEL_PRE_SENDING";
   public static final String COMET_CANCEL_ACK = "COMET_CANCEL_ACK";
+  public static final String COMET_CLOSE_PRE_SENDING = "COMET_CLOSE_PRE_SENDING";
+  public static final String COMET_CLOSE_ACK = "COMET_CLOSE_ACK";
   public static final String COMET_UPDATE_PRE_SENDING = "COMET_UPDATE_PRE_SENDING";
   public static final String COMET_UPDATE_ACK = "COMET_UPDATE_ACK";
   public static final String TM_SERVICE_UP = "TM_SERVICE_UP";
@@ -48,6 +50,8 @@ public class GatewayEventsConfig {
   // internal routing
   public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
+  public static final String CONVERT_SPG_UNIT_UPDATE_TO_CREATE = "CONVERT_SPG_UNIT_UPDATE_TO_CREATE";
+
   private final boolean useJsonLogging;
 
   public GatewayEventsConfig(@Value("#{'${logging.profile}' == 'CLOUD'}") boolean useJsonLogging) {
@@ -65,7 +69,7 @@ public class GatewayEventsConfig {
         RM_CREATE_REQUEST_RECEIVED, RM_UPDATE_REQUEST_RECEIVED, RM_CANCEL_REQUEST_RECEIVED,
         // from the job service v3
         COMET_CREATE_PRE_SENDING, COMET_CREATE_ACK, COMET_CANCEL_PRE_SENDING, COMET_CANCEL_ACK,
-        COMET_UPDATE_PRE_SENDING, COMET_UPDATE_ACK, TM_SERVICE_UP,
+        COMET_UPDATE_PRE_SENDING, COMET_UPDATE_ACK, TM_SERVICE_UP, CONVERT_SPG_UNIT_UPDATE_TO_CREATE,
     });
     gatewayEventManager.addErrorEventTypes(new String[] {
         // from both

@@ -25,15 +25,32 @@ public class RmReceiver {
     this.gatewayEventManager = gatewayEventManager;
   }
 
-  public void receiveMessage(FwmtActionInstruction ffu) throws GatewayException {
-    gatewayEventManager
-        .triggerEvent(ffu.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref", ffu.getCaseRef());
-    jobService.process(ffu);
+  public void receiveMessage(FwmtActionInstruction rmRequest) throws GatewayException {
+    //TODO trigger correct event CREATE or UPDATE
+    switch (rmRequest.getActionInstruction()) {
+      case CREATE : {
+        gatewayEventManager
+        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref", rmRequest.getCaseRef());
+        jobService.processCreate(rmRequest); break;
+      }
+      case UPDATE : {
+        gatewayEventManager
+        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_UPDATE_REQUEST_RECEIVED, "Case Ref", rmRequest.getCaseRef());
+        jobService.processUpdate(rmRequest); break;
+      }
+        default : break; //TODO THROW ROUTUNG FAILURE
+    }
   }
 
-  public void receiveMessage(FwmtCancelActionInstruction ffu) throws GatewayException {
-    gatewayEventManager
-        .triggerEvent(ffu.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref", "N/A");
-    jobService.process(ffu);
-  }
+  public void receiveMessage(FwmtCancelActionInstruction rmRequest) throws GatewayException {
+      //TODO trigger correct event CANCEL
+        switch (rmRequest.getActionInstruction()) {
+          case CANCEL : {
+            gatewayEventManager
+            .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CANCEL_REQUEST_RECEIVED, "Case Ref", "N/A");    
+            jobService.processCancel(rmRequest); break;
+          }
+            default : break; //TODO THROW ROUTUNG FAILURE
+        }
+      }
 }

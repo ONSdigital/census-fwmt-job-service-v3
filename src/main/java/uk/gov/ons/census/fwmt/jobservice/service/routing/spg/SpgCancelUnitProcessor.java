@@ -33,11 +33,11 @@ public class SpgCancelUnitProcessor implements InboundProcessor<FwmtCancelAction
   private RoutingValidator routingValidator;
 
   private static ProcessorKey key = ProcessorKey.builder()
-  .actionInstruction(ActionInstructionType.CANCEL.toString())
-  .surveyName("CENSUS")
-  .addressType("SPG")
-  .addressLevel("U")
-  .build();
+      .actionInstruction(ActionInstructionType.CANCEL.toString())
+      .surveyName("CENSUS")
+      .addressType("SPG")
+      .addressLevel("U")
+      .build();
 
   public SpgCancelUnitProcessor(CometRestClient cometRestClient) {
     this.cometRestClient = cometRestClient;
@@ -51,20 +51,24 @@ public class SpgCancelUnitProcessor implements InboundProcessor<FwmtCancelAction
   @Override
   public boolean isValid(FwmtCancelActionInstruction rmRequest, GatewayCache cache) {
     try {
-      return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL && rmRequest.getSurveyName().equals("CENSUS")
-          && rmRequest.getAddressType().equals("SPG") && rmRequest.getAddressLevel().equals("U")
+      return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL
+          && rmRequest.getSurveyName().equals("CENSUS")
+          && rmRequest.getAddressType().equals("SPG")
+          && rmRequest.getAddressLevel().equals("U")
           && cache != null;
     } catch (NullPointerException e) {
       return false;
     }
   }
 
-    //TODO Acceptance test should check close  is sent (new event)
+  // TODO Acceptance test should check close is sent (new event)
   @Override
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING, "Case Ref", "N/A");
-     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
+    
+    ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB);
+    
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK, "Case Ref", "N/A", "Response Code",
             response.getStatusCode().name());

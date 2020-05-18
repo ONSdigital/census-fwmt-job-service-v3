@@ -33,11 +33,11 @@ public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelAction
   private RoutingValidator routingValidator;
 
   private static ProcessorKey key = ProcessorKey.builder()
-  .actionInstruction(ActionInstructionType.CANCEL.toString())
-  .surveyName("CENSUS")
-  .addressType("SPG")
-  .addressLevel("E")
-  .build();
+      .actionInstruction(ActionInstructionType.CANCEL.toString())
+      .surveyName("CENSUS")
+      .addressType("SPG")
+      .addressLevel("E")
+      .build();
 
   @Override
   public ProcessorKey getKey() {
@@ -53,21 +53,26 @@ public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelAction
     try {
       // relies on the validation of: SpgRouter, SpgCancelRouter
       return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL
-          && rmRequest.getSurveyName().equals("CENSUS") && rmRequest.getAddressType().equals("SPG")
-          && rmRequest.getAddressLevel().equals("E") && cache != null;
+          && rmRequest.getSurveyName().equals("CENSUS")
+          && rmRequest.getAddressType().equals("SPG")
+          && rmRequest.getAddressLevel().equals("E")
+          && cache != null;
     } catch (NullPointerException e) {
       return false;
     }
   }
 
   // TODO Acceptance test should check delete is sent (new event)
-  // TODO Can ecent be added in class where its used, rather than config, or csan
+  // TODO Can ecent be added in class where its used, rather than config, or
+  // csan
   // it be added when used firat time
   @Override
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING, "Case Ref", "N/A");
+
     ResponseEntity<Void> response = cometRestClient.sendDelete(rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB);
+
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK, "Case Ref", "N/A",
         "Response Code", response.getStatusCode().name());
   }

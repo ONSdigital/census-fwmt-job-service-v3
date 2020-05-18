@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
-
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
@@ -26,7 +25,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 @Qualifier("Create")
 @Service
 public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstruction> {
-  
+
   @Autowired
   private CometRestClient cometRestClient;
 
@@ -40,48 +39,51 @@ public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstru
   private GatewayCacheService cacheService;
 
   private static ProcessorKey key = ProcessorKey.builder()
-  .actionInstruction(ActionInstructionType.CREATE.toString())
-  .surveyName("CENSUS")
-  .addressType("SPG")
-  .addressLevel("E")
-  .build();
+      .actionInstruction(ActionInstructionType.CREATE.toString())
+      .surveyName("CENSUS")
+      .addressType("SPG")
+      .addressLevel("E")
+      .build();
 
   @Override
   public ProcessorKey getKey() {
     return key;
   }
-  
-  //TODO shouldnt this state that handdeliver is true ( differential with SpgCreateUnitFollowupRouter )
+
+  // TODO shouldnt this state that handdeliver is true ( differential with
+  // SpgCreateUnitFollowupRouter )
   @Override
   public boolean isValid(FwmtActionInstruction rmRequest, GatewayCache cache) {
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CREATE
-          && rmRequest.getSurveyName().equals("CENSUS") && rmRequest.getAddressType().equals("SPG")
-          && rmRequest.getAddressLevel().equals("E") && (cache == null || !cache.existsInFwmt);
+          && rmRequest.getSurveyName().equals("CENSUS")
+          && rmRequest.getAddressType().equals("SPG")
+          && rmRequest.getAddressLevel().equals("E")
+          && (cache == null || !cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;
     }
   }
-  //TODO All events wfor sending to comment should have rm caseref and tm case ref to view secure caseref
+
+  // TODO All events wfor sending to comment should have rm caseref and tm case
+  // ref to view secure caseref
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-     CaseCreateRequest tmRequest = SpgCreateConverter.convertSite(rmRequest, cache);
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type", tmRequest.getSurveyType().toString());
+    CaseCreateRequest tmRequest = SpgCreateConverter.convertSite(rmRequest, cache);
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",
+        tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
 
-    // Save the new cache object
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    // update or create the cache entry with existsInFwmt=true
     if (newCache == null) {
       cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).build());
     } else {
       cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
     }
 
-   eventManager
+    eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
             response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
 

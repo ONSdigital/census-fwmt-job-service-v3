@@ -5,6 +5,8 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 
 public interface InboundProcessor<T> {
     ProcessorKey getKey();
+
     boolean isValid(T rmRequest, GatewayCache cache);
+
     void process(T rmRequest, GatewayCache cache) throws GatewayException;
 }

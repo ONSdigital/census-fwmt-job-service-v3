@@ -35,11 +35,11 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
   private RoutingValidator routingValidator;
 
   private static ProcessorKey key = ProcessorKey.builder()
-  .actionInstruction(ActionInstructionType.UPDATE.toString())
-  .surveyName("CENSUS")
-  .addressType("SPG")
-  .addressLevel("E")
-  .build();
+      .actionInstruction(ActionInstructionType.UPDATE.toString())
+      .surveyName("CENSUS")
+      .addressType("SPG")
+      .addressLevel("E")
+      .build();
 
   @Override
   public ProcessorKey getKey() {
@@ -50,8 +50,11 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
   public boolean isValid(FwmtActionInstruction rmRequest, GatewayCache cache) {
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.UPDATE
-          && rmRequest.getSurveyName().equals("CENSUS") && rmRequest.getAddressType().equals("SPG")
-          && rmRequest.getAddressLevel().equals("E") && cache!=null && cache.existsInFwmt;
+          && rmRequest.getSurveyName().equals("CENSUS")
+          && rmRequest.getAddressType().equals("SPG")
+          && rmRequest.getAddressLevel().equals("E")
+          && cache != null
+          && cache.existsInFwmt;
     } catch (NullPointerException e) {
       return false;
     }
@@ -61,14 +64,12 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseReopenCreateRequest tmRequest = SpgUpdateConverter.convertSite(rmRequest, cache);
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING, "Case Ref",
-        rmRequest.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING, "Case Ref", rmRequest.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
-
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK, "Case Ref",
-        rmRequest.getCaseRef(), "Response Code", response.getStatusCode().name());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
+        response.getStatusCode().name());
   }
 }

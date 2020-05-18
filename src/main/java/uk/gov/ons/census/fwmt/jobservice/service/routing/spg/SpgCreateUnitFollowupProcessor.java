@@ -58,8 +58,10 @@ public class SpgCreateUnitFollowupProcessor implements InboundProcessor<FwmtActi
   public boolean isValid(FwmtActionInstruction rmRequest, GatewayCache cache) {
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CREATE
-          && rmRequest.getSurveyName().equals("CENSUS") && rmRequest.getAddressType().equals("SPG")
-          && rmRequest.getAddressLevel().equals("U") && !rmRequest.isHandDeliver();
+          && rmRequest.getSurveyName().equals("CENSUS") 
+          && rmRequest.getAddressType().equals("SPG")
+          && rmRequest.getAddressLevel().equals("U") 
+          && !rmRequest.isHandDeliver();
     } catch (NullPointerException e) {
       return false;
     }
@@ -72,12 +74,9 @@ public class SpgCreateUnitFollowupProcessor implements InboundProcessor<FwmtActi
         tmRequest.getReference(), "Survey Type", tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
 
-    // Save the new cache object
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    // update or create the cache entry with existsInFwmt=true
     if (newCache == null) {
       cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).build());
     } else {
@@ -87,6 +86,5 @@ public class SpgCreateUnitFollowupProcessor implements InboundProcessor<FwmtActi
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref",
         rmRequest.getCaseRef(), "Response Code", response.getStatusCode().name(), "Survey Type",
         tmRequest.getSurveyType().toString());
-
   }
 }

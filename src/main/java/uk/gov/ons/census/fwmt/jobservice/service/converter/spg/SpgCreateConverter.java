@@ -24,6 +24,7 @@ public final class SpgCreateConverter {
   public static CaseCreateRequest.CaseCreateRequestBuilder convertCommon(
       FwmtActionInstruction ffu, GatewayCache cache, CaseCreateRequest.CaseCreateRequestBuilder builder)
       throws GatewayException {
+    
     builder.reference(ffu.getCaseRef());
     builder.type(CaseType.CE);
     builder.category("Not applicable");
@@ -75,8 +76,15 @@ public final class SpgCreateConverter {
 
   public static CaseCreateRequest convertSecureSite(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.SPG_Secure_Site)
-        .build();
+        .surveyType(SurveyType.SPG_Site)
+        .reference("SECSS_" + ffu.getCaseRef())
+        .description(cache.getCareCodes() + "<br> Secure Site").build();
+  }
+  public static CaseCreateRequest convertSecureUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
+        .surveyType(SurveyType.SPG_Unit_F)    
+        .reference("SECSS_" + ffu.getCaseRef())
+        .description(cache.getCareCodes() + "<br> Secure Site").build();
   }
 
   public static CaseCreateRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {

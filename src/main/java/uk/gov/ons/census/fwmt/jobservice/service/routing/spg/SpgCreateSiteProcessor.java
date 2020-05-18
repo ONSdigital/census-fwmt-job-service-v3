@@ -67,9 +67,16 @@ public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstru
 
   // TODO All events wfor sending to comment should have rm caseref and tm case
   // ref to view secure caseref
+  //TODO add test for secure
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest tmRequest = SpgCreateConverter.convertSite(rmRequest, cache);
+    CaseCreateRequest tmRequest;
+    if (rmRequest.isSecureEstablishment()){
+      tmRequest = SpgCreateConverter.convertSecureSite(rmRequest, cache);
+    }else{
+      tmRequest = SpgCreateConverter.convertSite(rmRequest, cache);
+    }
+    
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",
         tmRequest.getSurveyType().toString());
 

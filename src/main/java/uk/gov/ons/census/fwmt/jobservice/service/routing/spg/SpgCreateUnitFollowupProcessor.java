@@ -67,9 +67,15 @@ public class SpgCreateUnitFollowupProcessor implements InboundProcessor<FwmtActi
     }
   }
 //TODO what do we do with followUpService
+//TODO add test for secure
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest tmRequest = SpgCreateConverter.convertUnitFollowup(rmRequest, cache);
+    CaseCreateRequest tmRequest;
+    if (rmRequest.isSecureEstablishment()){
+      tmRequest = SpgCreateConverter.convertSecureUnitFollowup(rmRequest, cache);
+    }else{
+      tmRequest = SpgCreateConverter.convertUnitFollowup(rmRequest, cache);
+    }
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref",
         tmRequest.getReference(), "Survey Type", tmRequest.getSurveyType().toString());
 

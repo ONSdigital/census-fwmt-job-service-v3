@@ -7,4 +7,14 @@ databaseChangeLog:
         - sqlFile:
             path: initial_table.sql
             relativeToChangelogFile: true
-            splitStatements: false
+            splitStatements: false2
+  - changeSet:
+      id: v2
+      author: Steve Scorfield
+      comment: Add CE UPRN and Establishment UPRN to gateway_cache
+      changes:
+        - sqlFile:
+            path: add_uprns.sql
+            relativeToChangelogFile: true
+            splitStatements: false2
+

@@ -50,8 +50,6 @@ public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstru
     return key;
   }
 
-  // TODO shouldnt this state that handdeliver is true ( differential with
-  // SpgCreateUnitFollowupRouter )
   @Override
   public boolean isValid(FwmtActionInstruction rmRequest, GatewayCache cache) {
     try {
@@ -68,6 +66,7 @@ public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstru
   // TODO All events wfor sending to comment should have rm caseref and tm case
   // ref to view secure caseref
   //TODO add test for secure
+  //TODO Why are these deprecated
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseCreateRequest tmRequest;

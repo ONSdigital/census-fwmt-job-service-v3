@@ -16,6 +16,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.converter.ConverterUtils;
 import java.util.List;
 import java.util.Objects;
 
+//TODO Why are all these deprecated
 public final class SpgCreateConverter {
 
   private SpgCreateConverter() {
@@ -78,13 +79,13 @@ public final class SpgCreateConverter {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
         .surveyType(SurveyType.SPG_Site)
         .reference("SECSS_" + ffu.getCaseRef())
-        .description(cache.getCareCodes() + "<br> Secure Site").build();
+        .description((cache!=null)?(cache.getCareCodes() + "<br> "):"" + "Secure Site").build();
   }
   public static CaseCreateRequest convertSecureUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
         .surveyType(SurveyType.SPG_Unit_F)    
-        .reference("SECSS_" + ffu.getCaseRef())
-        .description(cache.getCareCodes() + "<br> Secure Site").build();
+        .reference("SECSU_" + ffu.getCaseRef())
+        .description((cache!=null)?(cache.getCareCodes() + "<br> "):"" + "Secure Site").build();
   }
 
   public static CaseCreateRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
@@ -107,4 +108,3 @@ public final class SpgCreateConverter {
         .build();
   }
 }
-

@@ -77,17 +77,20 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
     }
 
     CaseReopenCreateRequest tmRequest = SpgUpdateConverter.convertUnit(rmRequest, cache);
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING, "Case Ref", rmRequest.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
+        "Case Ref", rmRequest.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-        response.getStatusCode().name());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,
+        "Case Ref", rmRequest.getCaseRef(),
+        "Response Code", response.getStatusCode().name());
   }
 
   private void rerouteAsCreate(FwmtActionInstruction rmRequest) throws GatewayException {
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), CONVERT_SPG_UNIT_UPDATE_TO_CREATE, "Case Ref", rmRequest.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), CONVERT_SPG_UNIT_UPDATE_TO_CREATE,
+        "Case Ref", rmRequest.getCaseRef());
     rmRequest.setActionInstruction(ActionInstructionType.CREATE);
     jobService.processCreate(rmRequest);
   }

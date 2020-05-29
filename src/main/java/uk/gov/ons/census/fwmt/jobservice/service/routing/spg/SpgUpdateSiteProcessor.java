@@ -64,12 +64,14 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseReopenCreateRequest tmRequest = SpgUpdateConverter.convertSite(rmRequest, cache);
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING, "Case Ref", rmRequest.getCaseRef());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
+        "Case Ref", rmRequest.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-        response.getStatusCode().name());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,
+        "Case Ref", rmRequest.getCaseRef(),
+        "Response Code", response.getStatusCode().name());
   }
 }

@@ -57,6 +57,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
+          && rmRequest.isHandDeliver()
           && (cache == null
           || !(cache.getCaseId().isEmpty() && cache.existsInFwmt));
     } catch (NullPointerException e) {
@@ -69,9 +70,9 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
     CaseCreateRequest tmRequest;
 
     if (rmRequest.isSecureEstablishment()){
-      tmRequest = CeCreateConverter.convertCeUnitDeliver(rmRequest, cache);
-    }else{
       tmRequest = CeCreateConverter.convertCeUnitDeliverSecure(rmRequest, cache);
+    }else{
+      tmRequest = CeCreateConverter.convertCeUnitDeliver(rmRequest, cache);
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",

@@ -25,7 +25,11 @@ public final class SpgCreateConverter {
   public static CaseCreateRequest.CaseCreateRequestBuilder convertCommon(
       FwmtActionInstruction ffu, GatewayCache cache, CaseCreateRequest.CaseCreateRequestBuilder builder)
       throws GatewayException {
-    
+
+      
+
+    String savedCareCodes = "";
+
     builder.reference(ffu.getCaseRef());
     builder.type(CaseType.CE);
     builder.category("Not applicable");
@@ -65,8 +69,23 @@ public final class SpgCreateConverter {
     builder.ce(ceCaseExtension);
 
     if (cache != null) {
-      builder.description(cache.getCareCodes());
+      savedCareCodes = cache.getCareCodes();
       builder.specialInstructions(cache.getAccessInfo());
+    }
+
+    if (ffu.isSecureEstablishment())
+    {
+      if (ffu.getAddressLevel().equals("E")) {
+        if (cache == null || (cache.caseId.equals(ffu.getCaseId()) && !cache.existsInFwmt)) {
+          builder.reference("SECSS_" + ffu.getCaseRef());
+          builder.description(savedCareCodes + "<br> Secure Site");
+        }
+      } else if (!ffu.isHandDeliver() && ffu.getAddressLevel().equals("U")) {
+        builder.reference("SECSU_" + ffu.getCaseRef());
+        builder.description(savedCareCodes + "<br> Secure Site");
+      }
+    } else if (!(savedCareCodes == null)) {
+      builder.description(savedCareCodes);
     }
 
     builder.uaa(ffu.isUndeliveredAsAddress());

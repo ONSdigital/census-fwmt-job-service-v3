@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.service.converter.spg;
+package uk.gov.ons.census.fwmt.jobservice.service.converter.ce;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
@@ -11,22 +11,19 @@ import uk.gov.ons.census.fwmt.common.data.modelcase.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.ConverterUtils;
+import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgCreateConverter;
 
 import java.util.List;
 import java.util.Objects;
 
-//TODO Why are all these deprecated
-public final class SpgCreateConverter {
+public final class CeCreateConverter {
 
-  private SpgCreateConverter() {
+  private CeCreateConverter() {
   }
 
   public static CaseCreateRequest.CaseCreateRequestBuilder convertCommon(
       FwmtActionInstruction ffu, GatewayCache cache, CaseCreateRequest.CaseCreateRequestBuilder builder)
       throws GatewayException {
-
-      
 
     String savedCareCodes = "";
 
@@ -51,6 +48,8 @@ public final class SpgCreateConverter {
         .town(ffu.getTownName())
         .postcode(ffu.getPostcode())
         .geography(outGeography)
+        .uprn(Long.parseLong(ffu.getUprn()))
+        .estabUprn(Long.parseLong(ffu.getEstabUprn()))
         .build();
     builder.address(outAddress);
 
@@ -75,15 +74,8 @@ public final class SpgCreateConverter {
 
     if (ffu.isSecureEstablishment())
     {
-      if (ffu.getAddressLevel().equals("E")) {
-        if (cache == null || (cache.caseId.equals(ffu.getCaseId()) && !cache.existsInFwmt)) {
-          builder.reference("SECSS_" + ffu.getCaseRef());
-          builder.description(savedCareCodes + "<br> Secure Site");
-        }
-      } else if (!ffu.isHandDeliver() && ffu.getAddressLevel().equals("U")) {
-        builder.reference("SECSU_" + ffu.getCaseRef());
+        builder.reference("SECCU_" + ffu.getCaseRef());
         builder.description(savedCareCodes + "<br> Secure Site");
-      }
     } else if (!(savedCareCodes == null)) {
       builder.description(savedCareCodes);
     }
@@ -94,36 +86,26 @@ public final class SpgCreateConverter {
     return builder;
   }
 
-  public static CaseCreateRequest convertSecureSite(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.SPG_Site)
-        .reference("SECSS_" + ffu.getCaseRef())
-        .description((cache!=null)?(cache.getCareCodes() + "<br> "):"" + "Secure Site").build();
-  }
-  public static CaseCreateRequest convertSecureUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.SPG_Unit_F)    
-        .reference("SECSU_" + ffu.getCaseRef())
-        .description((cache!=null)?(cache.getCareCodes() + "<br> "):"" + "Secure Site").build();
-  }
-
-  public static CaseCreateRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.SPG_Site)
+  public static CaseCreateRequest convertCeUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+    return CeCreateConverter
+        .convertCommon(ffu, cache, CaseCreateRequest.builder())
+        .surveyType(SurveyType.CE_UNIT_D)
         .build();
   }
 
-  public static CaseCreateRequest convertUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache)
-      throws GatewayException {
+  public static CaseCreateRequest convertCeUnitDeliverSecure(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
     return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.SPG_Unit_D)
-        .build();
+        .surveyType(SurveyType.CE_UNIT_D)
+        .reference("SECCCU_" + ffu.getCaseRef())
+        .description(cache.getCareCodes() + "<br> Secure Site").build();
   }
 
-  public static CaseCreateRequest convertUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache)
+  public static CaseCreateRequest convertCeUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache)
       throws GatewayException {
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.SPG_Unit_F)
+    return CeCreateConverter
+        .convertCommon(ffu, cache, CaseCreateRequest.builder())
+        .surveyType(SurveyType.CE_UNIT_F)
         .build();
   }
 }
+

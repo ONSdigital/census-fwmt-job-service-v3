@@ -35,6 +35,12 @@ public class GatewayCache {
   @Column(name = "access_info")
   public String accessInfo;
 
+  @Column(name = "uprn")
+  public String uprn;
+
+  @Column(name = "estab_uprn")
+  public String estabUprn;
+
   // display only the details related to request routing
   public String toRoutingString() {
     return "GatewayCache(" +

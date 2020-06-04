@@ -58,7 +58,7 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getAddressType().equals("SPG")
           && rmRequest.getAddressLevel().equals("U")
           && (rmRequest.isHandDeliver()
-              || (cache != null && cache.existsInFwmt && cache.delivered));
+              || (cache != null && !cache.existsInFwmt && !cache.delivered));
     } catch (NullPointerException e) {
       return false;
     }
@@ -67,8 +67,9 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseCreateRequest tmRequest = SpgCreateConverter.convertUnitDeliver(rmRequest, cache);
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",
-        tmRequest.getSurveyType().toString());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING,
+        "Case Ref", tmRequest.getReference(),
+        "Survey Type", tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
@@ -81,8 +82,9 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
     }
 
     eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-            response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
-
+        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK,
+            "Case Ref", rmRequest.getCaseRef(),
+            "Response Code", response.getStatusCode().name(),
+            "Survey Type", tmRequest.getSurveyType().toString());
   }
 }

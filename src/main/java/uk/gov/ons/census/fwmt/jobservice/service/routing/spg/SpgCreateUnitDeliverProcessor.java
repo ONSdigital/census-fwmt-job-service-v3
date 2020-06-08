@@ -57,8 +57,8 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("SPG")
           && rmRequest.getAddressLevel().equals("U")
-          && (rmRequest.isHandDeliver()
-              || (cache != null && !cache.existsInFwmt && !cache.delivered));
+          && ((cache == null && rmRequest.isHandDeliver())
+          || (cache != null && !cache.existsInFwmt && !cache.delivered));
     } catch (NullPointerException e) {
       return false;
     }

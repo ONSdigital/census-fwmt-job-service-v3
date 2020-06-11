@@ -1,17 +1,13 @@
 package uk.gov.ons.census.fwmt.jobservice.service.converter.ce;
 
-import uk.gov.ons.census.fwmt.common.data.modelcase.Address;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseType;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CeCaseExtension;
-import uk.gov.ons.census.fwmt.common.data.modelcase.Contact;
-import uk.gov.ons.census.fwmt.common.data.modelcase.Geography;
-import uk.gov.ons.census.fwmt.common.data.modelcase.Location;
-import uk.gov.ons.census.fwmt.common.data.modelcase.SurveyType;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.data.tm.Address;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CeCaseExtension;
+import uk.gov.ons.census.fwmt.common.data.tm.Geography;
+import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgCreateConverter;
+import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,21 +17,16 @@ public final class CeCreateConverter {
   private CeCreateConverter() {
   }
 
-  public static CaseCreateRequest.CaseCreateRequestBuilder convertCommon(
-      FwmtActionInstruction ffu, GatewayCache cache, CaseCreateRequest.CaseCreateRequestBuilder builder)
-      throws GatewayException {
+  public static CaseRequest.CaseRequestBuilder convertCE(
+      FwmtActionInstruction ffu, GatewayCache cache, CaseRequest.CaseRequestBuilder builder,
+      boolean isEstab) {
 
-    String savedCareCodes = "";
+    boolean ce1Completed = false;
+    boolean handDelivery = false;
+    int actualResponse = 0;
+    int expectedResponse = 0;
 
-    builder.reference(ffu.getCaseRef());
-    builder.type(CaseType.CE);
-    builder.category("Not applicable");
-    builder.estabType(ffu.getEstabType());
-    builder.requiredOfficer(ffu.getFieldOfficerId());
-    builder.coordCode(ffu.getFieldCoordinatorId());
-
-    Contact outContact = Contact.builder().organisationName(ffu.getOrganisationName()).build();
-    builder.contact(outContact);
+    CaseRequest.CaseRequestBuilder commonBuilder = CommonCreateConverter.convertCommon(ffu, cache, builder);
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();
 
@@ -51,120 +42,137 @@ public final class CeCreateConverter {
         .uprn(Long.parseLong(ffu.getUprn()))
         .estabUprn(Long.parseLong(ffu.getEstabUprn()))
         .build();
-    builder.address(outAddress);
+    commonBuilder.address(outAddress);
 
-    Location outLocation = Location.builder()
-        .lat(ffu.getLatitude().floatValue())
-        ._long(ffu.getLongitude().floatValue())
-        .build();
-    builder.location(outLocation);
+    if (isEstab) {
+      if (ffu.isCe1Complete()) {
+        ce1Completed = true;
+      }
 
-    CeCaseExtension ceCaseExtension = CeCaseExtension.builder()
-        .ce1Complete(false)
-        .deliveryRequired(false)
-        .expectedResponses(0)
-        .actualResponses(0)
-        .build();
-    builder.ce(ceCaseExtension);
+      if (ffu.getCeActualResponses() != null && ffu.getCeActualResponses() != 0) {
+        actualResponse = ffu.getCeActualResponses();
+      }
 
-    if (cache != null) {
-      savedCareCodes = cache.getCareCodes();
-      builder.specialInstructions(cache.getAccessInfo());
+      if (ffu.getCeExpectedCapacity() != null && ffu.getCeExpectedCapacity() != 0) {
+        expectedResponse = ffu.getCeExpectedCapacity();
+      }
+
+      if (ffu.isHandDeliver()) {
+        handDelivery = ffu.isHandDeliver();
+      }
     }
 
-    if (ffu.isSecureEstablishment())
-    {
-        builder.reference("SECCU_" + ffu.getCaseRef());
-        builder.description(savedCareCodes + "<br> Secure Site");
-    } else if (!(savedCareCodes == null)) {
-      builder.description(savedCareCodes);
-    }
+      CeCaseExtension ceCaseExtension = CeCaseExtension.builder()
+          .ce1Complete(ce1Completed)
+          .deliveryRequired(handDelivery)
+          .expectedResponses(expectedResponse)
+          .actualResponses(actualResponse)
+          .build();
+      commonBuilder.ce(ceCaseExtension);
 
-    builder.uaa(ffu.isUndeliveredAsAddress());
-    builder.sai(false);
-
-    return builder;
+    return commonBuilder;
   }
 
-  public static CaseCreateRequest convertCeEstabDeliver(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+  public static CaseRequest convertCeEstabDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
     return CeCreateConverter
-        .convertCommon(ffu, cache, CaseCreateRequest.builder())
+        .convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_D)
         .build();
   }
 
-  public static CaseCreateRequest convertCeEstabDeliverSecure(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+  public static CaseRequest convertCeEstabDeliverSecure(FwmtActionInstruction ffu, GatewayCache cache) {
     String careCodes = "";
 
     if (cache != null) {
       careCodes = cache.getCareCodes();
     }
 
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
+    return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_D)
         .reference("SECCE_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Site").build();
+        .description(careCodes + "<br> Secure Establishment").build();
   }
 
-  public static CaseCreateRequest convertCeEstabFollowup(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+  public static CaseRequest convertCeEstabFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
     return CeCreateConverter
-        .convertCommon(ffu, cache, CaseCreateRequest.builder())
+        .convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_F)
         .build();
   }
 
-  public static CaseCreateRequest convertCeEstabFollowupSecure(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+  public static CaseRequest convertCeEstabFollowupSecure(FwmtActionInstruction ffu, GatewayCache cache)  {
     String careCodes = "";
 
     if (cache != null) {
       careCodes = cache.getCareCodes();
     }
 
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
+    return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_F)
         .reference("SECCE_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Site").build();
+        .description(careCodes + "<br> Secure Establishment").build();
   }
 
-  public static CaseCreateRequest convertCeUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+  public static CaseRequest convertCeSite(FwmtActionInstruction ffu, GatewayCache cache) {
     return CeCreateConverter
-        .convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.CE_UNIT_D)
+        .convertCE(ffu, cache, CaseRequest.builder(), false)
+        .surveyType(SurveyType.CE_SITE)
         .build();
   }
 
-  public static CaseCreateRequest convertCeUnitDeliverSecure(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+  public static CaseRequest convertCeSiteSecure(FwmtActionInstruction ffu, GatewayCache cache) {
     String careCodes = "";
 
     if (cache != null ) {
       careCodes = cache.getCareCodes();
     }
 
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.CE_UNIT_D)
-        .reference("SECCU_" + ffu.getCaseRef())
+    return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
+        .surveyType(SurveyType.CE_SITE)
+        .reference("SECCS_" + ffu.getCaseRef())
         .description(careCodes + "<br> Secure Site").build();
   }
 
-  public static CaseCreateRequest convertCeUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache)
-      throws GatewayException {
+  public static CaseRequest convertCeUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
     return CeCreateConverter
-        .convertCommon(ffu, cache, CaseCreateRequest.builder())
-        .surveyType(SurveyType.CE_UNIT_F)
+        .convertCE(ffu, cache, CaseRequest.builder(), false)
+        .surveyType(SurveyType.CE_UNIT_D)
         .build();
   }
 
-  public static CaseCreateRequest convertCeUnitFollowupSecure(FwmtActionInstruction ffu, GatewayCache cache) throws GatewayException {
+  public static CaseRequest convertCeUnitDeliverSecure(FwmtActionInstruction ffu, GatewayCache cache) {
     String careCodes = "";
 
     if (cache != null ) {
       careCodes = cache.getCareCodes();
     }
 
-    return SpgCreateConverter.convertCommon(ffu, cache, CaseCreateRequest.builder())
+    return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
+        .surveyType(SurveyType.CE_UNIT_D)
+        .reference("SECCU_" + ffu.getCaseRef())
+        .description(careCodes + "<br> Secure Unit").build();
+  }
+
+  public static CaseRequest convertCeUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
+    return CeCreateConverter
+        .convertCE(ffu, cache, CaseRequest.builder(), false)
+        .surveyType(SurveyType.CE_UNIT_F)
+        .build();
+  }
+
+  public static CaseRequest convertCeUnitFollowupSecure(FwmtActionInstruction ffu, GatewayCache cache) {
+    String careCodes = "";
+
+    if (cache != null ) {
+      careCodes = cache.getCareCodes();
+    }
+
+    return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_UNIT_F)
         .reference("SECCU_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Site").build();
+        .description(careCodes + "<br> Secure Unit").build();
   }
+
+
 }
 

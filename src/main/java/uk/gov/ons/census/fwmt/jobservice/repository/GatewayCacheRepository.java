@@ -11,6 +11,9 @@ import java.util.List;
 public interface GatewayCacheRepository extends JpaRepository<GatewayCache, Long> {
   GatewayCache findByCaseId(String caseId);
 
+  boolean existsByEstabUprn(String uprn);
+
   @NonNull
   List<GatewayCache> findAll();
+
 }

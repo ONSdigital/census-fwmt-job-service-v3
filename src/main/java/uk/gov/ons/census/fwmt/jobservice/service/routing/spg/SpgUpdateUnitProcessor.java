@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -76,7 +77,7 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
       return;
     }
 
-    CaseReopenCreateRequest tmRequest = SpgUpdateConverter.convertUnit(rmRequest, cache);
+    ReopenCaseRequest tmRequest = SpgUpdateConverter.convertUnit(rmRequest, cache);
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
         "Case Ref", rmRequest.getCaseRef());
 

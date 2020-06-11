@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -69,7 +70,7 @@ public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstru
   //TODO Why are these deprecated
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest tmRequest;
+    CaseRequest tmRequest;
     if (rmRequest.isSecureEstablishment()){
       tmRequest = SpgCreateConverter.convertSecureSite(rmRequest, cache);
     }else{

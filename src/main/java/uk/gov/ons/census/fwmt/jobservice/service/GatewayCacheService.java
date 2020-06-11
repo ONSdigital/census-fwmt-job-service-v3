@@ -24,6 +24,10 @@ public class GatewayCacheService {
     return repository.findByCaseId(caseId);
   }
 
+  public boolean doesEstabUprnExist(String uprn) {
+    return repository.existsByEstabUprn(uprn);
+  };
+
   public GatewayCache save(GatewayCache cache) {
     return repository.save(cache);
   }

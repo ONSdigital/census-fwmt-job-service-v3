@@ -25,7 +25,7 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yml
     user: postgres
     password: postgres
-#    enabled: false
+#     enabled: false
 
 management:
   # Place /info and /health in the root
@@ -101,3 +101,7 @@ eq:
 
 spg:
   followUpDate: 11111
+
+ce:
+   followUpDate: "01/05/2020"
+   startDate: "01/05/2020"

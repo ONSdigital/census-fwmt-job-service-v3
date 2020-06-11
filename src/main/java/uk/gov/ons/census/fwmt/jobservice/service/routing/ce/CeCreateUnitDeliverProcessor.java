@@ -4,16 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
+import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgCreateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
@@ -38,6 +40,12 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   @Autowired
   private GatewayCacheService cacheService;
 
+  @Autowired
+  private GatewayEventManager gatewayEventManager;
+
+  @Autowired
+  private JobService jobService;
+
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
       .surveyName("CENSUS")
@@ -59,7 +67,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
           && rmRequest.getAddressLevel().equals("U")
           && rmRequest.isHandDeliver()
           && (cache == null
-          || !(cache.getCaseId().isEmpty() && cache.existsInFwmt));
+          || (cache != null && !cache.existsInFwmt));
     } catch (NullPointerException e) {
       return false;
     }
@@ -67,8 +75,22 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest tmRequest;
+    CaseRequest tmRequest;
 
+//    if (cache != null && cache.getEstabUprn().equals(rmRequest.getEstabUprn()) && cache.type == 1) {
+//      FwmtActionInstruction ceSwitch = rmRequest;
+//
+//      ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
+//      ceSwitch.setSurveyName("CENSUS");
+//      ceSwitch.setAddressType("CE");
+//      ceSwitch.setCaseId(rmRequest.getCaseId());
+//      ceSwitch.setSurveyType(SurveyType.CE_SITE);
+//
+//      CeSwitchCreateProcessor ceSwitchCreateProcessor = new CeSwitchCreateProcessor();
+//
+//      ceSwitchCreateProcessor.process(ceSwitch, cache);
+//
+//    } else {
     if (rmRequest.isSecureEstablishment()){
       tmRequest = CeCreateConverter.convertCeUnitDeliverSecure(rmRequest, cache);
     }else{
@@ -92,5 +114,6 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
             response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
 
-  }
+    }
+//    }
 }

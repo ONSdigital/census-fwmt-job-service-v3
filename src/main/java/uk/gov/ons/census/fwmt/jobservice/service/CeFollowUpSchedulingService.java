@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * This class is a caching service that reduces the frequency of date checks
  */
@@ -12,18 +15,26 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CeFollowUpSchedulingService {
-  @Value("${spg.followUpDate}")
-  Long followUpDate;
+  @Value("${ce.followUpDate}")
+  Date followUpDate;
+  @Value("${ce.startDate}")
+  Date startDate;
   private boolean inFollowUp = false;
 
+
   public boolean isInFollowUp() {
-    return inFollowUp;
+    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+    Date todaysDate = new Date();
+
+    if (todaysDate.after(startDate) && todaysDate.after(followUpDate)) {
+      return inFollowUp = true;
+    }
+     return inFollowUp;
   }
 
-  @Scheduled(cron = "0 0 * * * *")
-  public void checkTimeDate() {
-    long unixTime = System.currentTimeMillis() / 1000L;
-    log.info("The time is now {}", unixTime);
-    inFollowUp = unixTime > followUpDate;
-  }
+//  public void checkTimeDate() {
+//    long unixTime = System.currentTimeMillis() / 1000L;
+//    log.info("The time is now {}", unixTime);
+//    inFollowUp = unixTime > followUpDate;
+//  }
 }

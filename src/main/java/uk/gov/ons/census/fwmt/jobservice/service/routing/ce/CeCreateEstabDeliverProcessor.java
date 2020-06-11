@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -58,8 +59,8 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getAddressLevel().equals("E")
           && rmRequest.isHandDeliver()
           && (cache == null
-          || !(cache.getCaseId().isEmpty() && cache.existsInFwmt)
-          && cache.getEstabUprn() != rmRequest.getUprn());
+          || (cache != null && !cache.existsInFwmt))
+          && !cacheService.doesEstabUprnExist(rmRequest.getUprn());
     } catch (NullPointerException e) {
       return false;
     }
@@ -67,7 +68,7 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest tmRequest;
+    CaseRequest tmRequest;
 
     if (rmRequest.isSecureEstablishment()){
       tmRequest = CeCreateConverter.convertCeEstabDeliverSecure(rmRequest, cache);
@@ -83,7 +84,7 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
-      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
+      cacheService.save(GatewayCache.builder().type(1).caseId(rmRequest.getCaseId()).existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
     } else {
       cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
     }

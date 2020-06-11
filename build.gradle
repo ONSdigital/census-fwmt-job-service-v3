@@ -90,7 +90,7 @@ dependencies {
     // Custom Libraries
     compile 'uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.17-RELEASE'
     compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.23-RELEASE'
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.1.24-SNAPSHOT'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.1.25-RELEASE'
 
     // General Libraries
     compile 'com.google.guava:guava:27.0.1-jre'

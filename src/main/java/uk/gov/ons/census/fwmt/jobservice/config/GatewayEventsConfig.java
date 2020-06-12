@@ -1,7 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.config;
 
 import com.godaddy.logging.LoggingConfigs;
-import liquibase.pro.packaged.S;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

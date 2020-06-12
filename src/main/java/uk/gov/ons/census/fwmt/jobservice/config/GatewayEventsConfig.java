@@ -1,6 +1,7 @@
 package uk.gov.ons.census.fwmt.jobservice.config;
 
 import com.godaddy.logging.LoggingConfigs;
+import liquibase.pro.packaged.S;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,7 @@ public class GatewayEventsConfig {
   public static final String FAILED_TO_CREATE_TM_JOB = "FAILED_TO_CREATE_TM_JOB";
   public static final String FAILED_TO_CANCEL_TM_JOB = "FAILED_TO_CANCEL_TM_JOB";
   public static final String FAILED_TO_UPDATE_TM_JOB = "FAILED_TO_UPDATE_TM_JOB";
+  public static final String FAILED_TO_CLOSE_TM_JOB = "FAILED_TO_CLOSE_TM_JOB";
   public static final String TM_SERVICE_DOWN = "TM_SERVICE_DOWN";
   public static final String RABBIT_QUEUE_DOWN = "RABBIT_QUEUE_DOWN";
   // public static final String REDIS_SERVICE_DOWN = "REDIS_SERVICE_DOWN";
@@ -78,6 +80,7 @@ public class GatewayEventsConfig {
         INVALID_ACTION_INSTRUCTION, FAILED_TO_UNMARSHALL_ACTION_INSTRUCTION,
         // from the job service v3
         FAILED_TM_AUTHENTICATION, FAILED_TO_CREATE_TM_JOB, FAILED_TO_CANCEL_TM_JOB, FAILED_TO_UPDATE_TM_JOB,
+        FAILED_TO_CLOSE_TM_JOB,
         TM_SERVICE_DOWN,
         // internal routing
         ROUTING_FAILED,

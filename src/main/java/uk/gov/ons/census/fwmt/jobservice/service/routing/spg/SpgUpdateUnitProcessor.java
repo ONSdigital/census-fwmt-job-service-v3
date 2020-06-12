@@ -17,6 +17,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CASE_NOT_FOUND;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
@@ -24,6 +25,7 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CONVERT_SPG_UNIT_UPDATE_TO_CREATE;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CLOSE_TM_JOB;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_UPDATE_TM_JOB;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
 @Qualifier("Update")
 @Service
@@ -82,7 +84,12 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
         "Case Ref", rmRequest.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Close", FAILED_TO_CLOSE_TM_JOB);
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CLOSE_TM_JOB);
+
+    if (response.getStatusCode().value() == 404) {
+      eventManager.triggerErrorEvent(this.getClass(), "Case not found within TM", String.valueOf(rmRequest.getCaseId()), CASE_NOT_FOUND);
+      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Case not found");
+    }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_ACK,
         "Case Ref", rmRequest.getCaseRef(),

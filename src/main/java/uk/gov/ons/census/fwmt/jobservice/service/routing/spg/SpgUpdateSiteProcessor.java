@@ -1,14 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_PRE_SENDING;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_UPDATE_TM_JOB;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
@@ -21,9 +16,20 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_PRE_SENDING;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_UPDATE_TM_JOB;
+
 @Qualifier("Update")
 @Service
 public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstruction> {
+
+  private static final ProcessorKey key = ProcessorKey.builder()
+      .actionInstruction(ActionInstructionType.UPDATE.toString())
+      .surveyName("CENSUS")
+      .addressType("SPG")
+      .addressLevel("E")
+      .build();
 
   @Autowired
   private CometRestClient cometRestClient;
@@ -33,13 +39,6 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
 
   @Autowired
   private RoutingValidator routingValidator;
-
-  private static ProcessorKey key = ProcessorKey.builder()
-      .actionInstruction(ActionInstructionType.UPDATE.toString())
-      .surveyName("CENSUS")
-      .addressType("SPG")
-      .addressLevel("E")
-      .build();
 
   @Override
   public ProcessorKey getKey() {
@@ -62,14 +61,15 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
+        "Case Ref", rmRequest.getCaseRef());
+
     CaseReopenCreateRequest tmRequest = SpgUpdateConverter.convertSite(rmRequest, cache);
-
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING, "Case Ref", rmRequest.getCaseRef());
-
     ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-        response.getStatusCode().name());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,
+        "Case Ref", rmRequest.getCaseRef(),
+        "Response Code", response.getStatusCode().name());
   }
 }

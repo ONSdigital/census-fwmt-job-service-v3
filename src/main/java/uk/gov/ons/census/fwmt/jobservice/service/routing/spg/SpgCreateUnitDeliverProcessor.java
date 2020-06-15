@@ -58,8 +58,8 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("SPG")
           && rmRequest.getAddressLevel().equals("U")
-          && (rmRequest.isHandDeliver()
-              || (cache != null && cache.existsInFwmt && cache.delivered));
+          && ((cache == null && rmRequest.isHandDeliver())
+          || (cache != null && !cache.existsInFwmt && !cache.delivered));
     } catch (NullPointerException e) {
       return false;
     }
@@ -68,6 +68,7 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseRequest tmRequest = SpgCreateConverter.convertUnitDeliver(rmRequest, cache);
+
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),
         "Survey Type", tmRequest.getSurveyType().toString());

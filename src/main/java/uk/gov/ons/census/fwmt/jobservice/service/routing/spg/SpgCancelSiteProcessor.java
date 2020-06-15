@@ -46,8 +46,8 @@ public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelAction
 
   // TODO Remove format on save
   // TODO add ffa formatter (modify)
-  // TODO Find ignore foramtting tag
-  // TODO Make eventManager Anotation
+  // TODO Find ignore formatting tag
+  // TODO Make eventManager Annotation
   @Override
   public boolean isValid(FwmtCancelActionInstruction rmRequest, GatewayCache cache) {
     try {
@@ -63,9 +63,7 @@ public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelAction
   }
 
   // TODO Acceptance test should check delete is sent (new event)
-  // TODO Can ecent be added in class where its used, rather than config, or
-  // csan
-  // it be added when used firat time
+  // TODO Can event be added in class where its used, rather than config, or can it be added when used first time
   @Override
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,

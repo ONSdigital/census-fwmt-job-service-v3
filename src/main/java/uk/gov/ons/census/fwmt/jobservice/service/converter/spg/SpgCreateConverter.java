@@ -43,7 +43,7 @@ public final class SpgCreateConverter {
         .actualResponses(0)
         .build();
     commonBuilder.ce(ceCaseExtension);
-
+  
     return commonBuilder;
   }
 

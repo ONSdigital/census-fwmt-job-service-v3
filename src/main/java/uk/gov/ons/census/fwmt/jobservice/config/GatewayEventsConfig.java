@@ -23,8 +23,6 @@ public class GatewayEventsConfig {
   public static final String COMET_CANCEL_ACK = "COMET_CANCEL_ACK";
   public static final String COMET_CLOSE_PRE_SENDING = "COMET_CLOSE_PRE_SENDING";
   public static final String COMET_CLOSE_ACK = "COMET_CLOSE_ACK";
-  public static final String COMET_REOPEN_PRE_SENDING = "COMET_REOPEN_PRE_SENDING";
-  public static final String COMET_REOPEN_ACK = "COMET_REOPEN_ACK";
   public static final String COMET_UPDATE_PRE_SENDING = "COMET_UPDATE_PRE_SENDING";
   public static final String COMET_UPDATE_ACK = "COMET_UPDATE_ACK";
   public static final String TM_SERVICE_UP = "TM_SERVICE_UP";
@@ -36,7 +34,6 @@ public class GatewayEventsConfig {
   public static final String FAILED_TO_CANCEL_TM_JOB = "FAILED_TO_CANCEL_TM_JOB";
   public static final String FAILED_TO_UPDATE_TM_JOB = "FAILED_TO_UPDATE_TM_JOB";
   public static final String FAILED_TO_CLOSE_TM_JOB = "FAILED_TO_CLOSE_TM_JOB";
-  public static final String FAILED_TO_REOPEN_TM_JOB = "FAILED_TO_REOPEN_TM_JOB";
   public static final String TM_SERVICE_DOWN = "TM_SERVICE_DOWN";
   public static final String RABBIT_QUEUE_DOWN = "RABBIT_QUEUE_DOWN";
   // public static final String REDIS_SERVICE_DOWN = "REDIS_SERVICE_DOWN";
@@ -74,7 +71,6 @@ public class GatewayEventsConfig {
         // from the job service v3
         COMET_CREATE_PRE_SENDING, COMET_CREATE_ACK, COMET_CANCEL_PRE_SENDING, COMET_CANCEL_ACK,
         COMET_UPDATE_PRE_SENDING, COMET_UPDATE_ACK, TM_SERVICE_UP, CONVERT_SPG_UNIT_UPDATE_TO_CREATE,
-        COMET_REOPEN_PRE_SENDING, COMET_REOPEN_ACK
     });
     gatewayEventManager.addErrorEventTypes(new String[] {
         // from both
@@ -83,7 +79,7 @@ public class GatewayEventsConfig {
         INVALID_ACTION_INSTRUCTION, FAILED_TO_UNMARSHALL_ACTION_INSTRUCTION,
         // from the job service v3
         FAILED_TM_AUTHENTICATION, FAILED_TO_CREATE_TM_JOB, FAILED_TO_CANCEL_TM_JOB, FAILED_TO_UPDATE_TM_JOB,
-        TM_SERVICE_DOWN, FAILED_TO_CLOSE_TM_JOB, FAILED_TO_REOPEN_TM_JOB,
+        TM_SERVICE_DOWN, FAILED_TO_CLOSE_TM_JOB,
         // internal routing
         ROUTING_FAILED,
     });

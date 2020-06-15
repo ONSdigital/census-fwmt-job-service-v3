@@ -10,9 +10,10 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.GatewayActionProducer;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmReceiver;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
@@ -41,7 +42,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   private GatewayCacheService cacheService;
 
   @Autowired
-  private GatewayEventManager gatewayEventManager;
+  private GatewayActionProducer actionProducer;
 
   @Autowired
   private JobService jobService;
@@ -67,7 +68,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
           && rmRequest.getAddressLevel().equals("U")
           && rmRequest.isHandDeliver()
           && (cache == null
-          || (cache != null && !cache.existsInFwmt));
+          || !cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;
     }
@@ -77,43 +78,42 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseRequest tmRequest;
 
-//    if (cache != null && cache.getEstabUprn().equals(rmRequest.getEstabUprn()) && cache.type == 1) {
-//      FwmtActionInstruction ceSwitch = rmRequest;
-//
-//      ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
-//      ceSwitch.setSurveyName("CENSUS");
-//      ceSwitch.setAddressType("CE");
-//      ceSwitch.setCaseId(rmRequest.getCaseId());
-//      ceSwitch.setSurveyType(SurveyType.CE_SITE);
-//
-//      CeSwitchCreateProcessor ceSwitchCreateProcessor = new CeSwitchCreateProcessor();
-//
-//      ceSwitchCreateProcessor.process(ceSwitch, cache);
-//
-//    } else {
-    if (rmRequest.isSecureEstablishment()){
-      tmRequest = CeCreateConverter.convertCeUnitDeliverSecure(rmRequest, cache);
-    }else{
-      tmRequest = CeCreateConverter.convertCeUnitDeliver(rmRequest, cache);
-    }
+    if (cache != null && cache.getEstabUprn().equals(rmRequest.getEstabUprn()) && cache.type == 1) {
+      FwmtActionInstruction ceSwitch = rmRequest;
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",
-        tmRequest.getSurveyType().toString());
+      ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
+      ceSwitch.setSurveyName("CENSUS");
+      ceSwitch.setAddressType("CE");
+      ceSwitch.setCaseId(rmRequest.getCaseId());
+      ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-    ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+      actionProducer.sendMessage(ceSwitch);
 
-    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    if (newCache == null) {
-      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
-    }
 
-    eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-            response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
+      if (rmRequest.isSecureEstablishment()){
+        tmRequest = CeCreateConverter.convertCeUnitDeliverSecure(rmRequest, cache);
+      }else{
+        tmRequest = CeCreateConverter.convertCeUnitDeliver(rmRequest, cache);
+      }
 
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",
+          tmRequest.getSurveyType().toString());
+
+      ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
+      routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+
+      GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+      if (newCache == null) {
+        cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
+      } else {
+        cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
+      }
+
+      eventManager
+          .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
+              response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
+
+      }
     }
-//    }
 }

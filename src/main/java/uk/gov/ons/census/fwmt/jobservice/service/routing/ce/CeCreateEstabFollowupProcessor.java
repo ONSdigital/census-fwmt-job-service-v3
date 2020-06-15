@@ -62,7 +62,7 @@ public class CeCreateEstabFollowupProcessor implements InboundProcessor<FwmtActi
           && rmRequest.getAddressLevel().equals("E")
           && !rmRequest.isHandDeliver()
           && (cache == null
-          || (cache != null && cache.existsInFwmt))
+          || cache.existsInFwmt)
           && !cacheService.doesEstabUprnExist(rmRequest.getUprn());
     } catch (NullPointerException e) {
       return false;

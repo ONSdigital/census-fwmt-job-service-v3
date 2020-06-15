@@ -62,7 +62,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getAddressLevel().equals("U")
           && !rmRequest.isHandDeliver()
           && (cache == null
-          || cache != null && !cache.existsInFwmt)
+          || !cache.existsInFwmt)
           && config.isInFollowUp();
 
     } catch (NullPointerException e) {

@@ -23,7 +23,6 @@ public class CeFollowUpSchedulingService {
 
 
   public boolean isInFollowUp() {
-    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
     Date todaysDate = new Date();
 
     if (todaysDate.after(startDate) && todaysDate.after(followUpDate)) {

@@ -64,14 +64,16 @@ public class SpgCancelUnitProcessor implements InboundProcessor<FwmtCancelAction
   // TODO Acceptance test should check close is sent (new event)
   @Override
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING, "Case Ref", "N/A", "TM Action", "CLOSE");
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
+        "Case Ref", "N/A",
+        "TM Action", "CLOSE");
     
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB);
     
-    eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK, "Case Ref", "N/A", "Response Code",
-            response.getStatusCode().name());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
+            "Case Ref", "N/A",
+            "Response Code", response.getStatusCode().name());
   }
 
 }

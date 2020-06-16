@@ -10,11 +10,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CasePause;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
@@ -104,9 +105,9 @@ public class CometRestClient {
     return httpHeaders;
   }
 
-  public ResponseEntity<Void> sendCreate(CaseCreateRequest request, String caseId) throws GatewayException {
+  public ResponseEntity<Void> sendCreate(CaseRequest request, String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
-    HttpEntity<CaseCreateRequest> body = new HttpEntity<>(request, httpHeaders);
+    HttpEntity<CaseRequest> body = new HttpEntity<>(request, httpHeaders);
     String path = createPath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.PUT, body, Void.class);
   }
@@ -118,9 +119,9 @@ public class CometRestClient {
     return restTemplate.exchange(path, HttpMethod.PUT, body, Void.class);
   }
 
-  public ResponseEntity<Void> sendReopen(CaseReopenCreateRequest request, String caseId) throws GatewayException {
+  public ResponseEntity<Void> sendReopen(ReopenCaseRequest request, String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
-    HttpEntity<CaseReopenCreateRequest> body = new HttpEntity<>(request, httpHeaders);
+    HttpEntity<ReopenCaseRequest> body = new HttpEntity<>(request, httpHeaders);
     String path = reopenPath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
   }
@@ -149,7 +150,7 @@ public class CometRestClient {
       httpHeaders.setBearerAuth(auth.getAccessToken());
     }
 
-    if (caseRequest instanceof CaseCreateRequest) {
+    if (caseRequest instanceof CaseRequest) {
       HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
       System.out.println(body);
       return restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);

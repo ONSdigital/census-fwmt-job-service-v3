@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -30,12 +31,14 @@ public class RmReceiver {
     switch (rmRequest.getActionInstruction()) {
       case CREATE : {
         gatewayEventManager
-        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED, "Case Ref", rmRequest.getCaseRef());
+        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED,
+            "Case Ref", rmRequest.getCaseRef());
         jobService.processCreate(rmRequest); break;
       }
       case UPDATE : {
         gatewayEventManager
-        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_UPDATE_REQUEST_RECEIVED, "Case Ref", rmRequest.getCaseRef());
+        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_UPDATE_REQUEST_RECEIVED,
+            "Case Ref", rmRequest.getCaseRef());
         jobService.processUpdate(rmRequest); break;
       }
         default : break; //TODO THROW ROUTUNG FAILURE
@@ -44,13 +47,12 @@ public class RmReceiver {
 
   public void receiveMessage(FwmtCancelActionInstruction rmRequest) throws GatewayException {
       //TODO trigger correct event CANCEL
-        switch (rmRequest.getActionInstruction()) {
-          case CANCEL : {
-            gatewayEventManager
-            .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CANCEL_REQUEST_RECEIVED, "Case Ref", "N/A");    
-            jobService.processCancel(rmRequest); break;
-          }
-            default : break; //TODO THROW ROUTUNG FAILURE
-        }
+    //TODO THROW ROUTUNG FAILURE
+    if (rmRequest.getActionInstruction() == ActionInstructionType.CANCEL) {
+      gatewayEventManager
+          .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CANCEL_REQUEST_RECEIVED,
+              "Case Ref", "N/A");
+      jobService.processCancel(rmRequest);
+    }
       }
 }

@@ -66,13 +66,16 @@ public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelAction
   // TODO Can event be added in class where its used, rather than config, or can it be added when used first time
   @Override
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING, "Case Ref", "N/A", "TM Action", "CLOSE");
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
+        "Case Ref", "N/A",
+        "TM Action", "CLOSE");
 
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB);
-    
+
     eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK, "Case Ref", "N/A", "Response Code",
-            response.getStatusCode().name());
+        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
+            "Case Ref", "N/A",
+            "Response Code", response.getStatusCode().name());
   }
 }

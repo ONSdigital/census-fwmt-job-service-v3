@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -69,15 +70,16 @@ public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstru
   //TODO Why are these deprecated
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest tmRequest;
+    CaseRequest tmRequest;
     if (rmRequest.isSecureEstablishment()){
       tmRequest = SpgCreateConverter.convertSecureSite(rmRequest, cache);
     }else{
       tmRequest = SpgCreateConverter.convertSite(rmRequest, cache);
     }
     
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",
-        tmRequest.getSurveyType().toString());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING,
+        "Case Ref", tmRequest.getReference(),
+        "Survey Type", tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
@@ -90,8 +92,9 @@ public class SpgCreateSiteProcessor implements InboundProcessor<FwmtActionInstru
     }
 
     eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-            response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
-
+        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK,
+            "Case Ref", rmRequest.getCaseRef(),
+            "Response Code", response.getStatusCode().name(),
+            "Survey Type", tmRequest.getSurveyType().toString());
   }
 }

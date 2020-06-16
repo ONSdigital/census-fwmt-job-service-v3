@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseCreateRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -66,7 +67,8 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseCreateRequest tmRequest = SpgCreateConverter.convertUnitDeliver(rmRequest, cache);
+    CaseRequest tmRequest = SpgCreateConverter.convertUnitDeliver(rmRequest, cache);
+
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),
         "Survey Type", tmRequest.getSurveyType().toString());

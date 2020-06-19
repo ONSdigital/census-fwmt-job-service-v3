@@ -13,7 +13,7 @@ import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.rabbit.GatewayActionProducer;
-import uk.gov.ons.census.fwmt.jobservice.rabbit.RmReceiver;
+import uk.gov.ons.census.fwmt.jobservice.service.CeFollowUpSchedulingService;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
@@ -43,9 +43,6 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
 
   @Autowired
   private GatewayActionProducer actionProducer;
-
-  @Autowired
-  private JobService jobService;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -78,7 +75,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseRequest tmRequest;
 
-    if (cache != null && cache.getEstabUprn().equals(rmRequest.getEstabUprn()) && cache.type == 1) {
+    if (cache != null && cacheService.doesEstabUprnExist(rmRequest.getEstabUprn()) && cache.type == 1) {
       FwmtActionInstruction ceSwitch = rmRequest;
 
       ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);

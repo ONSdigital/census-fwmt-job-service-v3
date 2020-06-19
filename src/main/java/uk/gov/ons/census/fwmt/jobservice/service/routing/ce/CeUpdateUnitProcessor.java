@@ -57,7 +57,7 @@ public class CeUpdateUnitProcessor implements InboundProcessor<FwmtActionInstruc
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
           && (cache != null
-          && !cacheService.doesEstabUprnExist(rmRequest.getEstabUprn())
+          && cacheService.doesEstabUprnExist(rmRequest.getEstabUprn())
           && cache.getType() == 3
           && cache.existsInFwmt);
     } catch (NullPointerException e) {

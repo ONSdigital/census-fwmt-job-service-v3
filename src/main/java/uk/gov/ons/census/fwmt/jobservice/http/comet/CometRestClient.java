@@ -124,10 +124,7 @@ public class CometRestClient {
   public ResponseEntity<Void> sendReopen(ReopenCaseRequest request, String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
     HttpEntity<ReopenCaseRequest> body = new HttpEntity<>(request, httpHeaders);
-    gatewayEventManager.triggerEvent(caseId,COMET_UPDATE_ACK,
-        "",body.getBody().getSurveyType().toString(),
-        "UAA",body.getBody().getUaa().toString(),
-        "Blank",body.getBody().getBlank().toString());
+    System.out.println(body.toString());
     String path = reopenPath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
   }

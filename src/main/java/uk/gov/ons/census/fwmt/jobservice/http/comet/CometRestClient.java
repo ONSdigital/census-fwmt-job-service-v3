@@ -28,6 +28,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
+
 @Component
 public class CometRestClient {
 
@@ -122,6 +124,7 @@ public class CometRestClient {
   public ResponseEntity<Void> sendReopen(ReopenCaseRequest request, String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
     HttpEntity<ReopenCaseRequest> body = new HttpEntity<>(request, httpHeaders);
+    System.out.println(body.toString());
     String path = reopenPath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
   }

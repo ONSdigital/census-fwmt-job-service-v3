@@ -33,6 +33,7 @@ public class GatewayEventsConfig {
   public static final String FAILED_TO_CREATE_TM_JOB = "FAILED_TO_CREATE_TM_JOB";
   public static final String FAILED_TO_CANCEL_TM_JOB = "FAILED_TO_CANCEL_TM_JOB";
   public static final String FAILED_TO_UPDATE_TM_JOB = "FAILED_TO_UPDATE_TM_JOB";
+  public static final String FAILED_TO_CLOSE_TM_JOB = "FAILED_TO_CLOSE_TM_JOB";
   public static final String TM_SERVICE_DOWN = "TM_SERVICE_DOWN";
   public static final String RABBIT_QUEUE_DOWN = "RABBIT_QUEUE_DOWN";
   public static final String CASE_NOT_FOUND = "CASE_NOT_FOUND";
@@ -71,6 +72,7 @@ public class GatewayEventsConfig {
         // from the job service v3
         COMET_CREATE_PRE_SENDING, COMET_CREATE_ACK, COMET_CANCEL_PRE_SENDING, COMET_CANCEL_ACK,
         COMET_UPDATE_PRE_SENDING, COMET_UPDATE_ACK, TM_SERVICE_UP, CONVERT_SPG_UNIT_UPDATE_TO_CREATE,
+        COMET_CLOSE_PRE_SENDING,COMET_CLOSE_ACK,
     });
     gatewayEventManager.addErrorEventTypes(new String[] {
         // from both
@@ -79,6 +81,7 @@ public class GatewayEventsConfig {
         INVALID_ACTION_INSTRUCTION, FAILED_TO_UNMARSHALL_ACTION_INSTRUCTION,
         // from the job service v3
         FAILED_TM_AUTHENTICATION, FAILED_TO_CREATE_TM_JOB, FAILED_TO_CANCEL_TM_JOB, FAILED_TO_UPDATE_TM_JOB,
+        FAILED_TO_CLOSE_TM_JOB,
         TM_SERVICE_DOWN,
         CASE_NOT_FOUND,
         // internal routing

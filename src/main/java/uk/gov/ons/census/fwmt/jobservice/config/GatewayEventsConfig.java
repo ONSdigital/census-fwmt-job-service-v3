@@ -72,6 +72,7 @@ public class GatewayEventsConfig {
         // from the job service v3
         COMET_CREATE_PRE_SENDING, COMET_CREATE_ACK, COMET_CANCEL_PRE_SENDING, COMET_CANCEL_ACK,
         COMET_UPDATE_PRE_SENDING, COMET_UPDATE_ACK, TM_SERVICE_UP, CONVERT_SPG_UNIT_UPDATE_TO_CREATE,
+        COMET_CLOSE_PRE_SENDING,COMET_CLOSE_ACK,
     });
     gatewayEventManager.addErrorEventTypes(new String[] {
         // from both

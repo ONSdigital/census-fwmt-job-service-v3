@@ -26,4 +26,13 @@ databaseChangeLog:
             path: add_type.sql
             relativeToChangelogFile: true
             splitStatements: false2
+    -changeSet:
+      id: v4
+      author: Steve Scorfield
+      comment: Add type to gateway_cache
+      changes:
+        - sqlFile:
+            path: add_index_to_uprn.sql
+            relativeToChangelogFile: true
+            splitStatements: false2
 

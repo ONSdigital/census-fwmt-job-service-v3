@@ -22,6 +22,6 @@ public class GatewayActionProducer {
   @Retryable
   public void sendMessage(FwmtActionInstruction gatewayMessage) {
 
-    rabbitTemplate.convertAndSend(gatewayActionsExchange.getName(), GatewayActionsQueueConfig.GATEWAY_ACTIONS_ROUTING_KEY, gatewayMessage);
+    rabbitTemplate.convertAndSend(gatewayActionsExchange.getName(), GatewayActionsQueueConfig.RM_FIELD_ROUTING_KEY, gatewayMessage);
   }
 }

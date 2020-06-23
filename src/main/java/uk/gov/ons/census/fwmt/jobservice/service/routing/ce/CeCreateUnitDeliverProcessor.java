@@ -44,6 +44,9 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   @Autowired
   private GatewayActionProducer actionProducer;
 
+  @Autowired
+  private JobService jobService;
+
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
       .surveyName("CENSUS")

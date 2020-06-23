@@ -14,10 +14,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayActionsQueueConfig {
 
-  public static final String GATEWAY_ACTIONS_QUEUE = "Gateway.Actions";
-  public static final String GATEWAY_ACTIONS_EXCHANGE = "Gateway.Actions.Exchange";
-  public static final String GATEWAY_ACTIONS_ROUTING_KEY = "Gateway.Action.Request";
-  public static final String GATEWAY_ACTIONS_DLQ = "Gateway.ActionsDLQ";
+  public static final String RM_FIELD_QUEUE = "RM.Field";
+  public static final String RM_FIELD_EXCHANGE = "RM.Field.Exchange";
+  public static final String RM_FIELD_ROUTING_KEY = "RM.Field.Request";
+  public static final String RM_FIELD_DLQ = "RM.FieldDLQ";
 
   @Autowired
   private AmqpAdmin amqpAdmin;
@@ -25,9 +25,8 @@ public class GatewayActionsQueueConfig {
   //Queues
   @Bean
   public Queue gatewayActionsQueue() {
-    Queue queue = QueueBuilder.durable(GATEWAY_ACTIONS_QUEUE)
-        .withArgument("x-dead-letter-exchange", "")
-        .withArgument("x-dead-letter-routing-key", GATEWAY_ACTIONS_DLQ)
+    Queue queue = QueueBuilder.durable(RM_FIELD_QUEUE)        .withArgument("x-dead-letter-exchange", "")
+        .withArgument("x-dead-letter-routing-key", RM_FIELD_DLQ).withArgument("x-dead-letter-exchange", "")
         .build();
     queue.setAdminsThatShouldDeclare(amqpAdmin);
     return queue;
@@ -36,7 +35,7 @@ public class GatewayActionsQueueConfig {
   //Dead Letter Queue
   @Bean
   public Queue gatewayActionsDeadLetterQueue() {
-    Queue queue = QueueBuilder.durable(GATEWAY_ACTIONS_DLQ).build();
+    Queue queue = QueueBuilder.durable(RM_FIELD_DLQ).build();
     queue.setAdminsThatShouldDeclare(amqpAdmin);
     return queue;
   }
@@ -44,7 +43,7 @@ public class GatewayActionsQueueConfig {
   //Exchange
   @Bean
   public DirectExchange gatewayActionsExchange() {
-    DirectExchange directExchange = new DirectExchange(GATEWAY_ACTIONS_EXCHANGE);
+    DirectExchange directExchange = new DirectExchange(RM_FIELD_EXCHANGE);
     directExchange.setAdminsThatShouldDeclare(amqpAdmin);
     return directExchange;
   }
@@ -54,7 +53,7 @@ public class GatewayActionsQueueConfig {
   public Binding gatewayActionsBinding(@Qualifier("gatewayActionsQueue") Queue gatewayActionsQueue,
       @Qualifier("gatewayActionsExchange") DirectExchange gatewayActionsExchange) {
     Binding binding = BindingBuilder.bind(gatewayActionsQueue).to(gatewayActionsExchange)
-        .with(GATEWAY_ACTIONS_ROUTING_KEY);
+        .with(RM_FIELD_ROUTING_KEY);
     binding.setAdminsThatShouldDeclare(amqpAdmin);
     return binding;
   }

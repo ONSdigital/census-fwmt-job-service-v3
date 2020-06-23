@@ -74,6 +74,7 @@ public final class CeCreateConverter {
   }
 
   public static CaseRequest convertCeEstabDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
+    cache.setType(1);
     return CeCreateConverter
         .convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_D)
@@ -86,6 +87,7 @@ public final class CeCreateConverter {
     if (cache != null) {
       careCodes = cache.getCareCodes();
     }
+    cache.setType(1);
 
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_D)
@@ -94,6 +96,7 @@ public final class CeCreateConverter {
   }
 
   public static CaseRequest convertCeEstabFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
+    cache.setType(1);
     return CeCreateConverter
         .convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_F)
@@ -107,6 +110,9 @@ public final class CeCreateConverter {
       careCodes = cache.getCareCodes();
     }
 
+    cache.setType(1);
+
+
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_F)
         .reference("SECCE_" + ffu.getCaseRef())
@@ -114,6 +120,7 @@ public final class CeCreateConverter {
   }
 
   public static CaseRequest convertCeSite(FwmtActionInstruction ffu, GatewayCache cache) {
+    cache.setType(2);
     return CeCreateConverter
         .convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_SITE)
@@ -127,6 +134,8 @@ public final class CeCreateConverter {
       careCodes = cache.getCareCodes();
     }
 
+    cache.setType(2);
+
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_SITE)
         .reference("SECCS_" + ffu.getCaseRef())
@@ -134,6 +143,7 @@ public final class CeCreateConverter {
   }
 
   public static CaseRequest convertCeUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
+    cache.setType(3);
     return CeCreateConverter
         .convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_UNIT_D)
@@ -147,6 +157,8 @@ public final class CeCreateConverter {
       careCodes = cache.getCareCodes();
     }
 
+    cache.setType(3);
+
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_UNIT_D)
         .reference("SECCU_" + ffu.getCaseRef())
@@ -154,6 +166,7 @@ public final class CeCreateConverter {
   }
 
   public static CaseRequest convertCeUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
+    cache.setType(3);
     return CeCreateConverter
         .convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_UNIT_F)
@@ -166,6 +179,8 @@ public final class CeCreateConverter {
     if (cache != null ) {
       careCodes = cache.getCareCodes();
     }
+
+    cache.setType(3);
 
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_UNIT_F)

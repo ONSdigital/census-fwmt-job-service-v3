@@ -4,7 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CeCase;
+import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -57,7 +58,6 @@ public class CeUpdateUnitProcessor implements InboundProcessor<FwmtActionInstruc
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
           && (cache != null
-          && cacheService.doesEstabUprnExist(rmRequest.getEstabUprn())
           && cache.getType() == 3
           && cache.existsInFwmt);
     } catch (NullPointerException e) {
@@ -67,14 +67,14 @@ public class CeUpdateUnitProcessor implements InboundProcessor<FwmtActionInstruc
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    ReopenCaseRequest tmRequest;
+    CeCasePatchRequest tmRequest;
 
     tmRequest = CeUpdateConverter.convertUnit(rmRequest);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
         "Case Ref", rmRequest.getCaseRef());
 
-    ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
+    ResponseEntity<Void> response = cometRestClient.sendCeDetails(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
     eventManager

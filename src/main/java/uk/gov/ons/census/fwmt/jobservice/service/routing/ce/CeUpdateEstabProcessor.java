@@ -4,14 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeUpdateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
@@ -34,9 +33,6 @@ public class CeUpdateEstabProcessor implements InboundProcessor<FwmtActionInstru
   @Autowired
   private RoutingValidator routingValidator;
 
-  @Autowired
-  private GatewayCacheService cacheService;
-
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.UPDATE.toString())
       .surveyName("CENSUS")
@@ -57,7 +53,6 @@ public class CeUpdateEstabProcessor implements InboundProcessor<FwmtActionInstru
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("E")
           && (cache != null
-          && cacheService.doesEstabUprnExist(rmRequest.getCaseId())
           && cache.getType() == 1
           && cache.existsInFwmt);
     } catch (NullPointerException e) {
@@ -67,14 +62,14 @@ public class CeUpdateEstabProcessor implements InboundProcessor<FwmtActionInstru
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    ReopenCaseRequest tmRequest;
+    CeCasePatchRequest tmRequest;
 
     tmRequest = CeUpdateConverter.convertEstab(rmRequest);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
         "Case Ref", rmRequest.getCaseRef());
 
-    ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
+    ResponseEntity<Void> response = cometRestClient.sendCeDetails(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
     eventManager

@@ -20,11 +20,12 @@ public final class CeUpdateConverter {
     }
 
     if (surveyType.equals("unit")) {
-      builder.actualResponses(actualResponse).expectedResponses(expectedResponse).build();
+      builder.actualResponses(actualResponse);
+      builder.expectedResponses(expectedResponse);
     } else {
-      builder.ce1Complete(ffu.isCe1Complete()).actualResponses(actualResponse).expectedResponses(expectedResponse)
-          .build();
-
+      builder.ce1Complete(ffu.isCe1Complete());
+      builder.actualResponses(actualResponse);
+      builder.expectedResponses(expectedResponse);
     }
     return builder;
   }

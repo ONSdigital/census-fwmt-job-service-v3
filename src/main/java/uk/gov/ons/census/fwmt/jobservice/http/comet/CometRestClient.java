@@ -10,11 +10,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CasePause;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -27,8 +27,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
 
 @Component
 public class CometRestClient {
@@ -51,6 +49,7 @@ public class CometRestClient {
   private final transient String deletePath;
   private final transient String pausePath;
   private final transient String reopenPath;
+  private final transient String patchCeDetails;
 
   public CometRestClient(
       CometConfig cometConfig,
@@ -67,6 +66,7 @@ public class CometRestClient {
     this.createPath = cometUrl + "{}";
     this.closePath = cometUrl + "{}/close";
     this.deletePath = cometUrl + "{}";
+    this.patchCeDetails = cometUrl + "{}/cedetails";
     this.pausePath = cometUrl + "{}";
     this.reopenPath = cometUrl + "{}/reopen";
   }
@@ -134,6 +134,13 @@ public class CometRestClient {
     HttpEntity<Void> body = new HttpEntity<>(httpHeaders);
     String path = closePath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
+  }
+
+  public ResponseEntity<Void> sendCeDetails(CeCasePatchRequest ceCasePatchRequest, String caseId) throws GatewayException {
+    HttpHeaders httpHeaders = makeAuthHeader();
+    HttpEntity<CeCasePatchRequest> body = new HttpEntity<>(ceCasePatchRequest, httpHeaders);
+    String path = patchCeDetails.replace("{}", caseId);
+    return restTemplate.exchange(path, HttpMethod.PATCH, body, Void.class);
   }
 
   public ResponseEntity<Void> sendDelete(String caseId) throws GatewayException {

@@ -17,7 +17,7 @@ public class ProcessRmFieldDlq {
   private AmqpAdmin amqpAdmin;
   private RabbitMqConfig config;
 
-  public ProcessRmFieldDlq(@Qualifier("feedbackRabbitTemplate") RabbitTemplate rabbitTemplate, AmqpAdmin amqpAdmin, RabbitMqConfig config) {
+  public ProcessRmFieldDlq( @Qualifier("GW_EVENT_RT") RabbitTemplate rabbitTemplate, AmqpAdmin amqpAdmin, RabbitMqConfig config) {
     this.rabbitTemplate = rabbitTemplate;
     this.amqpAdmin = amqpAdmin;
     this.config = config;

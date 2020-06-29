@@ -45,6 +45,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       .actionInstruction(ActionInstructionType.SWITCH_CE_TYPE.toString())
       .surveyName("CENSUS")
       .addressType("CE")
+      .addressLevel("U")
       .build();
 
   @Override
@@ -57,10 +58,10 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.SWITCH_CE_TYPE
           && rmRequest.getSurveyName().equals("CENSUS")
-          && (rmRequest.getAddressType().equals("CE")
-          || rmRequest.getSurveyType().equals("SPG"))
+          && rmRequest.getAddressType().equals("CE")
+          && rmRequest.getAddressLevel().equals("U")
           && cache != null
-          && (cacheService.doesEstabUprnExist(rmRequest.getCaseId()) && cache.existsInFwmt);
+          && cache.existsInFwmt;
     } catch (NullPointerException e) {
       return false;
     }
@@ -70,15 +71,15 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     ReopenCaseRequest tmRequest = new ReopenCaseRequest();
 
-    if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
-      cache.setType(2);
-      tmRequest = CommonSwitchConverter.convertSite(rmRequest, cache);
-    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_D)) {
+    if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_D)) {
       cache.setType(1);
       tmRequest = CommonSwitchConverter.convertUnitDeliver(rmRequest, cache);
     } else if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_F)) {
       cache.setType(1);
       tmRequest = CommonSwitchConverter.convertUnitFollowup(rmRequest, cache);
+    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
+      cache.setType(2);
+      tmRequest = CommonSwitchConverter.convertSite(rmRequest, cache);
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_PRE_SENDING,  "Survey Type",

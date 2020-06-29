@@ -10,7 +10,7 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 public class RmFieldRepublishProducer {
 
   @Autowired
-  @Qualifier("feedbackRabbitTemplate")
+  @Qualifier("republishRabbitTemplate")
   private RabbitTemplate rabbitTemplate;
 
   public void republish(FwmtActionInstruction fieldworkFollowup) {

@@ -29,9 +29,15 @@ public class RmReceiver {
   public void receiveMessage(FwmtActionInstruction rmRequest) throws GatewayException {
     //TODO trigger correct event CREATE or UPDATE
     switch (rmRequest.getActionInstruction()) {
-      case CREATE : {
+      case CREATE: {
         gatewayEventManager
-        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED,
+            .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CREATE_REQUEST_RECEIVED,
+                "Case Ref", rmRequest.getCaseRef());
+        jobService.processCreate(rmRequest); break;
+      }
+      case SWITCH_CE_TYPE: {
+        gatewayEventManager
+        .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.RM_CREATE_SWITCH_REQUEST_RECEIVED,
             "Case Ref", rmRequest.getCaseRef());
         jobService.processCreate(rmRequest); break;
       }

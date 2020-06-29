@@ -21,6 +21,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.util.List;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
@@ -40,9 +42,6 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
 
   @Autowired
   private GatewayCacheService cacheService;
-
-//  @Autowired
-//  private RmFieldProducer actionProducer;
 
   @Autowired
   private RmFieldRepublishProducer rmFieldRepublishProducer;
@@ -81,13 +80,13 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseRequest tmRequest;
 
-    if (cache != null && cache.getEstabUprn().equals(rmRequest.getEstabUprn()) && cache.type == 1) {
+    if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
       FwmtActionInstruction ceSwitch = rmRequest;
 
       ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
       ceSwitch.setSurveyName("CENSUS");
       ceSwitch.setAddressType("CE");
-      ceSwitch.setCaseId(rmRequest.getCaseId());
+      ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
       rmFieldRepublishProducer.republish(ceSwitch);

@@ -106,7 +106,10 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
       GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
       if (newCache == null) {
         cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).delivered(true).existsInFwmt(true)
-            .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
+            .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).build());
+      } else {
+        cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+            .existsInFwmt(true).build());
       }
 
       eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref",

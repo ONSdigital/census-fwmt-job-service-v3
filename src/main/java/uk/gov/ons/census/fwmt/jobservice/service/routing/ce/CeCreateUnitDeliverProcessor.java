@@ -21,8 +21,6 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
-import java.util.List;
-
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
@@ -45,9 +43,6 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
 
   @Autowired
   private RmFieldRepublishProducer rmFieldRepublishProducer;
-
-  @Autowired
-  private JobService jobService;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -107,7 +102,8 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
 
       GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
       if (newCache == null) {
-        cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
+        cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
+            .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).build());
       } else {
         cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
       }

@@ -87,7 +87,8 @@ public class CeCreateEstabFollowupProcessor implements InboundProcessor<FwmtActi
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
-      cacheService.save(GatewayCache.builder().type(1).caseId(rmRequest.getCaseId()).existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
+      cacheService.save(GatewayCache.builder().type(1).caseId(rmRequest.getCaseId()).existsInFwmt(true)
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(1).build());
     } else {
       cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
     }

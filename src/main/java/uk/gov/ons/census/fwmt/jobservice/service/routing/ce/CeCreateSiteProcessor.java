@@ -81,7 +81,8 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
-      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).build());
+      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(2).build());
     } else {
       cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
     }

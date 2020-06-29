@@ -75,10 +75,10 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       tmRequest = CommonSwitchConverter.convertSite(rmRequest, cache);
     } else if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_D)) {
       cache.setType(1);
-      tmRequest = CommonSwitchConverter.convertSite(rmRequest, cache);
+      tmRequest = CommonSwitchConverter.convertUnitDeliver(rmRequest, cache);
     } else if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_F)) {
       cache.setType(1);
-      tmRequest = CommonSwitchConverter.convertSite(rmRequest, cache);
+      tmRequest = CommonSwitchConverter.convertUnitFollowup(rmRequest, cache);
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_PRE_SENDING,  "Survey Type",

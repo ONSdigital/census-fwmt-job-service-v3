@@ -12,8 +12,8 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.rabbit.GatewayActionProducer;
-import uk.gov.ons.census.fwmt.jobservice.rabbit.RmReceiver;
+//import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldProducer;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldRepublishProducer;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
@@ -41,8 +41,11 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   @Autowired
   private GatewayCacheService cacheService;
 
+//  @Autowired
+//  private RmFieldProducer actionProducer;
+
   @Autowired
-  private GatewayActionProducer actionProducer;
+  private RmFieldRepublishProducer rmFieldRepublishProducer;
 
   @Autowired
   private JobService jobService;
@@ -87,7 +90,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
       ceSwitch.setCaseId(rmRequest.getCaseId());
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-      actionProducer.sendMessage(ceSwitch);
+      rmFieldRepublishProducer.republish(ceSwitch);
 
     } else {
 

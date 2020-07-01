@@ -12,8 +12,8 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.rabbit.GatewayActionProducer;
-import uk.gov.ons.census.fwmt.jobservice.service.CeFollowUpSchedulingService;
+//import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldProducer;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldRepublishProducer;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
@@ -42,7 +42,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   private GatewayCacheService cacheService;
 
   @Autowired
-  private GatewayActionProducer actionProducer;
+  private RmFieldRepublishProducer rmFieldRepublishProducer;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -75,16 +75,16 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseRequest tmRequest;
 
-    if (cache != null && cacheService.doesEstabUprnExist(rmRequest.getEstabUprn()) && cache.type == 1) {
+    if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
       FwmtActionInstruction ceSwitch = rmRequest;
 
       ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
       ceSwitch.setSurveyName("CENSUS");
       ceSwitch.setAddressType("CE");
-      ceSwitch.setCaseId(rmRequest.getCaseId());
+      ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-      actionProducer.sendMessage(ceSwitch);
+      rmFieldRepublishProducer.republish(ceSwitch);
 
     } else {
 

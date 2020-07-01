@@ -12,7 +12,7 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.rabbit.GatewayActionProducer;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldRepublishProducer;
 import uk.gov.ons.census.fwmt.jobservice.service.CeFollowUpSchedulingService;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
@@ -43,8 +43,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   private CeFollowUpSchedulingService config;
 
   @Autowired
-  private GatewayActionProducer actionProducer;
-
+  private RmFieldRepublishProducer rmFieldRepublishProducer;
 
   private static ProcessorKey key = ProcessorKey.builder()
   .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -66,11 +65,9 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
           && !rmRequest.isHandDeliver()
-          && config.isInFollowUp()
           && (cache == null
           || !cache.existsInFwmt)
           && config.isInFollowUp();
-
     } catch (NullPointerException e) {
       return false;
     }
@@ -81,16 +78,16 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseRequest tmRequest;
 
-    if (cache != null && cacheService.doesEstabUprnExist(rmRequest.getEstabUprn()) && cache.type == 1) {
+    if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
       FwmtActionInstruction ceSwitch = rmRequest;
 
       ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
       ceSwitch.setSurveyName("CENSUS");
       ceSwitch.setAddressType("CE");
-      ceSwitch.setCaseId(rmRequest.getCaseId());
+      ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-      actionProducer.sendMessage(ceSwitch);
+      rmFieldRepublishProducer.republish(ceSwitch);
 
     } else {
 
@@ -110,6 +107,9 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
       if (newCache == null) {
         cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).delivered(true).existsInFwmt(true)
             .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).build());
+      } else {
+        cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+            .existsInFwmt(true).build());
       }
 
       eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref",

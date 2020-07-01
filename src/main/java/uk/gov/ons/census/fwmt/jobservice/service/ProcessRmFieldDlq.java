@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.jobservice.config.RabbitMqConfig;
@@ -16,7 +17,7 @@ public class ProcessRmFieldDlq {
   private AmqpAdmin amqpAdmin;
   private RabbitMqConfig config;
 
-  public ProcessRmFieldDlq(RabbitTemplate rabbitTemplate, AmqpAdmin amqpAdmin, RabbitMqConfig config) {
+  public ProcessRmFieldDlq( @Qualifier("GW_EVENT_RT") RabbitTemplate rabbitTemplate, AmqpAdmin amqpAdmin, RabbitMqConfig config) {
     this.rabbitTemplate = rabbitTemplate;
     this.amqpAdmin = amqpAdmin;
     this.config = config;

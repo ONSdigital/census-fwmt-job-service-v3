@@ -1,12 +1,11 @@
 package uk.gov.ons.census.fwmt.jobservice.service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * This class is a caching service that reduces the frequency of date checks
@@ -15,25 +14,19 @@ import java.util.Date;
 @Slf4j
 @Service
 public class CeFollowUpSchedulingService {
+
   @Value("${ce.followUpDate}")
   Date followUpDate;
+
   @Value("${ce.startDate}")
   Date startDate;
-  private boolean inFollowUp = false;
 
 
   public boolean isInFollowUp() {
     Date todaysDate = new Date();
 
-    if (todaysDate.after(startDate) && todaysDate.after(followUpDate)) {
-      return inFollowUp = true;
-    }
-     return inFollowUp;
+    return (todaysDate.after(startDate) && todaysDate.after(followUpDate));
+
   }
 
-//  public void checkTimeDate() {
-//    long unixTime = System.currentTimeMillis() / 1000L;
-//    log.info("The time is now {}", unixTime);
-//    inFollowUp = unixTime > followUpDate;
-//  }
 }

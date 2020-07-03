@@ -46,11 +46,11 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   private RmFieldRepublishProducer rmFieldRepublishProducer;
 
   private static ProcessorKey key = ProcessorKey.builder()
-  .actionInstruction(ActionInstructionType.CREATE.toString())
-  .surveyName("CENSUS")
-  .addressType("CE")
-  .addressLevel("U")
-  .build();
+      .actionInstruction(ActionInstructionType.CREATE.toString())
+      .surveyName("CENSUS")
+      .addressType("CE")
+      .addressLevel("U")
+      .build();
 
   @Override
   public ProcessorKey getKey() {
@@ -61,19 +61,20 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   public boolean isValid(FwmtActionInstruction rmRequest, GatewayCache cache) {
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CREATE
-          && rmRequest.getSurveyName().equals("CENSUS") 
+          && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
           && !rmRequest.isHandDeliver()
           && (cache == null
-          || !cache.existsInFwmt)
+              || !cache.existsInFwmt)
           && config.isInFollowUp();
     } catch (NullPointerException e) {
       return false;
     }
   }
-//TODO what do we do with followUpService
-//TODO add test for secure
+
+  // TODO what do we do with followUpService
+  // TODO add test for secure
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     CaseRequest tmRequest;
@@ -89,32 +90,32 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
 
       rmFieldRepublishProducer.republish(ceSwitch);
 
-    } else {
-
-      if (rmRequest.isSecureEstablishment()) {
-        tmRequest = CeCreateConverter.convertCeUnitFollowupSecure(rmRequest, cache);
-      } else {
-        tmRequest = CeCreateConverter.convertCeUnitFollowup(rmRequest, cache);
-      }
-
-      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref",
-          tmRequest.getReference(), "Survey Type", tmRequest.getSurveyType().toString());
-
-      ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-      routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
-
-      GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-      if (newCache == null) {
-        cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).delivered(true).existsInFwmt(true)
-            .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).build());
-      } else {
-        cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
-            .existsInFwmt(true).build());
-      }
-
-      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref",
-          rmRequest.getCaseRef(), "Response Code", response.getStatusCode().name(), "Survey Type",
-          tmRequest.getSurveyType().toString());
     }
+
+    if (rmRequest.isSecureEstablishment()) {
+      tmRequest = CeCreateConverter.convertCeUnitFollowupSecure(rmRequest, cache);
+    } else {
+      tmRequest = CeCreateConverter.convertCeUnitFollowup(rmRequest, cache);
+    }
+
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref",
+        tmRequest.getReference(), "Survey Type", tmRequest.getSurveyType().toString());
+
+    ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+    if (newCache == null) {
+      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).delivered(true).existsInFwmt(true)
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).build());
+    } else {
+      cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+          .existsInFwmt(true).build());
+    }
+
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref",
+        rmRequest.getCaseRef(), "Response Code", response.getStatusCode().name(), "Survey Type",
+        tmRequest.getSurveyType().toString());
   }
+
 }

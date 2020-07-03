@@ -57,7 +57,7 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("E")
           && (cache == null
-          || !(cache.getCaseId().isEmpty() && cache.existsInFwmt))
+          || !cache.existsInFwmt)
           && cacheService.doesEstabUprnExist(rmRequest.getUprn());
     } catch (NullPointerException e) {
       return false;

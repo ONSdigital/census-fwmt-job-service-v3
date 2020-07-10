@@ -12,12 +12,12 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonSwitchConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.INCORRECT_SWITCH_SURVEY_TYPE;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_REOPEN_PRE_SENDING;
@@ -37,9 +37,6 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
 
   @Autowired
   private RoutingValidator routingValidator;
-
-  @Autowired
-  private GatewayCacheService cacheService;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.SWITCH_CE_TYPE.toString())
@@ -69,17 +66,21 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    ReopenCaseRequest tmRequest = new ReopenCaseRequest();
+    ReopenCaseRequest tmRequest;
 
     if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_D)) {
       cache.setType(1);
-      tmRequest = CommonSwitchConverter.convertUnitDeliver(rmRequest, cache);
+      tmRequest = CommonSwitchConverter.convertEstabDeliver(rmRequest);
     } else if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_F)) {
       cache.setType(1);
-      tmRequest = CommonSwitchConverter.convertUnitFollowup(rmRequest, cache);
+      tmRequest = CommonSwitchConverter.converEstabFollowup(rmRequest);
     } else if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
       cache.setType(2);
-      tmRequest = CommonSwitchConverter.convertSite(rmRequest, cache);
+      tmRequest = CommonSwitchConverter.convertSite(rmRequest);
+    } else {
+      eventManager.triggerErrorEvent(this.getClass(), "Not a recognised CE Switch SurveyType",
+          String.valueOf(rmRequest.getCaseId()), INCORRECT_SWITCH_SURVEY_TYPE);
+      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Incorrect CE Switch survey type");
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_PRE_SENDING,  "Survey Type",

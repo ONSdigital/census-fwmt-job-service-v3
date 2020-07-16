@@ -40,6 +40,7 @@ public class GatewayEventsConfig {
   public static final String TM_SERVICE_DOWN = "TM_SERVICE_DOWN";
   public static final String RABBIT_QUEUE_DOWN = "RABBIT_QUEUE_DOWN";
   public static final String CASE_NOT_FOUND = "CASE_NOT_FOUND";
+  public static final String INCORRECT_SWITCH_SURVEY_TYPE = "INCORRECT_SWITCH_SURVEY_TYPE";
   // public static final String REDIS_SERVICE_DOWN = "REDIS_SERVICE_DOWN";
 
   // from the rm adapter

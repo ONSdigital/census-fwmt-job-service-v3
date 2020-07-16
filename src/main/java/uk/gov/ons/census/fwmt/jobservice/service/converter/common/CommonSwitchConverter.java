@@ -10,30 +10,29 @@ public final class CommonSwitchConverter {
   private CommonSwitchConverter() {
   }
 
-  private static ReopenCaseRequest.ReopenCaseRequestBuilder convertCommon(FwmtActionInstruction ffu,
-      GatewayCache cache) {
+  private static ReopenCaseRequest.ReopenCaseRequestBuilder convertCommon(FwmtActionInstruction ffu) {
     return ReopenCaseRequest.builder().id(ffu.getCaseId());
   }
 
-  public static ReopenCaseRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) {
-    return CommonSwitchConverter.convertCommon(ffu, cache)
-        .surveyType(SurveyType.CE_SITE)
-        .build();
-  }
-
-  public static ReopenCaseRequest convertUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
-    return CommonSwitchConverter.convertCommon(ffu, cache)
+  public static ReopenCaseRequest convertEstabDeliver(FwmtActionInstruction ffu) {
+    return CommonSwitchConverter.convertCommon(ffu)
         .surveyType(SurveyType.CE_EST_D)
         .uaa(ffu.isUndeliveredAsAddress())
         .blank(ffu.isBlankFormReturned())
         .build();
   }
 
-  public static ReopenCaseRequest convertUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
-    return CommonSwitchConverter.convertCommon(ffu, cache)
+  public static ReopenCaseRequest converEstabFollowup(FwmtActionInstruction ffu) {
+    return CommonSwitchConverter.convertCommon(ffu)
         .surveyType(SurveyType.CE_EST_F)
         .uaa(ffu.isUndeliveredAsAddress())
         .blank(ffu.isBlankFormReturned())
+        .build();
+  }
+
+  public static ReopenCaseRequest convertSite(FwmtActionInstruction ffu) {
+    return CommonSwitchConverter.convertCommon(ffu)
+        .surveyType(SurveyType.CE_SITE)
         .build();
   }
 }

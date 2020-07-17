@@ -80,6 +80,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
       ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
       ceSwitch.setSurveyName("CENSUS");
       ceSwitch.setAddressType("CE");
+      ceSwitch.setAddressLevel(null);
       ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 

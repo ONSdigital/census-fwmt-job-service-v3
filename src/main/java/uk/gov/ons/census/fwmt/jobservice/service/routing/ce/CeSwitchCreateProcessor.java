@@ -42,7 +42,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       .actionInstruction(ActionInstructionType.SWITCH_CE_TYPE.toString())
       .surveyName("CENSUS")
       .addressType("CE")
-      .addressLevel("U")
+      .addressLevel(null)
       .build();
 
   @Override
@@ -56,7 +56,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       return rmRequest.getActionInstruction() == ActionInstructionType.SWITCH_CE_TYPE
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
-          && rmRequest.getAddressLevel().equals("U")
+          && rmRequest.getAddressLevel() == null
           && cache != null
           && cache.existsInFwmt;
     } catch (NullPointerException e) {

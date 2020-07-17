@@ -77,6 +77,12 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
     } else if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
       cache.setType(2);
       tmRequest = CommonSwitchConverter.convertSite(rmRequest);
+    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_UNIT_D)) {
+      cache.setType(3);
+      tmRequest = CommonSwitchConverter.convertUnitDeliver(rmRequest);
+    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_UNIT_F)) {
+      cache.setType(3);
+      tmRequest = CommonSwitchConverter.converUnitFollowup(rmRequest);
     } else {
       eventManager.triggerErrorEvent(this.getClass(), "Not a recognised CE Switch SurveyType",
           String.valueOf(rmRequest.getCaseId()), INCORRECT_SWITCH_SURVEY_TYPE);

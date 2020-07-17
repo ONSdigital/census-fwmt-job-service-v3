@@ -35,5 +35,21 @@ public final class CommonSwitchConverter {
         .surveyType(SurveyType.CE_SITE)
         .build();
   }
+
+  public static ReopenCaseRequest convertUnitDeliver(FwmtActionInstruction ffu) {
+    return CommonSwitchConverter.convertCommon(ffu)
+        .surveyType(SurveyType.CE_UNIT_D)
+        .uaa(ffu.isUndeliveredAsAddress())
+        .blank(ffu.isBlankFormReturned())
+        .build();
+  }
+
+  public static ReopenCaseRequest converUnitFollowup(FwmtActionInstruction ffu) {
+    return CommonSwitchConverter.convertCommon(ffu)
+        .surveyType(SurveyType.CE_UNIT_F)
+        .uaa(ffu.isUndeliveredAsAddress())
+        .blank(ffu.isBlankFormReturned())
+        .build();
+  }
 }
 

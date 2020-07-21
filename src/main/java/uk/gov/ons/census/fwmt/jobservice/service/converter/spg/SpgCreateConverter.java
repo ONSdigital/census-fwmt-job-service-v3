@@ -51,15 +51,15 @@ public final class SpgCreateConverter {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Site)
         .reference("SECSS_" + ffu.getCaseRef())
-        .description((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
-            + "\n":"" + "Secure Site").build();
+        .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
+            + "\n":"") + "Secure Site").build();
   }
   public static CaseRequest convertSecureUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Unit_F)    
         .reference("SECSU_" + ffu.getCaseRef())
-        .description((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
-            + "\n":"Secure Site").build();
+        .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
+            + "\n":"") + "Secure Site").build();
   }
 
   public static CaseRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) {

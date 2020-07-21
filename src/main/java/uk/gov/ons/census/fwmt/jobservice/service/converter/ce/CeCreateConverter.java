@@ -90,7 +90,7 @@ public final class CeCreateConverter {
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_D)
         .reference("SECCE_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Establishment").build();
+        .description(careCodes + "\nSecure Establishment").build();
   }
 
   public static CaseRequest convertCeEstabFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
@@ -110,7 +110,7 @@ public final class CeCreateConverter {
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), true)
         .surveyType(SurveyType.CE_EST_F)
         .reference("SECCE_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Establishment").build();
+        .description(careCodes + "\nSecure Establishment").build();
   }
 
   public static CaseRequest convertCeSite(FwmtActionInstruction ffu, GatewayCache cache) {
@@ -130,7 +130,7 @@ public final class CeCreateConverter {
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_SITE)
         .reference("SECCS_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Site").build();
+        .description(careCodes + "\nSecure Site").build();
   }
 
   public static CaseRequest convertCeUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
@@ -150,7 +150,7 @@ public final class CeCreateConverter {
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_UNIT_D)
         .reference("SECCU_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Unit").build();
+        .description(careCodes + "\nSecure Unit").build();
   }
 
   public static CaseRequest convertCeUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
@@ -170,9 +170,7 @@ public final class CeCreateConverter {
     return CeCreateConverter.convertCE(ffu, cache, CaseRequest.builder(), false)
         .surveyType(SurveyType.CE_UNIT_F)
         .reference("SECCU_" + ffu.getCaseRef())
-        .description(careCodes + "<br> Secure Unit").build();
+        .description(careCodes + "\nSecure Unit").build();
   }
-
-
 }
 

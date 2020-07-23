@@ -75,7 +75,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
     CaseRequest tmRequest;
 
     if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
-      FwmtActionInstruction ceSwitch = rmRequest;
+      FwmtActionInstruction ceSwitch = new FwmtActionInstruction();
 
       ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
       ceSwitch.setSurveyName("CENSUS");

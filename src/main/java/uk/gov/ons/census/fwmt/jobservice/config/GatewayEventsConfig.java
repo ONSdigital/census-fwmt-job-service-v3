@@ -27,6 +27,8 @@ public class GatewayEventsConfig {
   public static final String COMET_REOPEN_ACK = "COMET_REOPEN_ACK";
   public static final String COMET_UPDATE_PRE_SENDING = "COMET_UPDATE_PRE_SENDING";
   public static final String COMET_UPDATE_ACK = "COMET_UPDATE_ACK";
+  public static final String COMET_DELETE_PRE_SENDING = "COMET_DELETE_PRE_SENDING";
+  public static final String COMET_DELETE_ACK = "COMET_DELETE_ACK";
   public static final String TM_SERVICE_UP = "TM_SERVICE_UP";
   public static final String RABBIT_QUEUE_UP = "RABBIT_QUEUE_UP";
   // public static final String REDIS_SERVICE_UP = "REDIS_SERVICE_UP";
@@ -69,30 +71,6 @@ public class GatewayEventsConfig {
   public GatewayEventManager gatewayEventManager() {
     GatewayEventManager gatewayEventManager = new GatewayEventManager();
     gatewayEventManager.setSource(Application.APPLICATION_NAME);
-    gatewayEventManager.addEventTypes(new String[] {
-        // from both
-        RABBIT_QUEUE_UP,
-        // from the rm adapter
-        RM_CREATE_REQUEST_RECEIVED, RM_CREATE_SWITCH_REQUEST_RECEIVED, RM_UPDATE_REQUEST_RECEIVED,
-        RM_CANCEL_REQUEST_RECEIVED,
-        // from the job service v3
-        COMET_CREATE_PRE_SENDING, COMET_CREATE_ACK, COMET_CANCEL_PRE_SENDING, COMET_CANCEL_ACK,
-        COMET_UPDATE_PRE_SENDING, COMET_UPDATE_ACK, TM_SERVICE_UP, CONVERT_SPG_UNIT_UPDATE_TO_CREATE,
-        COMET_CLOSE_PRE_SENDING, COMET_CLOSE_ACK, COMET_REOPEN_PRE_SENDING, COMET_REOPEN_ACK
-    });
-    gatewayEventManager.addErrorEventTypes(new String[] {
-        // from both
-        RABBIT_QUEUE_DOWN, // REDIS_SERVICE_DOWN,
-        // from the rm adapter
-        INVALID_ACTION_INSTRUCTION, FAILED_TO_UNMARSHALL_ACTION_INSTRUCTION,
-        // from the job service v3
-        FAILED_TM_AUTHENTICATION, FAILED_TO_CREATE_TM_JOB, FAILED_TO_CANCEL_TM_JOB, FAILED_TO_UPDATE_TM_JOB,
-        TM_SERVICE_DOWN, FAILED_TO_CLOSE_TM_JOB, FAILED_TO_REOPEN_TM_JOB,
-        CASE_NOT_FOUND,
-        // internal routing
-        ROUTING_FAILED,
-
-    });
 
     return gatewayEventManager;
   }

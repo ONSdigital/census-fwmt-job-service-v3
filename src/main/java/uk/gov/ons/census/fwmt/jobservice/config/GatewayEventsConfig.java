@@ -58,6 +58,7 @@ public class GatewayEventsConfig {
   public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
   public static final String CONVERT_SPG_UNIT_UPDATE_TO_CREATE = "CONVERT_SPG_UNIT_UPDATE_TO_CREATE";
+  public static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";
 
   private final boolean useJsonLogging;
 

@@ -42,6 +42,7 @@ public class RabbitMqConfig {
   private final int initialInterval;
   private final double multiplier;
   private final int maxInterval;
+  private final int prefetchCount;
 
   public RabbitMqConfig(
       @Value("${rabbitmq.username}") String username,
@@ -52,6 +53,7 @@ public class RabbitMqConfig {
       @Value("${rabbitmq.initialInterval}") int initialInterval,
       @Value("${rabbitmq.multiplier}") double multiplier,
       @Value("${rabbitmq.maxInterval}") int maxInterval,
+      @Value("${rabbitmq.prefetchCount}") int prefetchCount,
       @Value("${rabbitmq.queues.rm.input}") String inputQueue,
       @Value("${rabbitmq.queues.rm.dlq}") String inputDlq) {
     this.username = username;
@@ -64,6 +66,7 @@ public class RabbitMqConfig {
     this.maxInterval = maxInterval;
     this.inputQueue = inputQueue;
     this.inputDlq = inputDlq;
+    this.prefetchCount = prefetchCount;
   }
 
   @Bean
@@ -171,7 +174,7 @@ public class RabbitMqConfig {
     container.setConnectionFactory(connectionFactory);
     container.setQueueNames(inputQueue);
     container.setMessageListener(listenerAdapter);
-
+    container.setPrefetchCount(prefetchCount);
     return container;
   }
 }

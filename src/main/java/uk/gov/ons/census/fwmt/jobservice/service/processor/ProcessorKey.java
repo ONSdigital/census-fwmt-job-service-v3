@@ -26,7 +26,8 @@ public class ProcessorKey {
         .actionInstruction(rmRequest.getActionInstruction().toString())
         .surveyName(rmRequest.getSurveyName())
         .addressType(rmRequest.getAddressType())
-        .addressLevel(rmRequest.getAddressLevel()).build();
+        .addressLevel(rmRequest.getAddressLevel())
+        .build();
   }
 
   @Override

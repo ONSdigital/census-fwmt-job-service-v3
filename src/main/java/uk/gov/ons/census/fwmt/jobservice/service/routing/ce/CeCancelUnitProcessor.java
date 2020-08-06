@@ -49,8 +49,7 @@ public class CeCancelUnitProcessor implements InboundProcessor<FwmtCancelActionI
       return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
-          && rmRequest.getAddressLevel().equals("U")
-          && cache != null;
+          && rmRequest.getAddressLevel().equals("U");
     } catch (NullPointerException e) {
       return false;
     }

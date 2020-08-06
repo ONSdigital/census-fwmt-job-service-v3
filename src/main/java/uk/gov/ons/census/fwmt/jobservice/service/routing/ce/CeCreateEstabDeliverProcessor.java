@@ -1,42 +1,45 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.ce;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CREATE_FOR_CASE_ALREADY_EXISTS;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.ConvertCachedMessage;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
-import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
+import uk.gov.ons.census.fwmt.jobservice.service.MessageCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.common.CeCreateCommonProcessor;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.common.CeUpdateCommonProcessor;
 
 @Qualifier("Create")
 @Service
 public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActionInstruction> {
 
   @Autowired
-  private CometRestClient cometRestClient;
-
-  @Autowired
   private GatewayEventManager eventManager;
 
   @Autowired
-  private RoutingValidator routingValidator;
+  private GatewayCacheService cacheService;
 
   @Autowired
-  private GatewayCacheService cacheService;
+  private MessageCacheService messageCacheService;
+
+  @Autowired
+  private CeCreateCommonProcessor ceCreateCommonProcessor;
+
+  @Autowired
+  private CeUpdateCommonProcessor ceUpdateCommonProcessor;
+
+  @Autowired
+  private ConvertCachedMessage convertCachedMessage;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -59,8 +62,8 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getAddressLevel().equals("E")
           && rmRequest.isHandDeliver()
           && (cache == null
-          || !cache.existsInFwmt)
-          && !cacheService.doesEstabUprnExist(rmRequest.getUprn());
+          || (!cache.existsInFwmt)
+          && !cacheService.doesEstabUprnExist(rmRequest.getUprn()));
     } catch (NullPointerException e) {
       return false;
     }
@@ -68,31 +71,21 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseRequest tmRequest;
-
-    if (rmRequest.isSecureEstablishment()){
-      tmRequest = CeCreateConverter.convertCeEstabDeliverSecure(rmRequest, cache);
-    }else{
-      tmRequest = CeCreateConverter.convertCeEstabDeliver(rmRequest, cache);
-    }
-
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref", tmRequest.getReference(), "Survey Type",
-        tmRequest.getSurveyType().toString());
-
-    ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
-
-    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    if (newCache == null) {
-      cacheService.save(GatewayCache.builder().type(1).caseId(rmRequest.getCaseId()).existsInFwmt(true)
-          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(1).build());
+    if (cacheService.getById(rmRequest.getCaseId()) == null) {
+      switch (messageCacheService.getMessageTypeForId(rmRequest.getCaseId())) {
+      case "Cancel":
+        ceCreateCommonProcessor.preCreateCancel(rmRequest, 1);
+      case "Update":
+        ceUpdateCommonProcessor.processPreUpdate(rmRequest, cache);
+        break;
+      case "": case "Create":
+        ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 1, false);
+      default:
+        break;
+      }
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
+      eventManager.triggerErrorEvent(this.getClass(), "Create already exists for case",
+          String.valueOf(rmRequest.getCaseId()), CREATE_FOR_CASE_ALREADY_EXISTS);
     }
-
-    eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-            response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
-
   }
 }

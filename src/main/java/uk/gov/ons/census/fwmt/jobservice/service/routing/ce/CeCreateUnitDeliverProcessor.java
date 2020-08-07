@@ -79,34 +79,34 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    if (messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Cancel")) {
-      ceCreateCommonProcessor.preCreateCancel(rmRequest, 3);
-    } else {
-      if (messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Create")) {
-        eventManager.triggerErrorEvent(this.getClass(), "Create already exists for case",
-            String.valueOf(rmRequest.getCaseId()), CREATE_FOR_CASE_ALREADY_EXISTS);
-      } else {
-        if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
-          FwmtActionInstruction ceSwitch = new FwmtActionInstruction();
+    if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
+      FwmtActionInstruction ceSwitch = new FwmtActionInstruction();
 
-          ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
-          ceSwitch.setSurveyName("CENSUS");
-          ceSwitch.setAddressType("CE");
-          ceSwitch.setAddressLevel(null);
-          ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
-          ceSwitch.setSurveyType(SurveyType.CE_SITE);
+      ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);
+      ceSwitch.setSurveyName("CENSUS");
+      ceSwitch.setAddressType("CE");
+      ceSwitch.setAddressLevel(null);
+      ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
+      ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-          rmFieldRepublishProducer.republish(ceSwitch);
-        } else if (messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Update")) {
-          CeCasePatchRequest tmRequest;
-          MessageCache messageCache = messageCacheService.getByIdAndMessageType(rmRequest.getCaseId(), "Update");
-          tmRequest = convertCachedMessage.convertMessageToDTO(CeCasePatchRequest.class, messageCache.message);
-          ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 3, false);
-          ceUpdateCommonProcessor.commonProcessor(rmRequest, tmRequest);
-        } else {
-          ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 3, false);
-        }
+      rmFieldRepublishProducer.republish(ceSwitch);
+    }
+
+    if (cacheService.getById(rmRequest.getCaseId()) == null) {
+      switch (messageCacheService.getMessageTypeForId(rmRequest.getCaseId())) {
+      case "Cancel":
+        ceCreateCommonProcessor.preCreateCancel(rmRequest, 3);
+      case "Update":
+        ceUpdateCommonProcessor.processPreUpdate(rmRequest, cache);
+        break;
+      case "": case "Create":
+        ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 3, false);
+      default:
+        break;
       }
+    } else {
+      eventManager.triggerErrorEvent(this.getClass(), "Create already exists for case",
+          String.valueOf(rmRequest.getCaseId()), CREATE_FOR_CASE_ALREADY_EXISTS);
     }
   }
 }

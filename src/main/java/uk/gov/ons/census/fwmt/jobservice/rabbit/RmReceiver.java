@@ -35,7 +35,7 @@ public class RmReceiver {
                 "Case Ref", rmRequest.getCaseRef());
         jobService.processCreate(rmRequest); break;
       }
-      case SWITCH_CEg_TYPE: {
+      case SWITCH_CE_TYPE: {
         gatewayEventManager
         .triggerEvent(rmRequest.getCaseId(), GatewayEventsConfig.CREATE_SWITCH_REQUEST_RECEIVED,
             "Case Ref", rmRequest.getCaseRef());

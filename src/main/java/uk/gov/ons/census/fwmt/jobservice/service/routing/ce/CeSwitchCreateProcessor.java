@@ -12,6 +12,7 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonSwitchConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
@@ -37,6 +38,9 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
 
   @Autowired
   private RoutingValidator routingValidator;
+
+  @Autowired
+  private GatewayCacheService cacheService;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.SWITCH_CE_TYPE.toString())
@@ -88,6 +92,8 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
           String.valueOf(rmRequest.getCaseId()), INCORRECT_SWITCH_SURVEY_TYPE);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Incorrect CE Switch survey type");
     }
+
+    cacheService.save(cache.toBuilder().build());
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_PRE_SENDING,  "Survey Type",
         rmRequest.getSurveyType().toString());

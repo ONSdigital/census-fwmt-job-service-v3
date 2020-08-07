@@ -37,6 +37,10 @@ public class GatewayCacheService {
     return repository.findByEstabUprn(estabUprn);
   }
 
+  public String getUprnCaseId(String uprn) {
+    return repository.findByUprn(uprn);
+  }
+
   public GatewayCache save(GatewayCache cache) {
     return repository.save(cache);
   }

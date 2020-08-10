@@ -9,6 +9,7 @@ import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.CaseType;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
 import uk.gov.ons.census.fwmt.jobservice.service.MessageCacheService;
@@ -66,8 +67,8 @@ public class CeUpdateEstabSitePreCreateProcessor implements InboundProcessor<Fwm
     } catch (JsonProcessingException processFailure){
       return;
     }
-    messageCacheService.save(MessageCache.builder().caseId(rmRequest.getCaseId()).messageType("Update").
-        message(message).build());
+    messageCacheService.save(MessageCache.builder().caseId(rmRequest.getCaseId())
+        .messageType(CaseType.UPDATE.toString()).message(message).build());
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_STORE,

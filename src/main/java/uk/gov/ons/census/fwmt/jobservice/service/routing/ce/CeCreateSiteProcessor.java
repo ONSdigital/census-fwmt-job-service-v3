@@ -79,21 +79,27 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    if (messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Cancel")) {
-      ceCreateCommonProcessor.preCreateCancel(rmRequest, 2);
-    } else {
-      if (messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Create")) {
-        eventManager.triggerErrorEvent(this.getClass(), "Create already exists for case",
-            String.valueOf(rmRequest.getCaseId()), CREATE_FOR_CASE_ALREADY_EXISTS);
-      } else if (messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Update")) {
-        CeCasePatchRequest tmRequest;
-        MessageCache messageCache = messageCacheService.getByIdAndMessageType(rmRequest.getCaseId(), "Update");
-        tmRequest = convertCachedMessage.convertMessageToDTO(CeCasePatchRequest.class, messageCache.message);
-        ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 2, false);
-        ceUpdateCommonProcessor.commonProcessor(rmRequest, tmRequest);
+    if (cacheService.getById(rmRequest.getCaseId()) == null) {
+      String converterMethod;
+      if (rmRequest.isSecureEstablishment()) {
+        converterMethod = "convertCeSiteSecure";
       } else {
-        ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 2, false);
+        converterMethod = "convertCeSite";
       }
+      switch (messageCacheService.getMessageTypeForId(rmRequest.getCaseId())) {
+      case "Cancel":
+        ceCreateCommonProcessor.preCreateCancel(rmRequest, 2);
+      case "Update":
+        ceUpdateCommonProcessor.processPreUpdate(rmRequest, converterMethod, cache);
+        break;
+      case "": case "Create":
+        ceCreateCommonProcessor.commonProcessor(rmRequest, converterMethod, cache, 2, false);
+      default:
+        break;
+      }
+    } else {
+      eventManager.triggerErrorEvent(this.getClass(), "Create already exists for case",
+          String.valueOf(rmRequest.getCaseId()), CREATE_FOR_CASE_ALREADY_EXISTS);
     }
   }
 }

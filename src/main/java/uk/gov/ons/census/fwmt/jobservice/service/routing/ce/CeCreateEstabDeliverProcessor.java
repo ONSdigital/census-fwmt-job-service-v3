@@ -14,6 +14,7 @@ import uk.gov.ons.census.fwmt.jobservice.data.ConvertCachedMessage;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.MessageCacheService;
+import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.common.CeCreateCommonProcessor;
@@ -38,8 +39,6 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
   @Autowired
   private CeUpdateCommonProcessor ceUpdateCommonProcessor;
 
-  @Autowired
-  private ConvertCachedMessage convertCachedMessage;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -72,14 +71,21 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     if (cacheService.getById(rmRequest.getCaseId()) == null) {
+      String converterMethod;
+      if (rmRequest.isSecureEstablishment()) {
+        converterMethod = "convertCeEstabDeliverSecure";
+      } else {
+        converterMethod = "convertCeEstabDeliver";
+      }
       switch (messageCacheService.getMessageTypeForId(rmRequest.getCaseId())) {
       case "Cancel":
         ceCreateCommonProcessor.preCreateCancel(rmRequest, 1);
       case "Update":
-        ceUpdateCommonProcessor.processPreUpdate(rmRequest, cache);
+        ceUpdateCommonProcessor.processPreUpdate(rmRequest, converterMethod, cache);
         break;
       case "": case "Create":
-        ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 1, false);
+        ceCreateCommonProcessor.commonProcessor(rmRequest, converterMethod, cache, 1, false);
+        break;
       default:
         break;
       }

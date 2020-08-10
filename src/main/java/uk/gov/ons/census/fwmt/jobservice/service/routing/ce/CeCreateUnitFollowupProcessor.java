@@ -8,6 +8,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.CaseType;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldRepublishProducer;
@@ -78,7 +79,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   // TODO add test for secure
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    if (!messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Cancel")) {
+    if (!messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), CaseType.CANCEL.toString())) {
       if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
         FwmtActionInstruction ceSwitch = new FwmtActionInstruction();
 
@@ -91,7 +92,14 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
 
         rmFieldRepublishProducer.republish(ceSwitch);
       }
-      ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 3, true);
+
+      String converterMethod;
+      if (rmRequest.isSecureEstablishment()) {
+        converterMethod = "convertCeUnitFollowupSecure";
+      } else {
+        converterMethod = "convertCeUnitFollowup";
+      }
+      ceCreateCommonProcessor.commonProcessor(rmRequest, converterMethod, cache, 3, true);
     } else {
       ceCreateCommonProcessor.preCreateCancel(rmRequest, 3);
     }

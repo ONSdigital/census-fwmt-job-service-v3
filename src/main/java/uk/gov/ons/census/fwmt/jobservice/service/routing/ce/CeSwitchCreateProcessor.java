@@ -72,22 +72,28 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
     ReopenCaseRequest tmRequest;
 
-    if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_D)) {
+    switch (rmRequest.getSurveyType().toString()) {
+    case "CE Est-D":
       cache.setType(1);
       tmRequest = CommonSwitchConverter.convertEstabDeliver(rmRequest);
-    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_F)) {
+      break;
+    case "CE Est_F":
       cache.setType(1);
       tmRequest = CommonSwitchConverter.converEstabFollowup(rmRequest);
-    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
+      break;
+    case "CE Site":
       cache.setType(2);
       tmRequest = CommonSwitchConverter.convertSite(rmRequest);
-    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_UNIT_D)) {
+      break;
+    case "CE Unit-D":
       cache.setType(3);
       tmRequest = CommonSwitchConverter.convertUnitDeliver(rmRequest);
-    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_UNIT_F)) {
+      break;
+    case "CE Unit-F":
       cache.setType(3);
       tmRequest = CommonSwitchConverter.converUnitFollowup(rmRequest);
-    } else {
+      break;
+    default:
       eventManager.triggerErrorEvent(this.getClass(), "Not a recognised CE Switch SurveyType",
           String.valueOf(rmRequest.getCaseId()), INCORRECT_SWITCH_SURVEY_TYPE);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Incorrect CE Switch survey type");

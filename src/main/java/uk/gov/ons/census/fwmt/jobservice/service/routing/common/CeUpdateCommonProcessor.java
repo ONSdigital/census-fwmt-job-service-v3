@@ -10,6 +10,7 @@ import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.CaseType;
 import uk.gov.ons.census.fwmt.jobservice.data.ConvertCachedMessage;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
@@ -72,15 +73,15 @@ public class CeUpdateCommonProcessor {
             "Response Code", response.getStatusCode().name());
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    cacheService.save(newCache.toBuilder().lastActionInstruction("Update")
+    cacheService.save(newCache.toBuilder().lastActionInstruction(CaseType.UPDATE.toString())
         .lastActionTime(lastActionInstructionTime).build());
   }
 
-  public void processPreUpdate(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void processPreUpdate(FwmtActionInstruction rmRequest, String converterMethod, GatewayCache cache) throws GatewayException {
     CeCasePatchRequest tmRequest;
     MessageCache messageCache = messageCacheService.getByIdAndMessageType(rmRequest.getCaseId(), "Update");
     tmRequest = convertCachedMessage.convertMessageToDTO(CeCasePatchRequest.class, messageCache.message);
-    ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 1, false);
+    ceCreateCommonProcessor.commonProcessor(rmRequest, converterMethod, cache, 1, false);
     ceUpdateCommonProcessor.commonProcessor(rmRequest, tmRequest);
   }
 }

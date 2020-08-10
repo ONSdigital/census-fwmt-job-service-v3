@@ -7,6 +7,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.CaseType;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
@@ -68,8 +69,14 @@ public class CeCreateEstabFollowupProcessor implements InboundProcessor<FwmtActi
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    if (!messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Cancel")) {
-        ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 1, true);
+    if (!messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), CaseType.CANCEL.toString())) {
+      String converterMethod;
+      if (rmRequest.isSecureEstablishment()) {
+        converterMethod = "convertCeEstabFollowupSecure";
+      } else {
+        converterMethod = "convertCeEstabFollowup";
+      }
+      ceCreateCommonProcessor.commonProcessor(rmRequest, converterMethod, cache, 1, true);
     } else {
       ceCreateCommonProcessor.preCreateCancel(rmRequest, 1);
     }

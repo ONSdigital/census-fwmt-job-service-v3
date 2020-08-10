@@ -93,14 +93,20 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
     }
 
     if (cacheService.getById(rmRequest.getCaseId()) == null) {
+      String converterMethod;
+      if (rmRequest.isSecureEstablishment()) {
+        converterMethod = "convertCeUnitDeliverSecure";
+      } else {
+        converterMethod = "convertCeUnitDeliver";
+      }
       switch (messageCacheService.getMessageTypeForId(rmRequest.getCaseId())) {
       case "Cancel":
         ceCreateCommonProcessor.preCreateCancel(rmRequest, 3);
       case "Update":
-        ceUpdateCommonProcessor.processPreUpdate(rmRequest, cache);
+        ceUpdateCommonProcessor.processPreUpdate(rmRequest, converterMethod, cache);
         break;
       case "": case "Create":
-        ceCreateCommonProcessor.commonProcessor(rmRequest, cache, 3, false);
+        ceCreateCommonProcessor.commonProcessor(rmRequest, converterMethod, cache, 3, false);
       default:
         break;
       }

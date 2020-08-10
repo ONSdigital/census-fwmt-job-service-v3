@@ -9,6 +9,7 @@ import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.CaseType;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
@@ -17,7 +18,9 @@ import uk.gov.ons.census.fwmt.jobservice.service.MessageCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
+import java.lang.reflect.Method;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CANCEL_CREATE;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
@@ -43,52 +46,22 @@ public class CeCreateCommonProcessor {
   @Autowired
   private MessageCacheService messageCacheService;
 
-  public void commonProcessor(FwmtActionInstruction rmRequest, GatewayCache cache, int type, boolean isFollowUp) throws GatewayException {
+  public void commonProcessor(FwmtActionInstruction rmRequest, String converterMethod, GatewayCache cache, int type, boolean isFollowUp)
+      throws GatewayException {
     CaseRequest tmRequest;
+    CeCreateConverter ceCreateConverter = null;
+    Method converter;
 
     Timestamp lastActionInstructionTime = new Timestamp(System.currentTimeMillis());
 
-    switch(type) {
-      case 1:
-        if (isFollowUp) {
-          if (rmRequest.isSecureEstablishment()) {
-            tmRequest = CeCreateConverter.convertCeEstabFollowupSecure(rmRequest, cache);
-          } else {
-            tmRequest = CeCreateConverter.convertCeEstabFollowup(rmRequest, cache);
-          }
-        } else {
-          if (rmRequest.isSecureEstablishment()) {
-            tmRequest = CeCreateConverter.convertCeEstabDeliverSecure(rmRequest, cache);
-          } else {
-            tmRequest = CeCreateConverter.convertCeEstabDeliver(rmRequest, cache);
-          }
-        }
-        break;
-      case 2:
-        if (rmRequest.isSecureEstablishment()) {
-          tmRequest = CeCreateConverter.convertCeSiteSecure(rmRequest, cache);
-        } else {
-          tmRequest = CeCreateConverter.convertCeSite(rmRequest, cache);
-        }
-        break;
-      case 3:
-        if (isFollowUp) {
-          if (rmRequest.isSecureEstablishment()) {
-            tmRequest = CeCreateConverter.convertCeUnitFollowupSecure(rmRequest, cache);
-          } else {
-            tmRequest = CeCreateConverter.convertCeUnitFollowup(rmRequest, cache);
-          }
-        } else {
-          if (rmRequest.isSecureEstablishment()) {
-            tmRequest = CeCreateConverter.convertCeUnitDeliverSecure(rmRequest, cache);
-          } else {
-            tmRequest = CeCreateConverter.convertCeUnitDeliver(rmRequest, cache);
-          }
-        }
-        break;
-      default:
-        throw new NotImplementedException("Type does not match gateway types");
+    try {
+      Class<?> ceCreate = Class.forName("uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter");
+      converter = ceCreate.getDeclaredMethod(converterMethod, FwmtActionInstruction.class, GatewayCache.class );
+      tmRequest = (CaseRequest) converter.invoke(ceCreateConverter, rmRequest, cache);
+    } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+      return;
     }
+
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING, "Case Ref",
         tmRequest.getReference(), "Survey Type",
@@ -101,30 +74,27 @@ public class CeCreateCommonProcessor {
 
     if (newCache == null) {
       cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
-          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(type).lastActionInstruction("Create")
-          .lastActionTime(lastActionInstructionTime).build());
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(type)
+          .lastActionInstruction(CaseType.CREATE.toString()).lastActionTime(lastActionInstructionTime).build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction("Create")
+      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction(CaseType.CREATE.toString())
           .lastActionTime(lastActionInstructionTime).build());
     }
 
-    messageCacheService.save(MessageCache.builder().caseId(rmRequest.getCaseId()).messageType("Create").build());
+    messageCacheService.save(MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(CaseType.CREATE.toString()).build());
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(),
             "Response Code",
             response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
 
-    if (messageCacheService.doesCaseIdAndMessageTypeExist(rmRequest.getCaseId(), "Update")) {
-      preCreateUpdate();
-    }
   }
 
   public void preCreateCancel(FwmtActionInstruction rmRequest, int type) {
     Timestamp lastActionInstructionTime = new Timestamp(System.currentTimeMillis());
 
     cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
-        .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(type).lastActionInstruction("Cancel")
+        .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(type).lastActionInstruction(CaseType.CANCEL.toString())
         .lastActionTime(lastActionInstructionTime).build());
 
     messageCacheService.delete(MessageCache.builder().caseId(rmRequest.getCaseId()).build());
@@ -132,9 +102,5 @@ public class CeCreateCommonProcessor {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_CREATE,
         "Case Ref", "N/A",
         "TM Action", "Cancel already present for create. Create cancelled and not sent to TM");
-  }
-
-  public void preCreateUpdate(){
-
   }
 }

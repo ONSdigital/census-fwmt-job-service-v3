@@ -61,8 +61,8 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel() == null
-          && cache != null
-          && cache.existsInFwmt;
+          && (cache != null
+          && cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;
     }

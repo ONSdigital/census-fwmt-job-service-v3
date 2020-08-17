@@ -64,10 +64,11 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
-          && !rmRequest.isHandDeliver()
-          && (cache == null
-              || !cache.existsInFwmt)
-          && config.isInFollowUp();
+          && ((cache == null
+          && !rmRequest.isHandDeliver())
+          || (cache != null
+          && !cache.existsInFwmt
+          && cache.isDelivered()));
     } catch (NullPointerException e) {
       return false;
     }

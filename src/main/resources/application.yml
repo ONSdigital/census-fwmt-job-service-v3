@@ -106,3 +106,7 @@ spg:
 ce:
    followUpDate: "01/05/2020"
    startDate: "01/05/2020"
+
+jobservice:
+  transitionRules:
+    path: classpath:/transitionRules.txt

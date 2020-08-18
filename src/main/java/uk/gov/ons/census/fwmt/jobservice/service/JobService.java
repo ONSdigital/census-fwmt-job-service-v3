@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.rabbitmq.client.AMQP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
@@ -61,18 +62,15 @@ public class JobService {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple CREATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple CREATE processors for request from RM", rmRequest, cache);
     }
-    transitioner.processTransition(cache, rmRequest, processors);
-
-//    if (process) {
-//      processors.get(0).process(rmRequest, cache);
-//    }
+    if (rmRequest.getActionInstruction().equals(ActionInstructionType.SWITCH_CE_TYPE)) {
+      processors.get(0).process(rmRequest, cache);
+    } else {
+      transitioner.processCreateOrUpdateTransition(cache, rmRequest, processors);
+    }
   }
 
   public void processUpdate(FwmtActionInstruction rmRequest) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
-    boolean process;
-    String actionInstruction = rmRequest.getActionInstruction().toString();
-    String caseId = rmRequest.getCaseId();
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     if (processors.size()==0){
@@ -85,17 +83,11 @@ public class JobService {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple UPDATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple UPDATE processors for request from RM", rmRequest, cache);
     }
-//    process = transitioner.processTransition(cache, actionInstruction, caseId);
-//    if (process) {
-//      processors.get(0).process(rmRequest, cache);
-//    }
+    transitioner.processCreateOrUpdateTransition(cache, rmRequest, processors);
   }
 
   public void processCancel(FwmtCancelActionInstruction rmRequest) throws GatewayException {
       final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
-    boolean process;
-    String actionInstruction = rmRequest.getActionInstruction().toString();
-    String caseId = rmRequest.getCaseId();
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     if (processors.size()==0){
@@ -108,10 +100,7 @@ public class JobService {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple CANCEL processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple CANCEL processors for request from RM", rmRequest, cache);
     }
-//    process = transitioner.processTransition(cache, actionInstruction, caseId);
-//    if (process) {
-//      processors.get(0).process(rmRequest, cache);
-//    }
+    transitioner.processCancelTransition(cache, rmRequest, processors);
   }
 
   /*private void routingFailure()

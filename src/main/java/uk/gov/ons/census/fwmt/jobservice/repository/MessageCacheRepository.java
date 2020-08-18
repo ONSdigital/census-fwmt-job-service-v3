@@ -8,6 +8,8 @@ import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
 public interface MessageCacheRepository extends JpaRepository<MessageCache, Long> {
   MessageCache findByCaseIdAndAndMessageType(String caseId, String messageType);
 
+  boolean existsByCaseId(String caseId);
+
   boolean existsByCaseIdAndMessageType(String caseId, String messageType);
 
   MessageCache deleteByCaseId(String caseId);

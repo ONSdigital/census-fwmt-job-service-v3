@@ -109,7 +109,8 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
       cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).delivered(true).existsInFwmt(true)
-          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).build());
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).
+              lastActionInstruction(rmRequest.getActionInstruction().toString()).build());
     } else {
       cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
           .existsInFwmt(true).build());

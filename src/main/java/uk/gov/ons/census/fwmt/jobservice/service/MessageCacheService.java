@@ -37,6 +37,10 @@ public class MessageCacheService {
     return messageType;
   }
 
+  public boolean doesCaseExist(String caseId) {
+    return repository.existsByCaseId(caseId);
+  }
+
   public MessageCache save(MessageCache cache) {
     return repository.save(cache);
   }

@@ -51,6 +51,8 @@ public class CometRestClient {
   private final transient String reopenPath;
   private final transient String patchCeDetails;
 
+  public static final String FAILED_TM_AUTHENTICATION = "FAILED_TM_AUTHENTICATION";
+
   public CometRestClient(
       CometConfig cometConfig,
       RestTemplateBuilder restTemplateBuilder,
@@ -90,7 +92,7 @@ public class CometRestClient {
     } catch (MalformedURLException | InterruptedException | ExecutionException e) {
       String errorMsg = "Failed to Authenticate with Totalmobile";
       gatewayEventManager
-          .triggerErrorEvent(this.getClass(), errorMsg, "<N/A_CASE_ID>", GatewayEventsConfig.FAILED_TM_AUTHENTICATION);
+          .triggerErrorEvent(this.getClass(), errorMsg, "<N/A_CASE_ID>", FAILED_TM_AUTHENTICATION);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, errorMsg, e);
     } finally {
       service.shutdown();

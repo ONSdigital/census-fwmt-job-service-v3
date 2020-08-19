@@ -1,7 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.hh;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
@@ -19,6 +21,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
+@Qualifier("Create")
+@Service
 public class HhCreateNisra implements InboundProcessor<FwmtActionInstruction> {
 
   private static final ProcessorKey key = ProcessorKey.builder()
@@ -81,6 +85,5 @@ public class HhCreateNisra implements InboundProcessor<FwmtActionInstruction> {
             "Case Ref", rmRequest.getCaseRef(),
             "Response Code", response.getStatusCode().name(),
             "Survey Type", tmRequest.getSurveyType().toString());
-
   }
 }

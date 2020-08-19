@@ -9,10 +9,10 @@ public final class HhPauseConverter {
   private HhPauseConverter() {
   }
 
-  public static CasePauseRequest buildPause(FwmtActionInstruction ffu, GatewayCache cache) {
+  public static CasePauseRequest buildPause(FwmtActionInstruction ffu) {
     return CasePauseRequest.builder()
         .code(ffu.getPauseCode())
-//        .effectiveFrom() OFFSET TIME ... yep
+        .effectiveFrom(ffu.getPauseFrom())
         .reason(ffu.getPauseReason())
         .build();
   }

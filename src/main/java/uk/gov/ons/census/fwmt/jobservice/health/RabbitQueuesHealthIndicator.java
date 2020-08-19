@@ -15,22 +15,23 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RABBIT_QUEUE_DOWN;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RABBIT_QUEUE_UP;
-
 @Component
 public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
 
+  public static final String RABBIT_QUEUE_DOWN = "RABBIT_QUEUE_DOWN";
+
+  public static final String RABBIT_QUEUE_UP = "RABBIT_QUEUE_UP";
+
   private final List<String> queues;
+
   private final ConnectionFactory connectionFactory;
+
   private final GatewayEventManager gatewayEventManager;
 
   private RabbitAdmin rabbitAdmin;
 
-  public RabbitQueuesHealthIndicator(
-      @Qualifier("connectionFactory") ConnectionFactory connectionFactory,
-      RabbitMqConfig config,
-      GatewayEventManager gatewayEventManager) {
+  public RabbitQueuesHealthIndicator(@Qualifier("connectionFactory") ConnectionFactory connectionFactory,
+      RabbitMqConfig config, GatewayEventManager gatewayEventManager) {
     this.queues = Arrays.asList(config.inputQueue, config.inputDlq);
     this.connectionFactory = connectionFactory;
     this.gatewayEventManager = gatewayEventManager;
@@ -61,5 +62,4 @@ public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
       gatewayEventManager.triggerEvent("<N/A>", RABBIT_QUEUE_UP);
     }
   }
-
 }

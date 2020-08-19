@@ -53,6 +53,7 @@ public final class HhCreateConverter {
     return HhCreateConverter
         .convertHH(ffu, cache, CaseRequest.builder())
         .requiredOfficer(ffu.getFieldOfficerId())
+        .sai(ffu.getEstabType().equals("Sheltered Accommodation"))
         .build();
   }
 }

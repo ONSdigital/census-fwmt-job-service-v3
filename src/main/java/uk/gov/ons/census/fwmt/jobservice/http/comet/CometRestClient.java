@@ -46,7 +46,7 @@ public class CometRestClient {
   private final transient String basePath;
   private final transient String createPath;
   private final transient String closePath;
-  private final transient String deletePath;
+  private final transient String deletePausePath;
   private final transient String pausePath;
   private final transient String reopenPath;
   private final transient String patchCeDetails;
@@ -67,9 +67,9 @@ public class CometRestClient {
     this.basePath = cometUrl + "{}";
     this.createPath = cometUrl + "{}";
     this.closePath = cometUrl + "{}/close";
-    this.deletePath = cometUrl + "{}/delete";
+    this.deletePausePath = cometUrl + "{}/pause";
     this.patchCeDetails = cometUrl + "{}/cedetails";
-    this.pausePath = cometUrl + "{}";
+    this.pausePath = cometUrl + "{}/pause";
     this.reopenPath = cometUrl + "{}/reopen";
   }
 
@@ -145,39 +145,11 @@ public class CometRestClient {
     return restTemplate.exchange(path, HttpMethod.PATCH, body, Void.class);
   }
 
-  public ResponseEntity<Void> sendDelete(String caseId) throws GatewayException {
+  public ResponseEntity<Void> sendDeletePause(String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
     HttpEntity<Void> body = new HttpEntity<>(httpHeaders);
-    String path = deletePath.replace("{}", caseId);
+    String path = pausePath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.DELETE, body, Void.class);
-  }
-
-  @Deprecated
-  public <A> ResponseEntity<Void> sendRequest(A caseRequest, String caseId) throws GatewayException {
-    String basePathway = cometUrl + caseId;
-    if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
-      auth();
-    HttpHeaders httpHeaders = new HttpHeaders();
-    if (isAuthed()) {
-      httpHeaders.setBearerAuth(auth.getAccessToken());
-    }
-
-    if (caseRequest instanceof CaseRequest) {
-      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
-      System.out.println(body);
-      return restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);
-
-    } else if (caseRequest instanceof CasePauseRequest) {
-      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
-      return restTemplate.exchange(basePathway + "/pause", HttpMethod.PUT, body, Void.class);
-
-    } else if (caseRequest instanceof CaseReopenCreateRequest) {
-      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
-      return restTemplate.exchange(basePathway + "/reopen", HttpMethod.POST, body, Void.class);
-
-    } else {
-      return null;
-    }
   }
 
   public ModelCase getCase(String caseId) throws GatewayException {

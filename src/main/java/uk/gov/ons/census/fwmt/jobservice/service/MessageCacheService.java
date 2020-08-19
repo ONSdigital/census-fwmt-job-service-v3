@@ -20,6 +20,10 @@ public class MessageCacheService {
     this.repository = repository;
   }
 
+  public MessageCache getById(String caseId) {
+    return repository.findByCaseId(caseId);
+  }
+
   public MessageCache getByIdAndMessageType(String caseId, String messageType) {
     return repository.findByCaseIdAndAndMessageType(caseId, messageType);
   }
@@ -52,4 +56,5 @@ public class MessageCacheService {
   public void deleteByCaseId(String caseId) {
     repository.deleteByCaseId(caseId);
   }
+
 }

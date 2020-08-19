@@ -47,9 +47,9 @@ public class GatewayCache {
 
   @Column(name = "last_action_instruction")
   public String lastActionInstruction;
-
-  @Column(name = "last_action_time")
-  public Timestamp lastActionTime;
+//
+//  @Column(name = "last_action_time")
+//  private Timestamp lastActionTime;
 
   // display only the details related to request routing
   public String toRoutingString() {
@@ -57,4 +57,8 @@ public class GatewayCache {
         "existsInFwmt=" + this.existsInFwmt + ", " +
         "delivered=" + this.delivered + ")";
   }
+
+//  public void setLastActionTime(Timestamp lastActionTime) {
+//    this.lastActionTime = new Timestamp(lastActionTime.getTime());
+//  }
 }

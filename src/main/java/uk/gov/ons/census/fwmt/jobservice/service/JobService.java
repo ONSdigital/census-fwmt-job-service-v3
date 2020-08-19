@@ -1,17 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.service;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -21,6 +13,12 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
 @Slf4j
 @Service

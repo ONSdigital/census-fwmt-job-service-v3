@@ -19,6 +19,9 @@ import java.util.List;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.NO_ACTION_REQUIRED;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RM_CANCEL_REQUEST_STORED;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RM_UPDATE_REQUEST_STORED;
+
 
 @Slf4j
 @Component
@@ -32,20 +35,18 @@ public class Transitioner {
   @Autowired
   private MessageCacheService messageCacheService;
 
+  private String storedCacheType;
+
   public void processCancelTransition(GatewayCache cache, FwmtCancelActionInstruction rmRequest,
       List<InboundProcessor<FwmtCancelActionInstruction>> processors) throws GatewayException {
     boolean noAction = false;
-    boolean processed = false;
     boolean cacheRmRequest;
-    String[] actionToTake;
     String message;
     ObjectMapper rmRequestMapper = new ObjectMapper();
 
     String[] returnedRules = setTransitionRules(cache ,rmRequest.getActionInstruction().toString(), rmRequest.getCaseId());
 
-    actionToTake = returnedRules[0].split(",");
-
-    switch (actionToTake[0]) {
+    switch (returnedRules[0]) {
     case "NO_ACTION":
       eventManager
           .triggerEvent(rmRequest.getCaseId(), NO_ACTION_REQUIRED);
@@ -54,18 +55,23 @@ public class Transitioner {
     case "REJECT":
       eventManager.triggerErrorEvent(this.getClass(), "Request from RM rejected",
           String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      break;
     case "PROCESS":
       processors.get(0).process(rmRequest, cache);
-      if (actionToTake[2].equals("false") && messageCacheService.doesCaseExist(rmRequest.getCaseId())) {
-        messageCacheService.deleteByCaseId(rmRequest.getCaseId());
-      }
+      break;
     case "MERGE":
       break;
     default:
       break;
     }
 
-    cacheRmRequest = Boolean.parseBoolean(actionToTake[2]);
+    cacheRmRequest = Boolean.parseBoolean(returnedRules[2]);
+
+    MessageCache messageCache = messageCacheService.getById(rmRequest.getCaseId());
+
+    if (!cacheRmRequest && messageCache != null) {
+      messageCacheService.deleteByCaseId(rmRequest.getCaseId());
+    }
 
     if (noAction && cacheRmRequest) {
       try {
@@ -73,56 +79,86 @@ public class Transitioner {
       } catch (JsonProcessingException processFailure){
         return;
       }
-      messageCacheService.save(
-          MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(actionToTake[1]).message(message).build());
+      if (messageCache == null) {
+        messageCacheService.save(
+            MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(returnedRules[1]).message(message)
+                .build());
+      } else {
+        messageCacheService.save(
+            messageCache.toBuilder().messageType(returnedRules[1]).message(message).build());
+      }
+
+      if (storedCacheType.equals("EMPTY")) {
+        eventManager
+            .triggerEvent(String.valueOf(rmRequest.getCaseId()), RM_CANCEL_REQUEST_STORED,
+                "TM Action", "Update received before create case. Update has been stored.");
+      }
     }
   }
 
   public void processCreateOrUpdateTransition(GatewayCache cache, FwmtActionInstruction rmRequest,
-      List<InboundProcessor<FwmtActionInstruction>> processors) throws GatewayException {
-    boolean noAction = false;
-    boolean cacheRmRequest;
-    String[] actionToTake;
-    String message;
-    ObjectMapper rmRequestMapper = new ObjectMapper();
+        List<InboundProcessor<FwmtActionInstruction>> processors) throws GatewayException {
+      boolean noAction = false;
+      boolean cacheRmRequest;
+      String message;
+      String actionInstruction;
+      ObjectMapper rmRequestMapper = new ObjectMapper();
 
-    String[] returnedRules = setTransitionRules(cache ,rmRequest.getActionInstruction().toString(), rmRequest.getCaseId());
+      actionInstruction = rmRequest.getActionInstruction().toString();
 
-    actionToTake = returnedRules[0].split(",");
+      String[] returnedRules = setTransitionRules(cache, actionInstruction, rmRequest.getCaseId());
 
-    switch (actionToTake[0]) {
-    case "NO_ACTION":
-      eventManager
-          .triggerEvent(rmRequest.getCaseId(), NO_ACTION_REQUIRED,
-              "Case Ref", rmRequest.getCaseRef());
-      noAction = true;
-      break;
-    case "REJECT":
-      eventManager.triggerErrorEvent(this.getClass(), "Request from RM rejected",
-          String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
-    case "PROCESS":
-      processors.get(0).process(rmRequest, cache);
-      if (actionToTake[2].equals("false") && messageCacheService.doesCaseExist(rmRequest.getCaseId())) {
+      cacheRmRequest = Boolean.parseBoolean(returnedRules[2]);
+
+      switch (returnedRules[0]) {
+      case "NO_ACTION":
+        eventManager
+            .triggerEvent(rmRequest.getCaseId(), NO_ACTION_REQUIRED,
+                "Case Ref", rmRequest.getCaseRef());
+        noAction = true;
+        break;
+      case "REJECT":
+        eventManager.triggerErrorEvent(this.getClass(), "Request from RM rejected",
+            String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+        break;
+      case "PROCESS":
+        processors.get(0).process(rmRequest, cache);
+        break;
+      case "MERGE":
+        //TODO - will make a call to mergeRecords() once code is complete
+        break;
+      default:
+        break;
+      }
+
+    MessageCache messageCache = messageCacheService.getById(rmRequest.getCaseId());
+
+    if (!cacheRmRequest && messageCache != null) {
         messageCacheService.deleteByCaseId(rmRequest.getCaseId());
       }
-      break;
-    case "MERGE":
-      break;
-    default:
-      break;
-    }
 
-    cacheRmRequest = Boolean.parseBoolean(actionToTake[2]);
+      if (noAction && cacheRmRequest) {
+        try {
+          message = rmRequestMapper.writeValueAsString(rmRequest);
+        } catch (JsonProcessingException processFailure) {
+          return;
+        }
 
-    if (noAction && cacheRmRequest) {
-      try {
-        message = rmRequestMapper.writeValueAsString(rmRequest);
-      } catch (JsonProcessingException processFailure){
-        return;
+        if (messageCache == null) {
+          messageCacheService.save(
+              MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(returnedRules[1]).message(message)
+                  .build());
+        } else {
+          messageCacheService.save(
+              messageCache.toBuilder().messageType(returnedRules[1]).message(message).build());
+        }
       }
-      messageCacheService.save(
-          MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(actionToTake[1]).message(message).build());
-    }
+      if (actionInstruction.equals("UPDATE") && storedCacheType.equals("EMPTY")) {
+        eventManager
+            .triggerEvent(String.valueOf(rmRequest.getCaseId()), RM_UPDATE_REQUEST_STORED,
+                "Case Ref", rmRequest.getCaseRef(),
+                "TM Action", "Update received before create case. Update has been stored.");
+      }
   }
 
   public String[] setTransitionRules(GatewayCache cache, String actionRequest, String caseId) throws GatewayException {
@@ -133,9 +169,12 @@ public class Transitioner {
       cacheType = "EMPTY";
       recordAge = "NEWER";
     } else {
+      //TODO - call to checkRecordAge() will be here once the code is there
       cacheType = cache.lastActionInstruction;
       recordAge = "NEWER";
     }
+
+    storedCacheType = cacheType;
 
     String[] returnedRules = transitionRulesLookup.getLookup(cacheType, actionRequest, recordAge);
 
@@ -155,6 +194,6 @@ public class Transitioner {
   }
 
   public void mergeRecords() {
-  // TODO - Need to add merge code once there is a better understanding of what needs to happen
+    // TODO - Need to add merge code once there is a better understanding of what needs to happen
   }
 }

@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.fwmt.common.data.modelcase.CasePauseRequest;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
@@ -46,7 +45,7 @@ public class CometRestClient {
   private final transient String basePath;
   private final transient String createPath;
   private final transient String closePath;
-  private final transient String deletePausePath;
+  private final transient String deletePath;
   private final transient String pausePath;
   private final transient String reopenPath;
   private final transient String patchCeDetails;
@@ -65,7 +64,7 @@ public class CometRestClient {
     this.basePath = cometUrl + "{}";
     this.createPath = cometUrl + "{}";
     this.closePath = cometUrl + "{}/close";
-    this.deletePausePath = cometUrl + "{}/pause";
+    this.deletePath = cometUrl + "{}/delete";
     this.patchCeDetails = cometUrl + "{}/cedetails";
     this.pausePath = cometUrl + "{}/pause";
     this.reopenPath = cometUrl + "{}/reopen";

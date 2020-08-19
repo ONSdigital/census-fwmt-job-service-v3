@@ -74,7 +74,7 @@ public class HhCreateEnglandAndWales implements InboundProcessor<FwmtActionInstr
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
-      cacheService.save(GatewayCache.builder().type(1).caseId(rmRequest.getCaseId()).existsInFwmt(true)
+      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
           .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(10).build());
     } else {
       cacheService.save(newCache.toBuilder().existsInFwmt(true).build());

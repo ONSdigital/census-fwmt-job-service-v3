@@ -85,7 +85,7 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
           "Case Ref", tmRequest.getReference(),
           "Survey Type", tmRequest.getSurveyType().toString());
 
-      response = cometRestClient.sendDelete(rmRequest.getCaseId());
+      response = cometRestClient.sendDeletePause(rmRequest.getCaseId());
       routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Delete", FAILED_TO_CREATE_TM_JOB);
 
       eventManager

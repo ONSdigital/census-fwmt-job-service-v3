@@ -10,7 +10,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
@@ -19,7 +18,6 @@ import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
-import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
 
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -67,7 +65,7 @@ public class CometRestClient {
     this.basePath = cometUrl + "{}";
     this.createPath = cometUrl + "{}";
     this.closePath = cometUrl + "{}/close";
-    this.deletePausePath = cometUrl + "{}/pause";
+    this.deletePausePath = cometUrl + "{}/delete";
     this.patchCeDetails = cometUrl + "{}/cedetails";
     this.pausePath = cometUrl + "{}/pause";
     this.reopenPath = cometUrl + "{}/reopen";

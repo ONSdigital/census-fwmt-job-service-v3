@@ -101,7 +101,6 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
 
   private void processSwitch(GatewayCache cache, FwmtActionInstruction rmRequest, ReopenCaseRequest tmRequest)
       throws GatewayException {
-    cacheService.save(cache.toBuilder().build());
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_PRE_SENDING, "Survey Type",
         rmRequest.getSurveyType().toString());
@@ -117,6 +116,8 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
 
     ResponseEntity<Void> reopenResponse = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB);
+
+    cacheService.save(cache.toBuilder().build());
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_ACK, "Survey Type",
         tmRequest.getSurveyType().toString());

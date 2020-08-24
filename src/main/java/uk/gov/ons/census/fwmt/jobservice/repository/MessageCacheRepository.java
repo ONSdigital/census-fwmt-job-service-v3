@@ -12,8 +12,6 @@ public interface MessageCacheRepository extends JpaRepository<MessageCache, Long
 
   boolean existsByCaseIdAndMessageType(String caseId, String messageType);
 
-  MessageCache deleteByCaseId(String caseId);
-
   MessageCache findByCaseId(String caseId);
 
 }

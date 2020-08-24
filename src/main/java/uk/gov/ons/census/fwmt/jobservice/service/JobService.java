@@ -71,13 +71,16 @@ public class JobService {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
-    if (processors.size()==0 && cache == null) {
-      transitioner.processEmptyUpdate(rmRequest);
-    }
-    if (processors.size()==0 && cache != null){
-      //TODO throw routing error & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
-      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Could not find a UPDATE processor for request from RM", rmRequest, cache);
+    if (processors.size()==0) {
+      if (cache == null) {
+        transitioner.processEmptyUpdate(rmRequest);
+      } else {
+        //TODO throw routing error & exit;
+        eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM",
+            String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+        throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,
+            "Could not find a UPDATE processor for request from RM", rmRequest, cache);
+      }
     }
     if (processors.size()>1){
       //TODO throw routing error  & exit;
@@ -93,13 +96,14 @@ public class JobService {
       final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
-    if (processors.size()==0 && cache == null) {
-      transitioner.processEmptyCancel(rmRequest);
-    }
-    if (processors.size()==0 && cache != null){
-      //TODO throw routing error & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Could not find a CANCEL processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
-      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Could not find a CANCEL processor for request from RM", rmRequest, cache);
+    if (processors.size()==0){
+      if (cache == null) {
+        transitioner.processEmptyCancel(rmRequest);
+      } else{
+        //TODO throw routing error & exit;
+        eventManager.triggerErrorEvent(this.getClass(), "Could not find a CANCEL processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+        throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Could not find a CANCEL processor for request from RM", rmRequest, cache);
+      }
     }
     if (processors.size()>1){
       //TODO throw routing error  & exit;

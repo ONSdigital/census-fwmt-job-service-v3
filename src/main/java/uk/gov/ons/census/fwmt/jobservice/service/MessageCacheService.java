@@ -53,8 +53,4 @@ public class MessageCacheService {
      repository.delete(cache);
   }
 
-  public void deleteByCaseId(String caseId) {
-    repository.deleteByCaseId(caseId);
-  }
-
 }

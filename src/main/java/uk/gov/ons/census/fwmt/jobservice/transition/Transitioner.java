@@ -9,18 +9,17 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.ActionInstructionType;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
 import uk.gov.ons.census.fwmt.jobservice.service.MessageCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.TransitionRulesLookup;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 
-import java.util.List;
-
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.NO_ACTION_REQUIRED;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RM_CANCEL_REQUEST_STORED;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.RM_UPDATE_REQUEST_STORED;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
 
 @Slf4j
@@ -38,13 +37,13 @@ public class Transitioner {
   private String storedCacheType;
 
   public void processCancelTransition(GatewayCache cache, FwmtCancelActionInstruction rmRequest,
-      List<InboundProcessor<FwmtCancelActionInstruction>> processors) throws GatewayException {
+      InboundProcessor<FwmtCancelActionInstruction> processors) throws GatewayException {
     boolean noAction = false;
     boolean cacheRmRequest;
     String message;
     ObjectMapper rmRequestMapper = new ObjectMapper();
 
-    String[] returnedRules = setTransitionRules(cache ,rmRequest.getActionInstruction().toString(), rmRequest.getCaseId());
+    String[] returnedRules = collectTransitionRules(cache ,rmRequest.getActionInstruction().toString(), rmRequest.getCaseId());
 
     switch (returnedRules[0]) {
     case "NO_ACTION":
@@ -55,9 +54,9 @@ public class Transitioner {
     case "REJECT":
       eventManager.triggerErrorEvent(this.getClass(), "Request from RM rejected",
           String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
-      break;
+      return;
     case "PROCESS":
-      processors.get(0).process(rmRequest, cache);
+      processors.process(rmRequest, cache);
       break;
     case "MERGE":
       break;
@@ -70,7 +69,7 @@ public class Transitioner {
     MessageCache messageCache = messageCacheService.getById(rmRequest.getCaseId());
 
     if (!cacheRmRequest && messageCache != null) {
-      messageCacheService.deleteByCaseId(rmRequest.getCaseId());
+      messageCacheService.delete(messageCache);
     }
 
     if (noAction && cacheRmRequest) {
@@ -87,17 +86,11 @@ public class Transitioner {
         messageCacheService.save(
             messageCache.toBuilder().messageType(returnedRules[1]).message(message).build());
       }
-
-      if (storedCacheType.equals("EMPTY")) {
-        eventManager
-            .triggerEvent(String.valueOf(rmRequest.getCaseId()), RM_CANCEL_REQUEST_STORED,
-                "TM Action", "Update received before create case. Update has been stored.");
-      }
     }
   }
 
   public void processCreateOrUpdateTransition(GatewayCache cache, FwmtActionInstruction rmRequest,
-        List<InboundProcessor<FwmtActionInstruction>> processors) throws GatewayException {
+        InboundProcessor<FwmtActionInstruction> processors) throws GatewayException {
       boolean noAction = false;
       boolean cacheRmRequest;
       String message;
@@ -106,7 +99,7 @@ public class Transitioner {
 
       actionInstruction = rmRequest.getActionInstruction().toString();
 
-      String[] returnedRules = setTransitionRules(cache, actionInstruction, rmRequest.getCaseId());
+      String[] returnedRules = collectTransitionRules(cache, actionInstruction, rmRequest.getCaseId());
 
       cacheRmRequest = Boolean.parseBoolean(returnedRules[2]);
 
@@ -122,7 +115,7 @@ public class Transitioner {
             String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
         break;
       case "PROCESS":
-        processors.get(0).process(rmRequest, cache);
+        processors.process(rmRequest, cache);
         break;
       case "MERGE":
         //TODO - will make a call to mergeRecords() once code is complete
@@ -134,34 +127,69 @@ public class Transitioner {
     MessageCache messageCache = messageCacheService.getById(rmRequest.getCaseId());
 
     if (!cacheRmRequest && messageCache != null) {
-        messageCacheService.deleteByCaseId(rmRequest.getCaseId());
+      messageCacheService.delete(messageCache);
+    }
+
+    if (noAction && cacheRmRequest) {
+      try {
+        message = rmRequestMapper.writeValueAsString(rmRequest);
+      } catch (JsonProcessingException processFailure) {
+        return;
       }
 
-      if (noAction && cacheRmRequest) {
-        try {
-          message = rmRequestMapper.writeValueAsString(rmRequest);
-        } catch (JsonProcessingException processFailure) {
-          return;
-        }
+      if (messageCache == null) {
+        messageCacheService.save(
+            MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(returnedRules[1]).message(message)
+                .build());
+      } else {
+        messageCacheService.save(
+            messageCache.toBuilder().messageType(returnedRules[1]).message(message).build());
+      }
+    }
+  }
+  public void processEmptyCancel(FwmtCancelActionInstruction rmRequest) {
+    String message;
 
-        if (messageCache == null) {
-          messageCacheService.save(
-              MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(returnedRules[1]).message(message)
-                  .build());
-        } else {
-          messageCacheService.save(
-              messageCache.toBuilder().messageType(returnedRules[1]).message(message).build());
-        }
-      }
-      if (actionInstruction.equals("UPDATE") && storedCacheType.equals("EMPTY")) {
-        eventManager
-            .triggerEvent(String.valueOf(rmRequest.getCaseId()), RM_UPDATE_REQUEST_STORED,
-                "Case Ref", rmRequest.getCaseRef(),
-                "TM Action", "Update received before create case. Update has been stored.");
-      }
+    ObjectMapper rmRequestMapper = new ObjectMapper();
+
+    eventManager
+        .triggerEvent(rmRequest.getCaseId(), NO_ACTION_REQUIRED);
+
+    try {
+      message = rmRequestMapper.writeValueAsString(rmRequest);
+    } catch (JsonProcessingException processFailure){
+      return;
+    }
+    messageCacheService.save(
+        MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(ActionInstructionType.CANCEL.toString())
+            .message(message).build());
+    eventManager
+        .triggerEvent(String.valueOf(rmRequest.getCaseId()), RM_CANCEL_REQUEST_STORED,
+            "TM Action", "Update received before create case. Update has been stored.");
   }
 
-  public String[] setTransitionRules(GatewayCache cache, String actionRequest, String caseId) throws GatewayException {
+  public void processEmptyUpdate(FwmtActionInstruction rmRequest) {
+    String message;
+
+    ObjectMapper rmRequestMapper = new ObjectMapper();
+
+    eventManager
+        .triggerEvent(rmRequest.getCaseId(), NO_ACTION_REQUIRED);
+
+    try {
+      message = rmRequestMapper.writeValueAsString(rmRequest);
+    } catch (JsonProcessingException processFailure){
+      return;
+    }
+    messageCacheService.save(
+        MessageCache.builder().caseId(rmRequest.getCaseId()).messageType(ActionInstructionType.UPDATE.toString())
+            .message(message).build());
+    eventManager
+        .triggerEvent(String.valueOf(rmRequest.getCaseId()), RM_UPDATE_REQUEST_STORED,
+            "TM Action", "Update received before create case. Update has been stored.");
+  }
+
+  public String[] collectTransitionRules(GatewayCache cache, String actionRequest, String caseId) throws GatewayException {
     String cacheType;
     String recordAge;
 

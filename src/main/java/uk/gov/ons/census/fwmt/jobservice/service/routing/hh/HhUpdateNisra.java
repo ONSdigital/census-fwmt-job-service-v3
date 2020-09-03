@@ -40,7 +40,7 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
   private GatewayCacheService cacheService;
 
   private static final ProcessorKey key = ProcessorKey.builder()
-      .actionInstruction(ActionInstructionType.CREATE.toString())
+      .actionInstruction(ActionInstructionType.UPDATE.toString())
       .surveyName("CENSUS")
       .addressType("HH")
       .build();

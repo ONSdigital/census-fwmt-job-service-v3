@@ -1,8 +1,12 @@
 package uk.gov.ons.census.fwmt.jobservice.http.comet;
 
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientCredential;
+import java.net.MalformedURLException;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,7 +14,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CasePauseRequest;
+
+import com.microsoft.aad.adal4j.AuthenticationContext;
+import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoft.aad.adal4j.ClientCredential;
+
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
@@ -19,13 +27,6 @@ import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
-
-import java.net.MalformedURLException;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Component
 public class CometRestClient {
@@ -91,7 +92,7 @@ public class CometRestClient {
     } catch (MalformedURLException | InterruptedException | ExecutionException e) {
       String errorMsg = "Failed to Authenticate with Totalmobile";
       gatewayEventManager
-          .triggerErrorEvent(this.getClass(), errorMsg, "<N/A_CASE_ID>", GatewayEventsConfig.FAILED_TM_AUTHENTICATION);
+          .triggerErrorEvent(this.getClass(), errorMsg, "<N/A_CASE_ID>", FAILED_TM_AUTHENTICATION);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, errorMsg, e);
     } finally {
       service.shutdown();

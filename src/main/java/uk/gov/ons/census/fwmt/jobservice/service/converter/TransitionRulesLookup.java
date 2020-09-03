@@ -5,14 +5,14 @@ import java.util.Map;
 
 public class TransitionRulesLookup {
 
-  private final Map<String, String[]> transitionRulesMap = new HashMap<>();
+  private final Map<String, TransitionRule> transitionRulesMap = new HashMap<>();
 
-  public String[] getLookup(String cacheType, String rmRequest, String recordAge) {
-    String requiredLookup = cacheType + "," + rmRequest + "," + recordAge;
+  public TransitionRule getLookup(String cacheType, String rmRequest, String recordAge) {
+    String requiredLookup = cacheType + "|" + rmRequest + "|" + recordAge;
     return transitionRulesMap.get(requiredLookup);
   }
 
-  public void add (String transitionRuleSelector, String[] transitionRule) {
+  public void add (String transitionRuleSelector, TransitionRule transitionRule) {
     transitionRulesMap.put(transitionRuleSelector, transitionRule);
   }
 }

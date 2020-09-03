@@ -2,7 +2,6 @@ package uk.gov.ons.census.fwmt.jobservice.http;
 
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +14,6 @@ public class QueueListenerController {
   @Autowired
   private ProcessRmFieldDlq processRMFieldDLQ;
 
-  @Autowired
-  @Qualifier("RM")
   private SimpleMessageListenerContainer simpleMessageListenerContainer;
 
   @GetMapping("/processDLQ")

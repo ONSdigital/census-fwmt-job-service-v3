@@ -10,7 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Timestamp;
+import java.util.Date;
 
 @Data
 @Builder(toBuilder = true)
@@ -47,9 +47,9 @@ public class GatewayCache {
 
   @Column(name = "last_action_instruction")
   public String lastActionInstruction;
-//
-//  @Column(name = "last_action_time")
-//  private Timestamp lastActionTime;
+
+  @Column(name = "last_action_time")
+  private Date lastActionTime;
 
   // display only the details related to request routing
   public String toRoutingString() {
@@ -58,7 +58,7 @@ public class GatewayCache {
         "delivered=" + this.delivered + ")";
   }
 
-//  public void setLastActionTime(Timestamp lastActionTime) {
-//    this.lastActionTime = new Timestamp(lastActionTime.getTime());
-//  }
+  public void setLastActionTime(Date lastActionTime) {
+    this.lastActionTime = new Date(lastActionTime.getTime());
+  }
 }

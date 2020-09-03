@@ -17,6 +17,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.util.Date;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_UPDATE_TM_JOB;
@@ -65,7 +67,7 @@ public class CeUpdateEstabProcessor implements InboundProcessor<FwmtActionInstru
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Date messageReceivedTime) throws GatewayException {
     CeCasePatchRequest tmRequest;
 
     tmRequest = CeUpdateConverter.convertEstab(rmRequest);
@@ -79,6 +81,7 @@ public class CeUpdateEstabProcessor implements InboundProcessor<FwmtActionInstru
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache != null) {
       cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
           .build());
     }
 

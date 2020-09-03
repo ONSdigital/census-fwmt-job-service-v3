@@ -17,6 +17,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.util.Date;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CASE_NOT_FOUND;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_PRE_SENDING;
@@ -73,7 +75,7 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
 
   // TODO Should this be re-posted in q instead?
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Date messageReceivedTime) throws GatewayException {
     if (rmRequest.isUndeliveredAsAddress() && cache == null) {
       rerouteAsCreate(rmRequest);
       return;
@@ -113,6 +115,6 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
         "Case Ref", rmRequest.getCaseRef());
 
     rmRequest.setActionInstruction(ActionInstructionType.CREATE);
-    jobService.processCreate(rmRequest);
+//    jobService.processCreate(rmRequest);
   }
 }

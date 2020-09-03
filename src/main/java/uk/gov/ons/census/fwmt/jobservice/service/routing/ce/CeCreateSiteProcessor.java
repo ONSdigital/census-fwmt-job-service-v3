@@ -17,6 +17,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.util.Date;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
@@ -65,7 +67,7 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Date messageReceivedTime) throws GatewayException {
     CaseRequest tmRequest;
 
     if (rmRequest.isSecureEstablishment()){
@@ -83,10 +85,11 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
       cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
-          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(2).
-              lastActionInstruction(rmRequest.getActionInstruction().toString()).build());
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(2).lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
+      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     }
 
     eventManager

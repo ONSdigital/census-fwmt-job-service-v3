@@ -1,10 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.service;
 
 import lombok.extern.slf4j.Slf4j;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -22,8 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
 @Slf4j
 @Service
@@ -132,7 +126,7 @@ public class JobService {
     }
   }
 
-  public void processPause(FwmtActionInstruction rmRequest) throws GatewayException {
+  public void processPause(FwmtActionInstruction rmRequest, Date messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
@@ -146,7 +140,7 @@ public class JobService {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple PAUSE processors for request from RM", rmRequest, cache);
     }
-    processors.get(0).process(rmRequest, cache);
+    processors.get(0).process(rmRequest, cache, messageReceivedTime);
   }
 
   /*private void routingFailure()

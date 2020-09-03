@@ -64,7 +64,7 @@ public class RmReceiver {
     case PAUSE: {
       gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,
           "Case Ref", rmRequest.getCaseRef());
-      jobService.processPause(rmRequest);
+      jobService.processPause(rmRequest, messageReceivedTime);
       break;
     }
     default:

@@ -42,9 +42,7 @@ public class GatewayEventsConfig {
   public static final String CASE_NOT_FOUND = "CASE_NOT_FOUND";
   public static final String INCORRECT_SWITCH_SURVEY_TYPE = "INCORRECT_SWITCH_SURVEY_TYPE";
 
-  public static final String RM_UPDATE_REQUEST_STORED = "RM_UPDATE_REQUEST_STORED";
-  public static final String RM_CANCEL_REQUEST_STORED = "RM_CANCEL_REQUEST_STORED";
-
+  public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
   public static final String CONVERT_SPG_UNIT_UPDATE_TO_CREATE = "CONVERT_SPG_UNIT_UPDATE_TO_CREATE";
 

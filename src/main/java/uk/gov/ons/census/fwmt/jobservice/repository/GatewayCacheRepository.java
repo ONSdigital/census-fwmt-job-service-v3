@@ -20,6 +20,9 @@ public interface GatewayCacheRepository extends JpaRepository<GatewayCache, Long
   @Query("SELECT estab.caseId FROM GatewayCache estab WHERE estab.estabUprn = :estabUprn")
   String findByEstabUprn(@Param("estabUprn") String estabUprn);
 
+  @Query("SELECT estab.caseId FROM GatewayCache estab WHERE estab.uprn = :uprn")
+  String findByUprn(@Param("uprn") String uprn);
+
   @NonNull
   List<GatewayCache> findAll();
 

@@ -85,6 +85,8 @@ public final class CeCreateConverter {
         .surveyType(SurveyType.CE_EST_D)
         .reference("SECCE_" + ffu.getCaseRef())
         .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
+            + "\n":"") + "Secure Establishment")
+        .specialInstructions(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
             + "\n":"") + "Secure Establishment").build();
   }
 
@@ -100,6 +102,8 @@ public final class CeCreateConverter {
         .surveyType(SurveyType.CE_EST_F)
         .reference("SECCE_" + ffu.getCaseRef())
         .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
+            + "\n":"") + "Secure Establishment")
+        .specialInstructions(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
             + "\n":"") + "Secure Establishment").build();
   }
 
@@ -115,6 +119,8 @@ public final class CeCreateConverter {
         .surveyType(SurveyType.CE_SITE)
         .reference("SECCS_" + ffu.getCaseRef())
         .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
+            + "\n":"") + "Secure Site")
+        .specialInstructions(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
             + "\n":"") + "Secure Site").build();
   }
 
@@ -130,6 +136,8 @@ public final class CeCreateConverter {
         .surveyType(SurveyType.CE_UNIT_D)
         .reference("SECCU_" + ffu.getCaseRef())
         .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
+            + "\n":"") + "Secure Unit")
+        .specialInstructions(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
             + "\n":"") + "Secure Unit").build();
   }
 
@@ -145,6 +153,8 @@ public final class CeCreateConverter {
         .surveyType(SurveyType.CE_UNIT_F)
         .reference("SECCU_" + ffu.getCaseRef())
         .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
+            + "\n":"") + "Secure Unit")
+        .specialInstructions(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
             + "\n":"") + "Secure Unit").build();
   }
 }

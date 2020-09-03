@@ -64,10 +64,11 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
-          && !rmRequest.isHandDeliver()
-          && (cache == null
-              || !cache.existsInFwmt)
-          && config.isInFollowUp();
+          && ((cache == null
+          && !rmRequest.isHandDeliver())
+          || (cache != null
+          && !cache.existsInFwmt
+          && cache.isDelivered()));
     } catch (NullPointerException e) {
       return false;
     }
@@ -86,7 +87,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
       ceSwitch.setSurveyName("CENSUS");
       ceSwitch.setAddressType("CE");
       ceSwitch.setAddressLevel(null);
-      ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
+      ceSwitch.setCaseId(cacheService.getUprnCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
       rmFieldRepublishProducer.republish(ceSwitch);

@@ -50,6 +50,7 @@ public class GatewayEventsConfig {
     GatewayEventManager gatewayEventManager = new GatewayEventManager();
     gatewayEventManager.setSource(Application.APPLICATION_NAME);
 
+
     return gatewayEventManager;
   }
 

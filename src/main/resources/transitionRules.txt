@@ -15,7 +15,7 @@ Update|Create|OLDER,NO_ACTION
 Update|Update|NEWER,PROCESS,Update,clear
 Update|Update|OLDER,REJECT
 Update|Cancel|NEWER,PROCESS,Cancel,clear
-Update|Cancel|NEWER,NO_ACTION
+Update|Cancel|OLDER,NO_ACTION
 Update(Held)|Create|NEWER,REJECT
 Update(Held)|Create|OLDER,MERGE,Update,clear
 Update(Held)|Update|NEWER,NO_ACTION,Update(Held),save

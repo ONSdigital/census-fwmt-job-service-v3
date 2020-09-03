@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.transition;
+package uk.gov.ons.census.fwmt.jobservice.transition.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +23,6 @@ public class RetrieveTransitionRules {
   @Autowired
   private TransitionRulesLookup transitionRulesLookup;
 
-  private TransitionRule returnedRules;
-
   public TransitionRule collectTransitionRules(GatewayCache cache, String actionRequest, String caseId,
       Date messageReceivedTime) throws GatewayException {
     String cacheType;
@@ -34,7 +32,6 @@ public class RetrieveTransitionRules {
       cacheType = "EMPTY";
       recordAge = "NEWER";
     } else {
-      //TODO - call to checkRecordAge() will be here once the code is there
       cacheType = cache.lastActionInstruction;
       recordAge = checkRecordAge(cache, messageReceivedTime);
     }

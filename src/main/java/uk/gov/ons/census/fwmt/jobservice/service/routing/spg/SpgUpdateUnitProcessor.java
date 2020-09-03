@@ -11,6 +11,7 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgUpdateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
@@ -47,6 +48,9 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
 
   @Autowired
   private RoutingValidator routingValidator;
+
+  @Autowired
+  private GatewayCacheService cacheService;
 
   // TODO This should faile or we should have a test
   // @Autowired
@@ -103,6 +107,13 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
     response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
 
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
+    }
+
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,
         "Case Ref", rmRequest.getCaseRef(),
         "Response Code", response.getStatusCode().name(),
@@ -115,6 +126,6 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
         "Case Ref", rmRequest.getCaseRef());
 
     rmRequest.setActionInstruction(ActionInstructionType.CREATE);
-//    jobService.processCreate(rmRequest);
+    jobService.processCreate(rmRequest, new Date());
   }
 }

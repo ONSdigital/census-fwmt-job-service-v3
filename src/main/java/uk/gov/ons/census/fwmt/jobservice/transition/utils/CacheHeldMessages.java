@@ -1,4 +1,4 @@
-package uk.gov.ons.census.fwmt.jobservice.transition;
+package uk.gov.ons.census.fwmt.jobservice.transition.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,9 +31,11 @@ public class CacheHeldMessages {
   private MessageCacheService messageCacheService;
 
   public void cacheMessage(MessageCache messageCache, GatewayCache cache, Object rmRequest,  Date messageQueueTime) {
+    boolean existsInFwmt = false;
     int type = 0;
     String actionInstruction;
-    String addressType;
+    String addressLevel;
+    String addressType = "";
     String caseId;
     String message;
     ObjectMapper rmRequestMapper = new ObjectMapper();
@@ -42,25 +44,33 @@ public class CacheHeldMessages {
       FwmtActionInstruction requestReceived = (FwmtActionInstruction) rmRequest;
       caseId = requestReceived.getCaseId();
       actionInstruction = "UPDATE(HELD)";
-      addressType = requestReceived.getAddressLevel();
+      addressLevel = requestReceived.getAddressLevel();
+      addressType = requestReceived.getAddressType();
     } else {
       FwmtCancelActionInstruction requestReceived = (FwmtCancelActionInstruction) rmRequest;
       caseId = requestReceived.getCaseId();
       actionInstruction = "CANCEL(HELD)";
-      addressType = requestReceived.getAddressLevel();
+      addressLevel = requestReceived.getAddressLevel();
+      addressType = requestReceived.getAddressType();
     }
 
-    if (addressType.equals("E")) {
+    if (addressLevel.equals("E")) {
       type = 1;
-    } else if (addressType.equals("U")) {
+      existsInFwmt = false;
+    } else if (addressLevel.equals("U")) {
       type = 3;
+      if (addressType.equals("SPG")) {
+        existsInFwmt = false;
+      } else {
+        existsInFwmt = true;
+      }
     }
 
     if (cache == null) {
-      cacheService.save(GatewayCache.builder().caseId(caseId).existsInFwmt(false)
+      cacheService.save(GatewayCache.builder().caseId(caseId).existsInFwmt(existsInFwmt)
           .lastActionTime(messageQueueTime).lastActionInstruction(actionInstruction).type(type).build());
     } else {
-      cacheService.save(cache.toBuilder().existsInFwmt(false).lastActionTime(messageQueueTime)
+      cacheService.save(cache.toBuilder().existsInFwmt(existsInFwmt).lastActionTime(messageQueueTime)
           .lastActionInstruction(actionInstruction).build());
     }
 

@@ -9,12 +9,12 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
-import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldRepublishProducer;
-import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.MessageCacheService;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.ConvertMessage;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.TransitionRule;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
+import uk.gov.ons.census.fwmt.jobservice.transition.utils.CacheHeldMessages;
+import uk.gov.ons.census.fwmt.jobservice.transition.utils.MergeMessages;
+import uk.gov.ons.census.fwmt.jobservice.transition.utils.RetrieveTransitionRules;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,19 +31,16 @@ public class Transitioner {
   private GatewayEventManager eventManager;
 
   @Autowired
-  private GatewayCacheService cacheService;
-
-  @Autowired
   private MessageCacheService messageCacheService;
-
-  @Autowired
-  private RmFieldRepublishProducer rmFieldRepublishProducer;
 
   @Autowired
   private CacheHeldMessages cacheHeldMessages;
 
   @Autowired
   private RetrieveTransitionRules retrieveTransitionRules;
+
+  @Autowired
+  private MergeMessages mergeMessages;
 
   public void processTransition(GatewayCache cache, Object rmRequestReceived,
         InboundProcessor<?> processor, Date messageQueueTime) throws GatewayException {
@@ -72,10 +69,14 @@ public class Transitioner {
       isCancel = true;
     }
 
-    try {
-      messageQueueTime = reformatDate.parse(messageQueueTime.toString());
-    } catch (ParseException e) {
-      // TODO: Add error meesage here
+    if (messageQueueTime != null) {
+      try {
+        messageQueueTime = reformatDate.parse(messageQueueTime.toString());
+      } catch (ParseException e) {
+        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Could not format message date", caseId);
+      }
+    } else {
+      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Message did not include a timestamp", caseId);
     }
 
     TransitionRule returnedRules = retrieveTransitionRules
@@ -101,11 +102,13 @@ public class Transitioner {
         }
         break;
       case MERGE:
-        mergeRecords(messageCache, cache, messageQueueTime);
+        if (!isCancel) {
+          processorCreateUpdate.process(rmRequestCreateUpdate, cache, messageQueueTime);
+        }
+        mergeMessages.mergeRecords(messageCache);
         break;
       default:
-        //TODO - add default - probably error
-        break;
+        throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "No such transition rule", caseId);
     }
 
   switch (returnedRules.getRequestAction()) {
@@ -124,25 +127,5 @@ public class Transitioner {
     default:
       break;
     }
-  }
-
-  public void mergeRecords(MessageCache messageCache, GatewayCache gatewayCache, Date messageQueueTime) {
-    ConvertMessage convertMessage = new ConvertMessage();
-    if (messageCache.messageType.equals("UPDATE(HELD)")) {
-      try {
-        cacheService.save(gatewayCache.toBuilder().existsInFwmt(true).lastActionInstruction("UPDATE")
-        .lastActionTime(messageQueueTime).build());
-        FwmtActionInstruction fwmtActionInstruction = convertMessage
-            .convertMessageToDTO(FwmtActionInstruction.class, messageCache.message);
-        rmFieldRepublishProducer.republish(fwmtActionInstruction);
-      } catch (GatewayException e) {
-        //TODO
-      }
-    }
-    if (messageCache.messageType.equals("CANCEL(HELD)")) {
-      cacheService.save(gatewayCache.toBuilder().lastActionInstruction("CANCEL")
-          .lastActionTime(messageQueueTime).build());
-    }
-
   }
 }

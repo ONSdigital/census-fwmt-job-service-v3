@@ -88,9 +88,14 @@ public class SpgCreateUnitFollowupProcessor implements InboundProcessor<FwmtActi
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
-      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).build());
+      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).delivered(true).existsInFwmt(true)
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3)
+          .lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
+      cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+          .existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK,

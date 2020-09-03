@@ -70,9 +70,15 @@ public class JobService {
 
   public void processUpdate(FwmtActionInstruction rmRequest, Date messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
+    boolean isHeld = false;
+    if (cache != null) {
+      if (cache.getLastActionInstruction().equals("UPDATE(HELD)") || cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
+        isHeld = true;
+      }
+    }
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
-    if (processors.size()==0 && cache!=null && !cache.getLastActionInstruction().equals("UPDATE(HELD)")) {
+    if (processors.size()==0 && cache!=null && !isHeld) {
       //TODO throw routing error & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM",
           String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
@@ -87,7 +93,7 @@ public class JobService {
     if (processors.size()==1) {
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
-    if (processors.size()==0 && cache==null || cache.getLastActionInstruction().equals("UPDATE(HELD)")){
+    if (processors.size()==0 && cache==null || isHeld){
       processors.add(null);
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }

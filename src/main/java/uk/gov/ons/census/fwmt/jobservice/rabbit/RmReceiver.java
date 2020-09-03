@@ -5,7 +5,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
@@ -34,7 +33,7 @@ public class RmReceiver {
   }
 
   @RabbitHandler
-  public void receiveCreateMessage(FwmtActionInstruction rmRequest, @Header("__TypeId__") String typeId, Message message) throws GatewayException {
+  public void receiveCreateMessage(FwmtActionInstruction rmRequest, Message message) throws GatewayException {
     //TODO trigger correct event CREATE or UPDATE
     Date messageReceivedTime = message.getMessageProperties().getTimestamp();
     switch (rmRequest.getActionInstruction()) {

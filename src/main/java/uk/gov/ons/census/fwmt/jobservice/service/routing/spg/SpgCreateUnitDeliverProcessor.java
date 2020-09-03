@@ -78,9 +78,15 @@ public class SpgCreateUnitDeliverProcessor implements InboundProcessor<FwmtActio
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
-      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true).build());
+      cacheService.save(GatewayCache.builder().type(3).caseId(rmRequest.getCaseId()).existsInFwmt(true)
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+          .lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
+      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
     }
 
     eventManager

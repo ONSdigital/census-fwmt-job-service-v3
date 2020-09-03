@@ -1,8 +1,12 @@
 package uk.gov.ons.census.fwmt.jobservice.http.comet;
 
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientCredential;
+import java.net.MalformedURLException;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,23 +14,19 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CasePauseRequest;
-import uk.gov.ons.census.fwmt.common.data.modelcase.CaseReopenCreateRequest;
+
+import com.microsoft.aad.adal4j.AuthenticationContext;
+import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoft.aad.adal4j.ClientCredential;
+
 import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
+import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
-import uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig;
-
-import java.net.MalformedURLException;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Component
 public class CometRestClient {
@@ -51,6 +51,8 @@ public class CometRestClient {
   private final transient String reopenPath;
   private final transient String patchCeDetails;
 
+  public static final String FAILED_TM_AUTHENTICATION = "FAILED_TM_AUTHENTICATION";
+
   public CometRestClient(
       CometConfig cometConfig,
       RestTemplateBuilder restTemplateBuilder,
@@ -65,9 +67,9 @@ public class CometRestClient {
     this.basePath = cometUrl + "{}";
     this.createPath = cometUrl + "{}";
     this.closePath = cometUrl + "{}/close";
-    this.deletePath = cometUrl + "{}";
+    this.deletePath = cometUrl + "{}/delete";
     this.patchCeDetails = cometUrl + "{}/cedetails";
-    this.pausePath = cometUrl + "{}";
+    this.pausePath = cometUrl + "{}/pause";
     this.reopenPath = cometUrl + "{}/reopen";
   }
 
@@ -90,7 +92,7 @@ public class CometRestClient {
     } catch (MalformedURLException | InterruptedException | ExecutionException e) {
       String errorMsg = "Failed to Authenticate with Totalmobile";
       gatewayEventManager
-          .triggerErrorEvent(this.getClass(), errorMsg, "<N/A_CASE_ID>", GatewayEventsConfig.FAILED_TM_AUTHENTICATION);
+          .triggerErrorEvent(this.getClass(), errorMsg, "<N/A_CASE_ID>", FAILED_TM_AUTHENTICATION);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, errorMsg, e);
     } finally {
       service.shutdown();
@@ -143,39 +145,11 @@ public class CometRestClient {
     return restTemplate.exchange(path, HttpMethod.PATCH, body, Void.class);
   }
 
-  public ResponseEntity<Void> sendDelete(String caseId) throws GatewayException {
+  public ResponseEntity<Void> sendDeletePause(String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
     HttpEntity<Void> body = new HttpEntity<>(httpHeaders);
-    String path = deletePath.replace("{}", caseId);
+    String path = pausePath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.DELETE, body, Void.class);
-  }
-
-  @Deprecated
-  public <A> ResponseEntity<Void> sendRequest(A caseRequest, String caseId) throws GatewayException {
-    String basePathway = cometUrl + caseId;
-    if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
-      auth();
-    HttpHeaders httpHeaders = new HttpHeaders();
-    if (isAuthed()) {
-      httpHeaders.setBearerAuth(auth.getAccessToken());
-    }
-
-    if (caseRequest instanceof CaseRequest) {
-      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
-      System.out.println(body);
-      return restTemplate.exchange(basePathway, HttpMethod.PUT, body, Void.class);
-
-    } else if (caseRequest instanceof CasePauseRequest) {
-      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
-      return restTemplate.exchange(basePathway + "/pause", HttpMethod.PUT, body, Void.class);
-
-    } else if (caseRequest instanceof CaseReopenCreateRequest) {
-      HttpEntity<A> body = new HttpEntity<>(caseRequest, httpHeaders);
-      return restTemplate.exchange(basePathway + "/reopen", HttpMethod.POST, body, Void.class);
-
-    } else {
-      return null;
-    }
   }
 
   public ModelCase getCase(String caseId) throws GatewayException {

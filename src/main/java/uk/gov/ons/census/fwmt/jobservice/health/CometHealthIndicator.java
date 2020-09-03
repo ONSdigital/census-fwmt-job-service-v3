@@ -12,20 +12,17 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_DOWN;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.TM_SERVICE_UP;
-
 @Slf4j
 @Component
 public class CometHealthIndicator extends AbstractHealthIndicator {
 
+  public static final String TM_SERVICE_UP = "TM_SERVICE_UP";
+  public static final String TM_SERVICE_DOWN = "TM_SERVICE_DOWN";
   private final GatewayEventManager gatewayEventManager;
   private final String swaggerUrl;
   private final RestTemplate restTemplate;
 
-  public CometHealthIndicator(
-      GatewayEventManager gatewayEventManager,
-      RestTemplateBuilder restTemplateBuilder,
+  public CometHealthIndicator(GatewayEventManager gatewayEventManager, RestTemplateBuilder restTemplateBuilder,
       CometConfig cometConfig
   ) {
     this.gatewayEventManager = gatewayEventManager;
@@ -47,15 +44,14 @@ public class CometHealthIndicator extends AbstractHealthIndicator {
         gatewayEventManager.triggerEvent("<N/A>", TM_SERVICE_UP, "response code", responseCode.toString());
       } else {
         builder.down().build();
-        // TODO why is this commented out?
-        //        gatewayEventManager.triggerErrorEvent(this.getClass(), null, "Cannot reach TM", "<NA>",
-        //            TM_SERVICE_DOWN, "url", swaggerUrl, "Response Code", responseCode.toString());
+        gatewayEventManager.triggerErrorEvent(this.getClass(), (Exception) null, "Cannot reach TM", "<NA>",
+            TM_SERVICE_DOWN, "url", swaggerUrl, "Response Code", responseCode.toString());
       }
 
     } catch (Exception e) {
       builder.down().withDetail(e.getMessage(), e.getClass()).build();
-      gatewayEventManager.triggerErrorEvent(this.getClass(), e, "Cannot reach TM", "<NA>",
-          TM_SERVICE_DOWN, "url", swaggerUrl);
+      gatewayEventManager.triggerErrorEvent(this.getClass(), e, "Cannot reach TM", "<NA>", TM_SERVICE_DOWN,
+          "url", swaggerUrl);
     }
   }
 }

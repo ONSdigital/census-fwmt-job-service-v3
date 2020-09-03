@@ -1,6 +1,10 @@
 package uk.gov.ons.census.fwmt.jobservice.service;
 
 import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -46,10 +50,16 @@ public class JobService {
   @Qualifier("CancelProcessorMap")
   private Map<ProcessorKey, List<InboundProcessor<FwmtCancelActionInstruction>>> cancelProcessorMap;
 
+  @Autowired
+  @Qualifier("PauseProcessorMap")
+  private Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> pauseProcessorMap;
+
+  public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
   public void processCreate(FwmtActionInstruction rmRequest, Date messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
+
     List<InboundProcessor<FwmtActionInstruction>> processors = createProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     if (processors.size()==0){
       //TODO throw routing error & exit;
@@ -120,6 +130,23 @@ public class JobService {
       processors.add(null);
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
+  }
+
+  public void processPause(FwmtActionInstruction rmRequest) throws GatewayException {
+    final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
+    ProcessorKey key = ProcessorKey.buildKey(rmRequest);
+    List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
+    if (processors.size()==0){
+      //TODO throw routing error & exit;
+      eventManager.triggerErrorEvent(this.getClass(), "Could not find a PAUSE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Could not find a PAUSE processor for request from RM", rmRequest, cache);
+    }
+    if (processors.size()>1){
+      //TODO throw routing error  & exit;
+      eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple PAUSE processors for request from RM", rmRequest, cache);
+    }
+    processors.get(0).process(rmRequest, cache);
   }
 
   /*private void routingFailure()

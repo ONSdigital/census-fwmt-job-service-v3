@@ -45,7 +45,7 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
       .actionInstruction(ActionInstructionType.UPDATE.toString())
       .surveyName("CENSUS")
       .addressType("HH")
-      .addressLevel(null)
+      .addressLevel("U")
       .build();
 
   @Override

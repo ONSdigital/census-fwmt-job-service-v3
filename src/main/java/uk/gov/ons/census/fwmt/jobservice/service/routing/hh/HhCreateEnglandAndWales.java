@@ -31,7 +31,7 @@ public class HhCreateEnglandAndWales implements InboundProcessor<FwmtActionInstr
       .actionInstruction(ActionInstructionType.CREATE.toString())
       .surveyName("CENSUS")
       .addressType("HH")
-      .addressLevel(null)
+      .addressLevel("U")
       .build();
 
   @Autowired

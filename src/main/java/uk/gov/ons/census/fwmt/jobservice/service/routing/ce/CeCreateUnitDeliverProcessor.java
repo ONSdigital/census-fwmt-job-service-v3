@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.ce;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
@@ -75,7 +74,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Date messageReceivedTime) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     CaseRequest tmRequest;
 
     if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
@@ -88,7 +87,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
       ceSwitch.setCaseId(cacheService.getUprnCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-      jobService.processCreate(ceSwitch, new Date());
+      jobService.processCreate(ceSwitch, Instant.now());
     }
 
     if (rmRequest.isSecureEstablishment()) {

@@ -10,7 +10,7 @@ import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ConvertMessage;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Slf4j
 @Component
@@ -25,7 +25,7 @@ public class MergeMessages {
       try {
         FwmtActionInstruction fwmtActionInstruction = convertMessage
             .convertMessageToDTO(FwmtActionInstruction.class, messageCache.message);
-        jobService.processUpdate(fwmtActionInstruction, new Date());
+        jobService.processUpdate(fwmtActionInstruction, Instant.now());
       } catch (GatewayException e) {
         throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR,  "Could not convert FWMTActionInstruction"
             ,messageCache.getCaseId());
@@ -35,7 +35,7 @@ public class MergeMessages {
       try {
         FwmtCancelActionInstruction fwmtCancelActionInstruction = convertMessage
             .convertMessageToDTO(FwmtCancelActionInstruction.class, messageCache.message);
-        jobService.processCancel(fwmtCancelActionInstruction, new Date());
+        jobService.processCancel(fwmtCancelActionInstruction, Instant.now());
       } catch (GatewayException e) {
         throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR,  "Could not convert FWMTActionCancelInstruction"
             ,messageCache.getCaseId());

@@ -13,7 +13,7 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Slf4j
 @Component
@@ -38,33 +38,33 @@ public class RmReceiver {
   @RabbitHandler
   public void receiveCreateMessage(FwmtActionInstruction rmRequest, Message message) throws GatewayException {
     //TODO trigger correct event CREATE or UPDATE
-    Date messageReceivedTime = message.getMessageProperties().getTimestamp();
+    Instant receivedMessageTime =message.getMessageProperties().getTimestamp().toInstant();
     switch (rmRequest.getActionInstruction()) {
     case CREATE: {
       gatewayEventManager
           .triggerEvent(rmRequest.getCaseId(), RM_CREATE_REQUEST_RECEIVED,
               "Case Ref", rmRequest.getCaseRef());
-      jobService.processCreate(rmRequest, messageReceivedTime);
+      jobService.processCreate(rmRequest, receivedMessageTime);
       break;
     }
     case SWITCH_CE_TYPE: {
       gatewayEventManager
           .triggerEvent(rmRequest.getCaseId(), RM_CREATE_SWITCH_REQUEST_RECEIVED,
               "Case Ref", rmRequest.getCaseRef());
-      jobService.processCreate(rmRequest, messageReceivedTime);
+      jobService.processCreate(rmRequest, receivedMessageTime);
       break;
     }
     case UPDATE : {
       gatewayEventManager
           .triggerEvent(rmRequest.getCaseId(), RM_UPDATE_REQUEST_RECEIVED,
               "Case Ref", rmRequest.getCaseRef());
-      jobService.processUpdate(rmRequest, messageReceivedTime);
+      jobService.processUpdate(rmRequest, receivedMessageTime);
       break;
     }
     case PAUSE: {
       gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,
           "Case Ref", rmRequest.getCaseRef());
-      jobService.processPause(rmRequest, messageReceivedTime);
+      jobService.processPause(rmRequest, receivedMessageTime);
       break;
     }
     default:
@@ -77,12 +77,12 @@ public class RmReceiver {
   public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, Message message) throws GatewayException {
       //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
-    Date messageReceivedTime = message.getMessageProperties().getTimestamp();
+    Instant receivedMessageTime = message.getMessageProperties().getTimestamp().toInstant();
     if (rmRequest.getActionInstruction() == ActionInstructionType.CANCEL) {
       gatewayEventManager
           .triggerEvent(rmRequest.getCaseId(), RM_CANCEL_REQUEST_RECEIVED,
               "Case Ref", "N/A");
-      jobService.processCancel(rmRequest, messageReceivedTime);
+      jobService.processCancel(rmRequest, receivedMessageTime);
     }
   }
 }

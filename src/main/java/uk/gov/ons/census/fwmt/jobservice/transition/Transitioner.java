@@ -16,13 +16,10 @@ import uk.gov.ons.census.fwmt.jobservice.transition.utils.CacheHeldMessages;
 import uk.gov.ons.census.fwmt.jobservice.transition.utils.MergeMessages;
 import uk.gov.ons.census.fwmt.jobservice.transition.utils.RetrieveTransitionRules;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.NO_ACTION_REQUIRED;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
-
 
 @Slf4j
 @Component
@@ -43,9 +40,8 @@ public class Transitioner {
   private MergeMessages mergeMessages;
 
   public void processTransition(GatewayCache cache, Object rmRequestReceived,
-        InboundProcessor<?> processor, Date messageQueueTime) throws GatewayException {
+        InboundProcessor<?> processor, Instant messageQueueTime) throws GatewayException {
     boolean isCancel = false;
-    SimpleDateFormat reformatDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSSS");
     String actionInstruction;
     String caseId;
     String caseref;
@@ -69,13 +65,7 @@ public class Transitioner {
       isCancel = true;
     }
 
-    if (messageQueueTime != null) {
-      try {
-        messageQueueTime = reformatDate.parse(messageQueueTime.toString());
-      } catch (ParseException e) {
-        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Could not format message date", caseId);
-      }
-    } else {
+    if (messageQueueTime == null) {
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Message did not include a timestamp", caseId);
     }
 

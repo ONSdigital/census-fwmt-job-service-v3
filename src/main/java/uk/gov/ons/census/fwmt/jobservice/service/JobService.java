@@ -14,7 +14,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,7 +50,7 @@ public class JobService {
 
   public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
-  public void processCreate(FwmtActionInstruction rmRequest, Date messageReceivedTime) throws GatewayException {
+  public void processCreate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
 
@@ -72,9 +72,10 @@ public class JobService {
     }
   }
 
-  public void processUpdate(FwmtActionInstruction rmRequest, Date messageReceivedTime) throws GatewayException {
+  public void processUpdate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     boolean isHeld = false;
+
     if (cache != null) {
       if (cache.getLastActionInstruction().equals("UPDATE(HELD)") || cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
         isHeld = true;
@@ -103,7 +104,7 @@ public class JobService {
     }
   }
 
-  public void processCancel(FwmtCancelActionInstruction rmRequest, Date messageReceivedTime) throws GatewayException {
+  public void processCancel(FwmtCancelActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
       final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
@@ -126,7 +127,7 @@ public class JobService {
     }
   }
 
-  public void processPause(FwmtActionInstruction rmRequest, Date messageReceivedTime) throws GatewayException {
+  public void processPause(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());

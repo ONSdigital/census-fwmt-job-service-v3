@@ -28,9 +28,6 @@ public class GatewayEventsConfig {
   public static final String COMET_UPDATE_ACK = "COMET_UPDATE_ACK";
   public static final String NO_ACTION_REQUIRED = "NO_ACTION_REQUIRED";
   public static final String MESSAGE_HELD = "MESSAGE_HELD";
-  public static final String TM_SERVICE_UP = "TM_SERVICE_UP";
-  public static final String RABBIT_QUEUE_UP = "RABBIT_QUEUE_UP";
-  // public static final String REDIS_SERVICE_UP = "REDIS_SERVICE_UP";
   public static final String COMET_DELETE_PRE_SENDING = "COMET_DELETE_PRE_SENDING";
   public static final String COMET_DELETE_ACK = "COMET_DELETE_ACK";
 

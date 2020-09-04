@@ -9,7 +9,7 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.TransitionRule;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.TransitionRulesLookup;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
@@ -24,7 +24,7 @@ public class RetrieveTransitionRules {
   private TransitionRulesLookup transitionRulesLookup;
 
   public TransitionRule collectTransitionRules(GatewayCache cache, String actionRequest, String caseId,
-      Date messageReceivedTime) throws GatewayException {
+      Instant messageReceivedTime) throws GatewayException {
     String cacheType;
     String recordAge;
 
@@ -47,11 +47,12 @@ public class RetrieveTransitionRules {
     return returnedRules;
   }
 
-  public String checkRecordAge(GatewayCache gatewayCache, Date messageReceivedTime) {
+  public String checkRecordAge(GatewayCache gatewayCache, Instant messageReceivedTime) {
     String recordAge = "";
-    if (gatewayCache.getLastActionTime().after(messageReceivedTime) || gatewayCache.getLastActionTime().equals(messageReceivedTime)) {
+    if (gatewayCache.getLastActionTime().compareTo(messageReceivedTime) > 0
+        || gatewayCache.getLastActionTime().equals(messageReceivedTime)) {
       recordAge = "OLDER";
-    } else if (gatewayCache.getLastActionTime().before(messageReceivedTime)) {
+    } else if (gatewayCache.getLastActionTime().compareTo(messageReceivedTime) < 0) {
       recordAge = "NEWER";
     }
     return recordAge;

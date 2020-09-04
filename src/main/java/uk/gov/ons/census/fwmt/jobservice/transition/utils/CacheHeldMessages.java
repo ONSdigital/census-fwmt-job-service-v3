@@ -13,7 +13,7 @@ import uk.gov.ons.census.fwmt.jobservice.data.MessageCache;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.MessageCacheService;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.MESSAGE_HELD;
 
@@ -30,7 +30,7 @@ public class CacheHeldMessages {
   @Autowired
   private MessageCacheService messageCacheService;
 
-  public void cacheMessage(MessageCache messageCache, GatewayCache cache, Object rmRequest,  Date messageQueueTime) {
+  public void cacheMessage(MessageCache messageCache, GatewayCache cache, Object rmRequest, Instant messageQueueTime) {
     boolean existsInFwmt = false;
     int type = 0;
     String actionInstruction;

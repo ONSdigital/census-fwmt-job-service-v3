@@ -17,7 +17,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_DELETE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_DELETE_PRE_SENDING;
@@ -45,6 +45,7 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
       .actionInstruction(ActionInstructionType.UPDATE.toString())
       .surveyName("CENSUS")
       .addressType("HH")
+      .addressLevel(null)
       .build();
 
   @Override
@@ -66,8 +67,10 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Date messageReceivedTime) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     CaseRequest tmRequest = HhCreateConverter.convertHhEnglandAndWales(rmRequest, cache);
+
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),
@@ -75,6 +78,12 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_CREATE_TM_JOB);
+
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
+    }
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,
@@ -89,6 +98,12 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
 
       response = cometRestClient.sendDeletePause(rmRequest.getCaseId());
       routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Delete", FAILED_TO_CREATE_TM_JOB);
+
+      if (newCache != null) {
+        cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+            .lastActionTime(messageReceivedTime)
+            .build());
+      }
 
       eventManager
           .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_DELETE_ACK,

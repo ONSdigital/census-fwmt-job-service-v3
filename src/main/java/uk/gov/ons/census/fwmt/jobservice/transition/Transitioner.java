@@ -44,7 +44,7 @@ public class Transitioner {
     boolean isCancel = false;
     String actionInstruction;
     String caseId;
-    String caseref;
+    String caseRef;
     FwmtActionInstruction rmRequestCreateUpdate = null;
     FwmtCancelActionInstruction rmRequestCancel = null;
     InboundProcessor<FwmtActionInstruction> processorCreateUpdate = null;
@@ -55,13 +55,13 @@ public class Transitioner {
       processorCreateUpdate = (InboundProcessor<FwmtActionInstruction>) processor;
       actionInstruction = rmRequestCreateUpdate.getActionInstruction().toString();
       caseId = rmRequestCreateUpdate.getCaseId();
-      caseref = rmRequestCreateUpdate.getCaseRef();
+      caseRef = rmRequestCreateUpdate.getCaseRef();
     } else {
       rmRequestCancel = (FwmtCancelActionInstruction) rmRequestReceived;
       processorCancel = (InboundProcessor<FwmtCancelActionInstruction>) processor;
       actionInstruction = rmRequestCancel.getActionInstruction().toString();
       caseId = rmRequestCancel.getCaseId();
-      caseref = "";
+      caseRef = "";
       isCancel = true;
     }
 
@@ -78,7 +78,7 @@ public class Transitioner {
       case NO_ACTION:
         eventManager
             .triggerEvent(caseId, NO_ACTION_REQUIRED,
-                "Case Ref", caseref);
+                "Case Ref", caseRef);
         break;
       case REJECT:
         eventManager.triggerErrorEvent(this.getClass(), "Request from RM rejected",

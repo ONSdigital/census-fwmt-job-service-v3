@@ -98,7 +98,7 @@ public class JobService {
     if (processors.size()==1) {
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
-    if (processors.size()==0 && cache==null || isHeld){
+    if (processors.size()==0 && (cache==null || isHeld)){
       processors.add(null);
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
@@ -121,7 +121,7 @@ public class JobService {
     if (processors.size()==1) {
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
-    if (processors.size()==0 && cache==null || cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
+    if (processors.size()==0 && (cache==null || cache.getLastActionInstruction().equals("CANCEL(HELD)"))) {
       processors.add(null);
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }

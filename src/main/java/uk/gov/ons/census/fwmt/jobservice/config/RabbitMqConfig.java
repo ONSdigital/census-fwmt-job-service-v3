@@ -11,6 +11,12 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
+import org.springframework.retry.support.RetryTemplate;
+import uk.gov.ons.census.fwmt.common.retry.DefaultListenerSupport;
+import uk.gov.ons.census.fwmt.common.retry.GatewayMessageRecover;
+import uk.gov.ons.census.fwmt.common.retry.GatewayRetryPolicy;
 
 @Configuration
 public class RabbitMqConfig {
@@ -86,32 +92,31 @@ public class RabbitMqConfig {
   //    classMapper.setTrustedPackages("*");
   //    return classMapper;
   //  }
-//  @Bean
-//  public RetryOperationsInterceptor interceptor(
-//      @Qualifier("retryTemplate") RetryOperations retryOperations) {
-//    RetryOperationsInterceptor interceptor = new RetryOperationsInterceptor();
-//    interceptor.setRecoverer(new GatewayMessageRecover());
-//    interceptor.setRetryOperations(retryOperations);
-//    return interceptor;
-//  }
-//
-//  @Bean
-//  public RetryTemplate retryTemplate() {
-//    RetryTemplate retryTemplate = new RetryTemplate();
-//
-//    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-//    backOffPolicy.setInitialInterval(initialInterval);
-//    backOffPolicy.setMultiplier(multiplier);
-//    backOffPolicy.setMaxInterval(maxInterval);
-//    retryTemplate.setBackOffPolicy(backOffPolicy);
-//
-//    GatewayRetryPolicy gatewayRetryPolicy = new GatewayRetryPolicy();
-//    retryTemplate.setRetryPolicy(gatewayRetryPolicy);
-//
-//    retryTemplate.registerListener(new DefaultListenerSupport());
-//
-//    return retryTemplate;
-//  }
+  @Bean
+  public RetryOperationsInterceptor interceptor() {
+    RetryOperationsInterceptor interceptor = new RetryOperationsInterceptor();
+    interceptor.setRecoverer(new GatewayMessageRecover());
+    interceptor.setRetryOperations(retryTemplate());
+    return interceptor;
+  }
+
+  @Bean
+  public RetryTemplate retryTemplate() {
+    RetryTemplate retryTemplate = new RetryTemplate();
+
+    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+    backOffPolicy.setInitialInterval(initialInterval);
+    backOffPolicy.setMultiplier(multiplier);
+    backOffPolicy.setMaxInterval(maxInterval);
+    retryTemplate.setBackOffPolicy(backOffPolicy);
+
+    GatewayRetryPolicy gatewayRetryPolicy = new GatewayRetryPolicy();
+    retryTemplate.setRetryPolicy(gatewayRetryPolicy);
+
+    retryTemplate.registerListener(new DefaultListenerSupport());
+
+    return retryTemplate;
+  }
 
   @Bean
   public Queue queue() {

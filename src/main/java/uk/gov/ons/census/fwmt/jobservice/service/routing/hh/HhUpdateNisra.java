@@ -45,6 +45,8 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
       .addressType("HH")
       .build();
 
+  private static final String PROCESSING = "PROCESSING";
+
   @Override
   public ProcessorKey getKey() {
     return key;
@@ -65,6 +67,11 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
+        "type", "NISRA",
+        "action", "Update");
+
+    
     CaseRequest tmRequest = HhCreateConverter.convertHhEnglandAndWales(rmRequest, cache);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,

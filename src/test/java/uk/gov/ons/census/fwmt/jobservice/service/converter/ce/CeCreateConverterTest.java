@@ -13,12 +13,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CeCreateConverterTest {
     private GatewayCache cache;
+    private GatewayCache cacheWithNoData;
+
     public CeCreateConverterTest() {
         cache = GatewayCache.builder()
                 .careCodes("careCode1")
                 .accessInfo("this is access info")
                 .build();
+        cacheWithNoData = GatewayCache.builder()
+                .accessInfo("this is access info")
+                .build();
+
+
+
     }
+
+
 
     @Test
     public void test_convertCeEstabDeliver() {
@@ -38,6 +48,15 @@ class CeCreateConverterTest {
         assertEquals("careCode1\n" + "Secure Establishment", cr.getDescription());
         assertEquals("careCode1\n" +
                 "this is access info", cr.getSpecialInstructions());
+    }
+
+    @Test
+    public void test_convertCeEstabDeliverSecure_noCache() {
+        FwmtActionInstruction ffu = CeRequestBuilder.makeSite();
+        CaseRequest cr = CeCreateConverter.convertCeEstabDeliverSecure(ffu, cacheWithNoData);
+        System.out.println(cr);
+        assertEquals( "Secure Establishment", cr.getDescription());
+        assertEquals("", cr.getSpecialInstructions());
     }
 
 

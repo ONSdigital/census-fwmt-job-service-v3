@@ -22,7 +22,7 @@ public class JobService {
 
   @Autowired
   private GatewayCacheService cacheService;
-  
+
   @Autowired
   private GatewayEventManager eventManager;
 
@@ -59,7 +59,7 @@ public class JobService {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple CREATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple CREATE processors for request from RM", rmRequest, cache);
     }
-    processors.get(0).process(rmRequest, cache);    
+    processors.get(0).process(rmRequest, cache);
   }
 
   public void processUpdate(FwmtActionInstruction rmRequest) throws GatewayException {
@@ -110,7 +110,6 @@ public class JobService {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple PAUSE processors for request from RM", rmRequest, cache);
     }
-
     processors.get(0).process(rmRequest, cache);
   }
 

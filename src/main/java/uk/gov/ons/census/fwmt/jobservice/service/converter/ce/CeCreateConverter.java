@@ -168,10 +168,7 @@ public final class CeCreateConverter {
 
   private static String getDescription(GatewayCache cache, String referenceType) {
     StringBuilder description = new StringBuilder(getDescription(cache));
-    if (SECURE_UNIT.equalsIgnoreCase(referenceType) || SECURE_ESTABLISHMENT.equalsIgnoreCase(referenceType) ||
-            SECURE_SITE.equalsIgnoreCase(referenceType)) {
-      description.append(referenceType);
-    }
+    description.append(referenceType);
     return description.toString();
   }
 
@@ -184,9 +181,9 @@ public final class CeCreateConverter {
   }
 
   private static String getSpecialInstructions(GatewayCache cache) {
-    StringBuilder instruction = new StringBuilder("");
-    if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
-      instruction.append(cache.getCareCodes()).append("\n").append(cache.getAccessInfo());
+    StringBuilder instruction = new StringBuilder(getDescription(cache));
+    if (cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) {
+      instruction.append(cache.getAccessInfo());
     }
     return instruction.toString();
   }

@@ -57,6 +57,7 @@ rabbitmq:
   initialInterval: 5000
   multiplier: 3.0
   maxInterval: 45000
+  prefetchCount: 500
   concurrentConsumers: 5
   queues:
     rm:

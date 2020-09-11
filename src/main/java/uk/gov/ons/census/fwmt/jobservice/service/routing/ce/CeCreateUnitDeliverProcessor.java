@@ -62,9 +62,11 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
-          && rmRequest.isHandDeliver()
-          && (cache == null
-              || !cache.existsInFwmt);
+          && ((cache == null
+          && rmRequest.isHandDeliver())
+          || (cache != null
+          && !cache.existsInFwmt
+          && !cache.isDelivered()));
     } catch (NullPointerException e) {
       return false;
     }

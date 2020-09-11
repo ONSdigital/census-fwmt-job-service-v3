@@ -48,6 +48,8 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
       .addressLevel("U")
       .build();
 
+  private static final String PROCESSING = "PROCESSING";
+
   @Override
   public ProcessorKey getKey() {
     return key;
@@ -68,6 +70,10 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
+        "type", "NISRA",
+        "action", "Update");
+    
     CaseRequest tmRequest = HhCreateConverter.convertHhEnglandAndWales(rmRequest, cache);
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());

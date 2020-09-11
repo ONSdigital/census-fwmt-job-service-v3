@@ -85,7 +85,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
       ceSwitch.setSurveyName("CENSUS");
       ceSwitch.setAddressType("CE");
       ceSwitch.setAddressLevel(null);
-      ceSwitch.setCaseId(cacheService.getUprnCaseId(rmRequest.getEstabUprn()));
+      ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
       jobService.processCreate(ceSwitch, Instant.now());

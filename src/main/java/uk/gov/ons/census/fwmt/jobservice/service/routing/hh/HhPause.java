@@ -25,6 +25,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 @Service
 public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 
+  private static final String PROCESSING = "PROCESSING";
+  
   public static final String COMET_PAUSE_PRE_SENDING = "COMET_PAUSE_PRE_SENDING";
 
   public static final String COMET_PAUSE_ACK = "COMET_PAUSE_ACK";
@@ -67,11 +69,15 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
+        "type", "HH Pause Case",
+        "action", "Pause");
+    
+
     CasePauseRequest tmRequest = HhPauseConverter.buildPause(rmRequest);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_PRE_SENDING,
-        "Case Ref", rmRequest.getCaseRef(),
-        "Survey Type", rmRequest.getSurveyType().toString());
+        "Case Ref", rmRequest.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendPause(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Pause", FAILED_TO_CREATE_TM_JOB);
@@ -85,7 +91,6 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_ACK,
         "Case Ref", rmRequest.getCaseRef(),
-        "Response Code", response.getStatusCode().name(),
-        "Survey Type", rmRequest.getSurveyType().toString());
+        "Response Code", response.getStatusCode().name());
   }
 }

@@ -29,6 +29,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 @Service
 public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstruction> {
 
+  private static final String PROCESSING = "PROCESSING";
+
   @Autowired
   private CometRestClient cometRestClient;
 
@@ -68,6 +70,9 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
+        "type", "HH E & W",
+        "action", "Update");
     CaseRequest tmRequest = HhCreateConverter.convertHhEnglandAndWales(rmRequest, cache);
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
@@ -91,7 +96,7 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
             "Response Code", response.getStatusCode().name(),
             "Survey Type", tmRequest.getSurveyType().toString());
 
-    if (!rmRequest.isBlankFormReturned() || !rmRequest.isUndeliveredAsAddress()) {
+    if (rmRequest.isBlankFormReturned() || rmRequest.isUndeliveredAsAddress()) {
       eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_DELETE_PRE_SENDING,
           "Case Ref", tmRequest.getReference(),
           "Survey Type", tmRequest.getSurveyType().toString());

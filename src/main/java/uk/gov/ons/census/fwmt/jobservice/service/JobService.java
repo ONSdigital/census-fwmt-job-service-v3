@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 public class JobService {
@@ -70,6 +74,7 @@ public class JobService {
     } else {
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
+
   }
 
   public void processUpdate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {

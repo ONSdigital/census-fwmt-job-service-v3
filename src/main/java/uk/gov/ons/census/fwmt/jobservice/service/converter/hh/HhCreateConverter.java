@@ -45,7 +45,7 @@ public final class HhCreateConverter {
   public static CaseRequest convertHhEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache) {
     return HhCreateConverter
         .convertHH(ffu, cache, CaseRequest.builder())
-        .sai(ffu.getEstabType().equals("Sheltered Accommodation"))
+        .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
         .build();
   }
 
@@ -53,7 +53,7 @@ public final class HhCreateConverter {
     return HhCreateConverter
         .convertHH(ffu, cache, CaseRequest.builder())
         .requiredOfficer(ffu.getFieldOfficerId())
-        .sai(ffu.getEstabType().equals("Sheltered Accommodation"))
+        .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
         .build();
   }
 }

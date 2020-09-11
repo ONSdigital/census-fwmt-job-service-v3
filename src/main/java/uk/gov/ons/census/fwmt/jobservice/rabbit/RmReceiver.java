@@ -25,6 +25,7 @@ public class RmReceiver {
   public static final String RM_UPDATE_REQUEST_RECEIVED = "RM_UPDATE_REQUEST_RECEIVED";
   public static final String RM_CANCEL_REQUEST_RECEIVED = "RM_CANCEL_REQUEST_RECEIVED";
   public static final String RM_PAUSE_REQUEST_RECEIVED = "RM_PAUSE_REQUEST_RECEIVED";
+  private static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";
   @Autowired
   private final JobService jobService;
   @Autowired
@@ -83,6 +84,11 @@ public class RmReceiver {
           .triggerEvent(rmRequest.getCaseId(), RM_CANCEL_REQUEST_RECEIVED,
               "Case Ref", "N/A");
       jobService.processCancel(rmRequest, receivedMessageTime);
+    } else {
+      gatewayEventManager
+          .triggerErrorEvent(this.getClass(), "Could not route Request", rmRequest.getCaseId(), FAILED_TO_ROUTE_REQUEST,
+              "Action Request", rmRequest.getActionInstruction().toString());
+      throw new RuntimeException("Could not route Request");
     }
   }
 }

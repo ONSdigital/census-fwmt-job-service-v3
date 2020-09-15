@@ -33,6 +33,7 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
       .actionInstruction(ActionInstructionType.PAUSE.toString())
       .surveyName("CENSUS")
       .addressType("HH")
+      .addressLevel("U")
       .build();
 
   @Autowired

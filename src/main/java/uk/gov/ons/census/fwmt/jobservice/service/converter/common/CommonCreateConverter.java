@@ -19,7 +19,6 @@ public final class CommonCreateConverter {
     builder.type(CaseType.CE);
     builder.category("Not applicable");
     builder.estabType(ffu.getEstabType());
-    builder.requiredOfficer(ffu.getFieldOfficerId());
     builder.coordCode(ffu.getFieldCoordinatorId());
 
     Contact outContact = Contact.builder().organisationName(ffu.getOrganisationName()).build();

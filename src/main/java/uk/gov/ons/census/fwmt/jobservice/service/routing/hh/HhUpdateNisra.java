@@ -43,6 +43,7 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
       .actionInstruction(ActionInstructionType.UPDATE.toString())
       .surveyName("CENSUS")
       .addressType("HH")
+      .addressLevel("U")
       .build();
 
   private static final String PROCESSING = "PROCESSING";

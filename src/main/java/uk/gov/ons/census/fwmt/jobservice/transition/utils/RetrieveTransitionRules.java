@@ -11,11 +11,12 @@ import uk.gov.ons.census.fwmt.jobservice.service.converter.TransitionRulesLookup
 
 import java.time.Instant;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
 @Slf4j
 @Component
 public class RetrieveTransitionRules {
+
+  private static final String TRANSITION_RULE_RETREIVAL_FALIURE = "TRANSITION_RULE_RETREIVAL_FALIURE";
 
   @Autowired
   private GatewayEventManager eventManager;
@@ -40,7 +41,7 @@ public class RetrieveTransitionRules {
 
     if (returnedRules == null) {
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a rule for the create request from RM",
-          String.valueOf(caseId), ROUTING_FAILED);
+          String.valueOf(caseId), TRANSITION_RULE_RETREIVAL_FALIURE, "cacheType", cacheType, "actionRequest", actionRequest, "recordAge", recordAge);
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,
           "Could not find a rule for the create request from RM", cache);
     }

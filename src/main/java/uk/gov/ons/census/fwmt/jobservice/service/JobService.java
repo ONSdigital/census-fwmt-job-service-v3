@@ -57,16 +57,16 @@ public class JobService {
   public void processCreate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
-
+    
     List<InboundProcessor<FwmtActionInstruction>> processors = createProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     if (processors.size()==0){
       //TODO throw routing error & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Could not find a CREATE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      eventManager.triggerErrorEvent(this.getClass(), "Could not find a CREATE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtActionInstruction", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Could not find a CREATE processor for request from RM", rmRequest, cache);
     }
     if (processors.size()>1){
       //TODO throw routing error  & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Found multiple CREATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      eventManager.triggerErrorEvent(this.getClass(), "Found multiple CREATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtActionInstruction", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple CREATE processors for request from RM", rmRequest, cache);
     }
     if (rmRequest.getActionInstruction().equals(ActionInstructionType.SWITCH_CE_TYPE)) {
@@ -97,7 +97,7 @@ public class JobService {
     }
     if (processors.size()>1){
       //TODO throw routing error  & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Found multiple UPDATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      eventManager.triggerErrorEvent(this.getClass(), "Found multiple UPDATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtActionInstruction", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple UPDATE processors for request from RM", rmRequest, cache);
     }
     if (processors.size()==1) {
@@ -115,12 +115,12 @@ public class JobService {
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     if (processors.size()==0 && cache!=null && !cache.getLastActionInstruction().equals("CANCEL(HELD)")){
       //TODO throw routing error & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Could not find a CANCEL processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      eventManager.triggerErrorEvent(this.getClass(), "Could not find a CANCEL processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtCancelActionInstruction", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Could not find a CANCEL processor for request from RM", rmRequest, cache);
     }
     if (processors.size()>1){
       //TODO throw routing error  & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Found multiple CANCEL processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      eventManager.triggerErrorEvent(this.getClass(), "Found multiple CANCEL processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtCancelActionInstruction", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple CANCEL processors for request from RM", rmRequest, cache);
     }
     if (processors.size()==1) {
@@ -138,12 +138,12 @@ public class JobService {
     List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     if (processors.size()==0){
       //TODO throw routing error & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Could not find a PAUSE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      eventManager.triggerErrorEvent(this.getClass(), "Could not find a PAUSE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtActionInstruction", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Could not find a PAUSE processor for request from RM", rmRequest, cache);
     }
     if (processors.size()>1){
       //TODO throw routing error  & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+      eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtActionInstruction", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple PAUSE processors for request from RM", rmRequest, cache);
     }
     processors.get(0).process(rmRequest, cache, messageReceivedTime);

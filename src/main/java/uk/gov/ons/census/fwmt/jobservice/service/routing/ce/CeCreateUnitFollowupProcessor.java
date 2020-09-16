@@ -12,6 +12,7 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldPublisher;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
@@ -41,7 +42,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   private GatewayCacheService cacheService;
 
   @Autowired
-  private JobService jobService;
+  private RmFieldPublisher rmFieldPublisher;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -88,7 +89,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
       ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-      jobService.processCreate(ceSwitch, Instant.now());
+      rmFieldPublisher.publish(ceSwitch);
     }
 
     if (rmRequest.isSecureEstablishment()) {

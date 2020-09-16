@@ -19,11 +19,12 @@ import uk.gov.ons.census.fwmt.jobservice.transition.utils.RetrieveTransitionRule
 import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.NO_ACTION_REQUIRED;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
 @Slf4j
 @Component
 public class Transitioner {
+  private static final String REJECTED_RM_REQUEST = "REJECTED_RM_REQUEST";
+
   @Autowired
   private GatewayEventManager eventManager;
 
@@ -82,7 +83,7 @@ public class Transitioner {
         break;
       case REJECT:
         eventManager.triggerErrorEvent(this.getClass(), "Request from RM rejected",
-            String.valueOf(caseId), ROUTING_FAILED);
+            String.valueOf(caseId), REJECTED_RM_REQUEST);
         break;
       case PROCESS:
         if (isCancel) {

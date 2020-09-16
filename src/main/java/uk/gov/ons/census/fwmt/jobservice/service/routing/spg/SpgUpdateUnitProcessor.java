@@ -1,25 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
-import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
-import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
-import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
-import uk.gov.ons.census.fwmt.jobservice.service.JobService;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgUpdateConverter;
-import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
-import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
-import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
-
-import java.time.Instant;
-
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CASE_NOT_FOUND;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_PRE_SENDING;
@@ -28,6 +8,27 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CONVERT_SPG_UNIT_UPDATE_TO_CREATE;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CLOSE_TM_JOB;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_UPDATE_TM_JOB;
+
+import java.time.Instant;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
+import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
+import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldPublisher;
+import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
+import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgUpdateConverter;
+import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
+import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 @Qualifier("Update")
 @Service
@@ -57,7 +58,7 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
   // private SpgCreateRouter createRouter;
 
   @Autowired
-  private JobService jobService;
+  private RmFieldPublisher rmFieldPublisher;
 
   @Override
   public ProcessorKey getKey() {
@@ -77,7 +78,6 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
     }
   }
 
-  // TODO Should this be re-posted in q instead?
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     if (rmRequest.isUndeliveredAsAddress() && cache == null) {
@@ -126,6 +126,6 @@ public class SpgUpdateUnitProcessor implements InboundProcessor<FwmtActionInstru
         "Case Ref", rmRequest.getCaseRef());
 
     rmRequest.setActionInstruction(ActionInstructionType.CREATE);
-    jobService.processCreate(rmRequest, Instant.now());
+    rmFieldPublisher.publish(rmRequest);
   }
 }

@@ -26,8 +26,8 @@ public final class CommonCreateConverter {
     builder.contact(outContact);
 
     Location outLocation = Location.builder()
-        .lat(ffu.getLatitude().floatValue())
-        ._long(ffu.getLongitude().floatValue())
+        .lat(ffu.getLatitude())
+        ._long(ffu.getLongitude())
         .build();
     builder.location(outLocation);
 

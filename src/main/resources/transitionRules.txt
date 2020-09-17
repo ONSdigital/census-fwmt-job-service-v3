@@ -25,7 +25,7 @@ Update(Held)|Cancel|OLDER,NO_ACTION
 Cancel|Create|NEWER,REJECT
 Cancel|Create|OLDER,NO_ACTION
 Cancel|Update|NEWER,PROCESS,Update,clear
-Cancel|Update|OLDER,NO_ACTION
+Cancel|Update|OLDER,PROCESS,Update,clear
 Cancel|Cancel|NEWER,REJECT
 Cancel|Cancel|OLDER,NO_ACTION
 Cancel(Held)|Create|NEWER,REJECT

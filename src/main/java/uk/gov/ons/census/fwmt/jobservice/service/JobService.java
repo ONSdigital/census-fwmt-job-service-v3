@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 @Slf4j
 @Service
 public class JobService {
@@ -56,6 +58,7 @@ public class JobService {
 
   public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
+  @Transactional
   public void processCreate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
@@ -79,6 +82,7 @@ public class JobService {
 
   }
 
+  @Transactional
   public void processUpdate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     boolean isHeld = false;
@@ -130,6 +134,7 @@ public class JobService {
     }
   }
 
+  @Transactional
   public void processCancel(FwmtCancelActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
       final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
@@ -153,6 +158,7 @@ public class JobService {
     }
   }
 
+  @Transactional
   public void processPause(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);

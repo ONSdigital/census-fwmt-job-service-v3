@@ -12,7 +12,8 @@ public final class SpgUpdateConverter {
 
   private static ReopenCaseRequest.ReopenCaseRequestBuilder convertCommon(FwmtActionInstruction ffu,
       GatewayCache cache) {
-    return ReopenCaseRequest.builder().id(ffu.getCaseId());
+    return ReopenCaseRequest.builder().id(ffu.getCaseId()).uaa(ffu.isUndeliveredAsAddress())
+        .blank(ffu.isBlankFormReturned());
   }
 
   public static ReopenCaseRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) {

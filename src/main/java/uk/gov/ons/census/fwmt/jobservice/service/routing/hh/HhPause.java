@@ -1,12 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.hh;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
@@ -14,10 +11,15 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.hh.HhPauseConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+
+import java.time.Instant;
+
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
 @Qualifier("Pause")
 @Service
@@ -45,6 +47,9 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
   @Autowired
   private RoutingValidator routingValidator;
 
+  @Autowired
+  private GatewayCacheService cacheService;
+
   @Override
   public ProcessorKey getKey() {
     return key;
@@ -63,11 +68,12 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
         "type", "HH Pause Case",
         "action", "Pause");
     
+
     CasePauseRequest tmRequest = HhPauseConverter.buildPause(rmRequest);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_PRE_SENDING,
@@ -75,6 +81,13 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 
     ResponseEntity<Void> response = cometRestClient.sendPause(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Pause", FAILED_TO_CREATE_TM_JOB);
+
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
+    }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_ACK,
         "Case Ref", rmRequest.getCaseRef(),

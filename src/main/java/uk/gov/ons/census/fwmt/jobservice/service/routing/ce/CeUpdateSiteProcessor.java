@@ -17,6 +17,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.time.Instant;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_UPDATE_TM_JOB;
@@ -65,7 +67,7 @@ public class CeUpdateSiteProcessor implements InboundProcessor<FwmtActionInstruc
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     CeCasePatchRequest tmRequest;
 
     tmRequest = CeUpdateConverter.convertSite(rmRequest);
@@ -75,6 +77,13 @@ public class CeUpdateSiteProcessor implements InboundProcessor<FwmtActionInstruc
 
     ResponseEntity<Void> response = cometRestClient.sendCeDetails(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
+
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
+    }
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,

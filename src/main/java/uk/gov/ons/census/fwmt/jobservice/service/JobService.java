@@ -10,9 +10,12 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldPublisher;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
+
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CONVERT_SPG_UNIT_UPDATE_TO_CREATE;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,6 +34,9 @@ public class JobService {
 
   @Autowired
   private Transitioner transitioner;
+  
+  @Autowired
+  private RmFieldPublisher rmFieldPublisher;
 
   @Autowired
   @Qualifier("CreateProcessorMap")
@@ -82,22 +88,38 @@ public class JobService {
         isHeld = true;
       }
     }
-    if (cache == null && rmRequest.isUndeliveredAsAddress()) {
+    if (cache == null && rmRequest.isUndeliveredAsAddress() && (rmRequest.getAddressType().equals("HH") || rmRequest.getAddressType().equals("SPG"))) {
       rmRequest.setActionInstruction(ActionInstructionType.CREATE);
+
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), CONVERT_SPG_UNIT_UPDATE_TO_CREATE,
+          "Case Ref", rmRequest.getCaseRef());
+
+      rmFieldPublisher.publish(rmRequest);
+      return;
     }
+    
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
-    List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
+    List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key);
+    if (processors==null) {
+      eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM",
+          String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "rmRequest", rmRequest.toString());
+      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,
+          "Could not find a UPDATE processor for request from RM", rmRequest, cache);
+
+    }
+    
+    processors = updateProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     if (processors.size()==0 && cache!=null && !isHeld) {
       //TODO throw routing error & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM",
-          String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED);
+          String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "rmRequest", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,
           "Could not find a UPDATE processor for request from RM", rmRequest, cache);
     }
     if (processors.size()>1){
       //TODO throw routing error  & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple UPDATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "FwmtActionInstruction", rmRequest.toString());
-      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple UPDATE processors for request from RM", rmRequest, cache);
+      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,  "Found multiple UPDATE processors for request from RM", rmRequest, cache, "rmRequest", rmRequest.toString());
     }
     if (processors.size()==1) {
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);

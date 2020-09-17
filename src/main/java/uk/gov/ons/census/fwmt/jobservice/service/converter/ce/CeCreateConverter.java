@@ -30,6 +30,7 @@ public final class CeCreateConverter {
     int expectedResponse = 0;
 
     CaseRequest.CaseRequestBuilder commonBuilder = CommonCreateConverter.convertCommon(ffu, cache, builder);
+    commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();
 

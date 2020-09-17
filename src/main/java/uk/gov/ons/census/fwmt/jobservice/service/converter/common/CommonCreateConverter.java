@@ -19,15 +19,14 @@ public final class CommonCreateConverter {
     builder.type(CaseType.CE);
     builder.category("Not applicable");
     builder.estabType(ffu.getEstabType());
-    builder.requiredOfficer(ffu.getFieldOfficerId());
     builder.coordCode(ffu.getFieldCoordinatorId());
 
     Contact outContact = Contact.builder().organisationName(ffu.getOrganisationName()).build();
     builder.contact(outContact);
 
     Location outLocation = Location.builder()
-        .lat(ffu.getLatitude().floatValue())
-        ._long(ffu.getLongitude().floatValue())
+        .lat(ffu.getLatitude())
+        ._long(ffu.getLongitude())
         .build();
     builder.location(outLocation);
 

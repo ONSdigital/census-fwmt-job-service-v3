@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 public class JobService {
@@ -85,6 +81,9 @@ public class JobService {
       if (cache.getLastActionInstruction().equals("UPDATE(HELD)") || cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
         isHeld = true;
       }
+    }
+    if (cache == null && rmRequest.isUndeliveredAsAddress()) {
+      rmRequest.setActionInstruction(ActionInstructionType.CREATE);
     }
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());

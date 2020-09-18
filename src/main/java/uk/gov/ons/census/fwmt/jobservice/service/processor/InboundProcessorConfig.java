@@ -27,10 +27,6 @@ public class InboundProcessorConfig {
   @Qualifier("Cancel")
   private List<InboundProcessor<FwmtCancelActionInstruction>> cancelProcessors;
 
-  @Autowired
-  @Qualifier("Pause")
-  private List<InboundProcessor<FwmtActionInstruction>> pauseProcessors;
-
   @Bean
   @Qualifier("CreateProcessorMap")
   public Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> buildCreateProcessorMap(

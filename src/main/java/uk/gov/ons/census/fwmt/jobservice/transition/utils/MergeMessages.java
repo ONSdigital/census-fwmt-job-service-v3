@@ -30,6 +30,16 @@ public class MergeMessages {
         throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR,  "Could not convert FWMTActionInstruction"
             ,messageCache.getCaseId());
       }
+    }    
+    if (messageCache.messageType.equals("SWITCH_CE_TYPE(Held)")) {
+      try {
+        FwmtActionInstruction fwmtActionInstruction = convertMessage
+            .convertMessageToDTO(FwmtActionInstruction.class, messageCache.message);
+        jobService.processUpdate(fwmtActionInstruction, Instant.now());
+      } catch (GatewayException e) {
+        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR,  "Could not convert FWMTActionInstruction"
+            ,messageCache.getCaseId());
+      }
     }
     if (messageCache.messageType.equals("CANCEL(HELD)")) {
       try {

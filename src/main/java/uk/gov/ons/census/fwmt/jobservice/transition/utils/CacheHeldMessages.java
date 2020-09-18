@@ -54,12 +54,12 @@ public class CacheHeldMessages {
       addressType = requestReceived.getAddressType();
     }
 
-    if (addressLevel.equals("E")) {
+    if ("E".equals(addressLevel)) {
       type = 1;
       existsInFwmt = false;
-    } else if (addressLevel.equals("U")) {
+    } else if ("U".equals(addressLevel)) {
       type = 3;
-      if (addressType.equals("SPG")) {
+      if ("SPG".equals(addressType)) {
         existsInFwmt = false;
       } else {
         existsInFwmt = true;

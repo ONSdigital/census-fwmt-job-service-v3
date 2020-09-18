@@ -5,6 +5,6 @@ public enum TransitionAction {
   PROCESS,
   NO_ACTION,
   REJECT,
-  MERGE
-
+  MERGE,
+  SWITCH_CE_TYPE
 }

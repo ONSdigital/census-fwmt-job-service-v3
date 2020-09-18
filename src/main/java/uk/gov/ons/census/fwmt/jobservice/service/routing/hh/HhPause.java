@@ -32,7 +32,7 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
   public static final String COMET_PAUSE_ACK = "COMET_PAUSE_ACK";
 
   private static final ProcessorKey key = ProcessorKey.builder()
-      .actionInstruction(ActionInstructionType.PAUSE.toString())
+      .actionInstruction(ActionInstructionType.CANCEL.toString())
       .surveyName("CENSUS")
       .addressType("HH")
       .addressLevel("U")

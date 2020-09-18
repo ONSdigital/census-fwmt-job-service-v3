@@ -21,7 +21,7 @@ import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
-@Qualifier("Pause")
+@Qualifier("Cancel")
 @Service
 public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 
@@ -32,7 +32,7 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
   public static final String COMET_PAUSE_ACK = "COMET_PAUSE_ACK";
 
   private static final ProcessorKey key = ProcessorKey.builder()
-      .actionInstruction(ActionInstructionType.PAUSE.toString())
+      .actionInstruction(ActionInstructionType.CANCEL.toString())
       .surveyName("CENSUS")
       .addressType("HH")
       .addressLevel("U")

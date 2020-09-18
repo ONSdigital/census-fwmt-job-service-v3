@@ -67,17 +67,10 @@ public class RmReceiver {
       jobService.processUpdate(rmRequest, receivedMessageTime);
       break;
     }
-    case PAUSE: {
-      gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,
-          "Case Ref", rmRequest.getCaseRef());
-      jobService.processPause(rmRequest, receivedMessageTime);
-      break;
-    }
     default:
       break; //TODO THROW ROUTUNG FAILURE
     }
   }
-
 
   @RabbitHandler
   public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, Message message) throws GatewayException {

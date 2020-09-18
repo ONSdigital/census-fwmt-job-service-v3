@@ -83,11 +83,7 @@ public class JobService {
           "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple CREATE processors for request from RM", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
     }
-//    if (rmRequest.getActionInstruction().equals(ActionInstructionType.SWITCH_CE_TYPE)) {
-//      processors.get(0).process(rmRequest, cache, messageReceivedTime);
-//    } else {
-      transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
-//    }
+    transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
 
   }
 

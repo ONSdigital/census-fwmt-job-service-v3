@@ -26,13 +26,40 @@ databaseChangeLog:
             path: add_type.sql
             relativeToChangelogFile: true
             splitStatements: false2
-    -changeSet:
+  - changeSet:
       id: v4
       author: Steve Scorfield
       comment: Add type to gateway_cache
       changes:
         - sqlFile:
             path: add_index_to_uprn.sql
+            relativeToChangelogFile: true
+            splitStatements: false2
+  - changeSet:
+      id: v5
+      author: Steve Scorfield
+      comment: Add message caching table
+      changes:
+        - sqlFile:
+            path: add_message_caching.sql
+            relativeToChangelogFile: true
+            splitStatements: false2
+  - changeSet:
+      id: v6
+      author: Steve Scorfield
+      comment: Rename cached type column to message type
+      changes:
+        - sqlFile:
+            path: change_cachetype.sql
+            relativeToChangelogFile: true
+            splitStatements: false2
+  - changeSet:
+      id: v7
+      author: Steve Scorfield
+      comment: Add lastActionInstruction and lastActionTime
+      changes:
+        - sqlFile:
+            path: add_lastactioninstruction_and_time.sql
             relativeToChangelogFile: true
             splitStatements: false2
 

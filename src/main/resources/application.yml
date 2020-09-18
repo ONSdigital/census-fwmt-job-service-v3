@@ -57,6 +57,7 @@ rabbitmq:
   initialInterval: 5000
   multiplier: 3.0
   maxInterval: 45000
+  maxRetries: 1
   prefetchCount: 500
   concurrentConsumers: 5
   queues:
@@ -106,3 +107,7 @@ spg:
 ce:
    followUpDate: "01/05/2020"
    startDate: "01/05/2020"
+
+jobservice:
+  transitionRules:
+    path: classpath:/transitionRules.txt

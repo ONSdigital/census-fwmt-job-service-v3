@@ -26,6 +26,8 @@ public class GatewayEventsConfig {
   public static final String COMET_REOPEN_ACK = "COMET_REOPEN_ACK";
   public static final String COMET_UPDATE_PRE_SENDING = "COMET_UPDATE_PRE_SENDING";
   public static final String COMET_UPDATE_ACK = "COMET_UPDATE_ACK";
+  public static final String NO_ACTION_REQUIRED = "NO_ACTION_REQUIRED";
+  public static final String MESSAGE_HELD = "MESSAGE_HELD";
   public static final String COMET_DELETE_PRE_SENDING = "COMET_DELETE_PRE_SENDING";
   public static final String COMET_DELETE_ACK = "COMET_DELETE_ACK";
 
@@ -36,6 +38,8 @@ public class GatewayEventsConfig {
   public static final String FAILED_TO_UPDATE_TM_JOB = "FAILED_TO_UPDATE_TM_JOB";
   public static final String CASE_NOT_FOUND = "CASE_NOT_FOUND";
   public static final String INCORRECT_SWITCH_SURVEY_TYPE = "INCORRECT_SWITCH_SURVEY_TYPE";
+
+  public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
   public static final String CONVERT_SPG_UNIT_UPDATE_TO_CREATE = "CONVERT_SPG_UNIT_UPDATE_TO_CREATE";
   public static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";

@@ -21,7 +21,7 @@ import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
-@Qualifier("Pause")
+@Qualifier("Cancel")
 @Service
 public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 

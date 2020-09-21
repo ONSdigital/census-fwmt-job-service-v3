@@ -3,7 +3,6 @@ package uk.gov.ons.census.fwmt.jobservice.rabbit;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -28,8 +27,9 @@ public class RmReceiver {
   public static final String RM_CREATE_SWITCH_REQUEST_RECEIVED = "RM_CREATE_SWITCH_REQUEST_RECEIVED";
   public static final String RM_UPDATE_REQUEST_RECEIVED = "RM_UPDATE_REQUEST_RECEIVED";
   public static final String RM_CANCEL_REQUEST_RECEIVED = "RM_CANCEL_REQUEST_RECEIVED";
-  public static final String RM_PAUSE_REQUEST_RECEIVED = "RM_PAUSE_REQUEST_RECEIVED";
   private static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";
+  private static final String RM_PAUSE_REQUEST_RECEIVED = "RM_PAUSE_REQUEST_RECEIVED";
+  
   @Autowired
   private final JobService jobService;
   @Autowired
@@ -66,6 +66,12 @@ public class RmReceiver {
               "Case Ref", rmRequest.getCaseRef());
       jobService.processUpdate(rmRequest, receivedMessageTime);
       break;
+    }
+    case PAUSE: {  
+      gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,  
+          "Case Ref", rmRequest.getCaseRef());  
+      jobService.processPause(rmRequest, receivedMessageTime);  
+      break;  
     }
     default:
       break; //TODO THROW ROUTUNG FAILURE

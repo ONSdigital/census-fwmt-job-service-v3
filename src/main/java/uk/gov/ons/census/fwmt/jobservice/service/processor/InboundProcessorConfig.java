@@ -27,6 +27,10 @@ public class InboundProcessorConfig {
   @Qualifier("Cancel")
   private List<InboundProcessor<FwmtCancelActionInstruction>> cancelProcessors;
 
+  @Autowired
+  @Qualifier("Pause")
+  private List<InboundProcessor<FwmtActionInstruction>> pauseProcessors;
+
   @Bean
   @Qualifier("CreateProcessorMap")
   public Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> buildCreateProcessorMap(
@@ -73,5 +77,21 @@ public class InboundProcessorConfig {
       cancelProcessorMap.put(p.getKey(), list);
     }
     return cancelProcessorMap;
+  }
+
+  @Bean
+  @Qualifier("PauseProcessorMap")
+  public Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> buildPauseProcessorMap(
+      @Qualifier("Pause") List<InboundProcessor<FwmtActionInstruction>> processors) {
+    var pauseProcessorMap = new HashMap<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>>();
+    for (InboundProcessor<FwmtActionInstruction> p : processors) {
+      if (!pauseProcessorMap.containsKey(p.getKey())) {
+        pauseProcessorMap.put(p.getKey(), new ArrayList<>());
+      }
+      List<InboundProcessor<FwmtActionInstruction>> list = pauseProcessorMap.get(p.getKey());
+      list.add(p);
+      pauseProcessorMap.put(p.getKey(), list);
+    }
+    return pauseProcessorMap;
   }
 }

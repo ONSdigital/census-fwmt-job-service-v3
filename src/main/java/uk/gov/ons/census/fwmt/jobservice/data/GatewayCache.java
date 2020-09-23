@@ -45,7 +45,7 @@ public class GatewayCache {
   public String estabUprn;
 
   @Column(name = "type")
-  public int type;
+  public Integer type;
 
   @Column(name = "last_action_instruction")
   public String lastActionInstruction;

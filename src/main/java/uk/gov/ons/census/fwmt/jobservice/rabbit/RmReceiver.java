@@ -1,6 +1,7 @@
 package uk.gov.ons.census.fwmt.jobservice.rabbit;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class RmReceiver {
   public static final String RM_CANCEL_REQUEST_RECEIVED = "RM_CANCEL_REQUEST_RECEIVED";
   private static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";
   private static final String RM_PAUSE_REQUEST_RECEIVED = "RM_PAUSE_REQUEST_RECEIVED";
-  
+
   @Autowired
   private final JobService jobService;
   @Autowired
@@ -40,11 +41,12 @@ public class RmReceiver {
   }
 
   @RabbitHandler
-  public void receiveCreateMessage(FwmtActionInstruction rmRequest, @Header("timestamp") String timestamp) throws GatewayException {
+  public void receiveCreateMessage(FwmtActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) throws GatewayException {
     //TODO trigger correct event CREATE or UPDATE
     long epochTimeStamp = Long.parseLong(timestamp);
     Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
     System.out.println(receivedMessageTime);
+    System.out.println(message.getMessageProperties());
     switch (rmRequest.getActionInstruction()) {
     case CREATE: {
       gatewayEventManager
@@ -67,11 +69,11 @@ public class RmReceiver {
       jobService.processUpdate(rmRequest, receivedMessageTime);
       break;
     }
-    case PAUSE: {  
-      gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,  
-          "Case Ref", rmRequest.getCaseRef());  
-      jobService.processPause(rmRequest, receivedMessageTime);  
-      break;  
+    case PAUSE: {
+      gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,
+          "Case Ref", rmRequest.getCaseRef());
+      jobService.processPause(rmRequest, receivedMessageTime);
+      break;
     }
     default:
       break; //TODO THROW ROUTUNG FAILURE
@@ -79,11 +81,12 @@ public class RmReceiver {
   }
 
   @RabbitHandler
-  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp) throws GatewayException {
+  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) throws GatewayException {
       //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
     long epochTimeStamp = Long.parseLong(timestamp);
     Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
+    System.out.println(message.getMessageProperties());
     if (rmRequest.getActionInstruction() == ActionInstructionType.CANCEL) {
       gatewayEventManager
           .triggerEvent(rmRequest.getCaseId(), RM_CANCEL_REQUEST_RECEIVED,

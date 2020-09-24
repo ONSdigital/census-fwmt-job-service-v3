@@ -33,7 +33,7 @@ public class RetrieveTransitionRules {
       cacheType = "EMPTY";
       recordAge = "NEWER";
     } else {
-      String lastActionType = cache.getLastActionInstruction();
+      String lastActionType = cache.lastActionInstruction();
       if(lastActionType != null && !lastActionType.isEmpty()) {
         cacheType = cache.lastActionInstruction;
       } else {

@@ -33,7 +33,12 @@ public class RetrieveTransitionRules {
       cacheType = "EMPTY";
       recordAge = "NEWER";
     } else {
-      cacheType = cache.lastActionInstruction;
+      String lastActionType = cache.lastActionInstruction;
+      if(!lastActionType.isEmpty()) {
+        cacheType = cache.lastActionInstruction;
+      } else {
+        cacheType = "EMPTY";
+      }
       recordAge = checkRecordAge(cache, messageReceivedTime);
     }
 
@@ -50,10 +55,10 @@ public class RetrieveTransitionRules {
 
   public String checkRecordAge(GatewayCache gatewayCache, Instant messageReceivedTime) {
     String recordAge = "";
-    if (gatewayCache.getLastActionTime().compareTo(messageReceivedTime) > 0
-        || gatewayCache.getLastActionTime().equals(messageReceivedTime)) {
+    Instant lastActionTime = gatewayCache.getLastActionTime();
+    if (lastActionTime != null && lastActionTime.compareTo(messageReceivedTime) >= 0) {
       recordAge = "OLDER";
-    } else if (gatewayCache.getLastActionTime().compareTo(messageReceivedTime) < 0) {
+    } else {
       recordAge = "NEWER";
     }
     return recordAge;

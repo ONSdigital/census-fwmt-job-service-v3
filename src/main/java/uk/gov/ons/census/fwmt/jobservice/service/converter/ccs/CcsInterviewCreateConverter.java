@@ -63,7 +63,7 @@ public class CcsInterviewCreateConverter  {
   public CaseRequest convertCcsInterview(FwmtActionInstruction ffu, GatewayCache cache) {
     return CcsInterviewCreateConverter
         .convertCcs(ffu, cache, CaseRequest.builder())
-        .ccs(CcsCaseExtension.builder().questionnaireUrl(this.eqUrl).build())
+        .ccs(CcsCaseExtension.builder().questionnaireUrl(eqUrl).build())
         .specialInstructions(((cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) ?
             cache.getAccessInfo()
                 + "\n" :

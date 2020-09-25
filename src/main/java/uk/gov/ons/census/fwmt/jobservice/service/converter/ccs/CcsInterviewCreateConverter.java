@@ -1,5 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.service.converter.ccs;
 
+import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
@@ -16,7 +17,10 @@ import java.util.Objects;
 
 public class CcsInterviewCreateConverter  {
 
-  private CcsInterviewCreateConverter() {
+  public final String eqUrl;
+
+  private CcsInterviewCreateConverter(@Value("${eq.url}") String eqUrl) {
+    this.eqUrl = eqUrl;
   }
 
   public static CaseRequest.CaseRequestBuilder convertCcs(
@@ -56,10 +60,10 @@ public class CcsInterviewCreateConverter  {
     return commonBuilder;
   }
 
-  public static CaseRequest convertCcsInterview(FwmtActionInstruction ffu, GatewayCache cache) {
+  public CaseRequest convertCcsInterview(FwmtActionInstruction ffu, GatewayCache cache) {
     return CcsInterviewCreateConverter
         .convertCcs(ffu, cache, CaseRequest.builder())
-        .ccs(CcsCaseExtension.builder().questionnaireUrl("url").build())
+        .ccs(CcsCaseExtension.builder().questionnaireUrl(this.eqUrl).build())
         .specialInstructions(((cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) ?
             cache.getAccessInfo()
                 + "\n" :

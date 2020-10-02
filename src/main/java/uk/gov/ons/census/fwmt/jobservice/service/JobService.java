@@ -15,15 +15,14 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CONVERT_SPG_UNIT_UPDATE_TO_CREATE;
-
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CONVERT_SPG_UNIT_UPDATE_TO_CREATE;
 
 @Slf4j
 @Service
@@ -80,14 +79,10 @@ public class JobService {
     if (processors.size() > 1) {
       // TODO throw routing error & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple CREATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
-          "FwmtActionInstruction", rmRequest.toString());
+          "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple CREATE processors for request from RM", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
     }
-    if (rmRequest.getActionInstruction().equals(ActionInstructionType.SWITCH_CE_TYPE)) {
-      processors.get(0).process(rmRequest, cache, messageReceivedTime);
-    } else {
-      transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
-    }
+    transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
 
   }
 
@@ -97,7 +92,7 @@ public class JobService {
     boolean isHeld = false;
 
     if (cache != null) {
-      if (cache.getLastActionInstruction().equals("UPDATE(HELD)") || cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
+      if ("UPDATE(HELD)".equals(cache.getLastActionInstruction()) || "CANCEL(HELD)".equals(cache.getLastActionInstruction())) {
         isHeld = true;
       }
     }
@@ -128,7 +123,7 @@ public class JobService {
     if (processors.size() > 1) {
       // TODO throw routing error & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple UPDATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
-          "FwmtActionInstruction", rmRequest.toString());
+          "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple UPDATE processors for request from RM", rmRequest, cache, "rmRequest",
           rmRequest.toString());
     }
@@ -156,13 +151,13 @@ public class JobService {
     if (processors.size() == 0 && cache != null && !cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
       // TODO throw routing error & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a CANCEL processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
-          "FwmtCancelActionInstruction", rmRequest.toString());
+          "FwmtCancelActionInstruction", rmRequest.toString(), cache.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Could not find a CANCEL processor for request from RM", rmRequest, cache);
     }
     if (processors.size() > 1) {
       // TODO throw routing error & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple CANCEL processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
-          "FwmtCancelActionInstruction", rmRequest.toString());
+          "FwmtCancelActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple CANCEL processors for request from RM", rmRequest, cache);
     }
     if (processors.size() == 1) {
@@ -174,32 +169,31 @@ public class JobService {
     }
   }
 
-  
-  @Transactional  
-  public void processPause(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {  
-    final GatewayCache cache = cacheService.getById(rmRequest.getCaseId()); 
-    ProcessorKey key = ProcessorKey.buildKey(rmRequest);  
+  @Transactional
+  public void processPause(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
+    final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
+    ProcessorKey key = ProcessorKey.buildKey(rmRequest);
 
-    List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key);  
+    List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key);
 
-    if (processors == null) 
-      processors = Collections.emptyList(); 
-    else  
-      processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());     
-
-    if (processors.size() == 0) { 
-      // TODO throw routing error & exit; 
-      eventManager.triggerErrorEvent(this.getClass(), "Could not find a PAUSE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,  
-          "FwmtActionInstruction", rmRequest.toString()); 
-      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Could not find a PAUSE processor for request from RM", rmRequest, cache); 
-    } 
-    if (processors.size() > 1) {  
-      // TODO throw routing error & exit; 
-      eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, 
-          "FwmtActionInstruction", rmRequest.toString()); 
-      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple PAUSE processors for request from RM", rmRequest, cache);  
-    } 
-    processors.get(0).process(rmRequest, cache, messageReceivedTime); 
+    if (processors == null)
+      processors = Collections.emptyList();
+    else
+      processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());    
+    
+    if (processors.size() == 0) {
+      // TODO throw routing error & exit;
+      eventManager.triggerErrorEvent(this.getClass(), "Could not find a PAUSE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
+          "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
+      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Could not find a PAUSE processor for request from RM", rmRequest, cache);
+    }
+    if (processors.size() > 1) {
+      // TODO throw routing error & exit;
+      eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
+          "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
+      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple PAUSE processors for request from RM", rmRequest, cache);
+    }
+    processors.get(0).process(rmRequest, cache, messageReceivedTime);
   }
   
   /*

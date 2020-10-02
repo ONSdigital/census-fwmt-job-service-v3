@@ -52,7 +52,7 @@ public class RabbitMqConfig {
       @Value("${rabbitmq.initialInterval}") int initialInterval,
       @Value("${rabbitmq.multiplier}") double multiplier,
       @Value("${rabbitmq.maxInterval}") int maxInterval,
-      @Value("${rabbitmq.maxRetries}") int maxRetries,
+      @Value("${rabbitmq.maxRetries:1}") int maxRetries,
       @Value("${rabbitmq.prefetchCount}") int prefetchCount,
       @Value("${rabbitmq.queues.rm.input}") String inputQueue,
       @Value("${rabbitmq.queues.rm.dlq}") String inputDlq) {

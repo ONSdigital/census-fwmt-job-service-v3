@@ -53,10 +53,10 @@ public class JobService {
   @Qualifier("CancelProcessorMap")
   private Map<ProcessorKey, List<InboundProcessor<FwmtCancelActionInstruction>>> cancelProcessorMap;
 
-  @Autowired
-  @Qualifier("PauseProcessorMap")
-  private Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> pauseProcessorMap;
-
+  @Autowired  
+  @Qualifier("PauseProcessorMap") 
+  private Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> pauseProcessorMap; 
+  
   public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
   @Transactional
@@ -196,7 +196,7 @@ public class JobService {
     }
     processors.get(0).process(rmRequest, cache, messageReceivedTime);
   }
-
+  
   /*
    * private void routingFailure() String ffuDetail = ffu.toRoutingString();
    * String cacheDetail = (cache == null) ? "null" : cache.toRoutingString();

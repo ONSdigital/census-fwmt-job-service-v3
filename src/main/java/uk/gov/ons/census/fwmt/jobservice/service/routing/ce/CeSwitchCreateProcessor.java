@@ -120,7 +120,9 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
     ResponseEntity<Void> reopenResponse = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
     routingValidator.validateResponseCodePoo(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
-    cacheService.save(cache.toBuilder().build());
+    if(cache != null) {
+      cacheService.save(cache.toBuilder().build());
+    }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_ACK, "Survey Type",
         tmRequest.getSurveyType().toString());

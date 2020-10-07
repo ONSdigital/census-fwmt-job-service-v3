@@ -12,7 +12,7 @@ import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
-import uk.gov.ons.census.fwmt.jobservice.service.converter.hh.HhCancelConvertor;
+import uk.gov.ons.census.fwmt.jobservice.service.converter.hh.HhCancelConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
@@ -75,7 +75,7 @@ public class HhCancel implements InboundProcessor<FwmtActionInstruction> {
         "type", "HH Cancel Case",
         "action", "Cancel");
 
-    CasePauseRequest tmRequest = HhCancelConvertor.buildCancel(rmRequest);
+    CasePauseRequest tmRequest = HhCancelConverter.buildCancel(rmRequest);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
         "Case Ref", rmRequest.getCaseRef());

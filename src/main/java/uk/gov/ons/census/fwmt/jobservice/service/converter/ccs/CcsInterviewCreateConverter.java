@@ -17,10 +17,10 @@ import java.util.Objects;
 
 public class CcsInterviewCreateConverter  {
 
-  public final String eqUrl;
+  public static String eqUrl;
 
   private CcsInterviewCreateConverter(@Value("${eq.url}") String eqUrl) {
-    this.eqUrl = eqUrl;
+    CcsInterviewCreateConverter.eqUrl = eqUrl;
   }
 
   public static CaseRequest.CaseRequestBuilder convertCcs(
@@ -60,14 +60,13 @@ public class CcsInterviewCreateConverter  {
     return commonBuilder;
   }
 
-  public CaseRequest convertCcsInterview(FwmtActionInstruction ffu, GatewayCache cache) {
+  public static CaseRequest convertCcsInterview(FwmtActionInstruction ffu, GatewayCache cache) {
     return CcsInterviewCreateConverter
         .convertCcs(ffu, cache, CaseRequest.builder())
         .ccs(CcsCaseExtension.builder().questionnaireUrl(eqUrl).build())
         .specialInstructions(((cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) ?
             cache.getAccessInfo()
-                + "\n" :
-            ""))
+                + "\n" : ""))
         .description(
             ((cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) ? cache.getCareCodes()
                 + "\n" : ""))

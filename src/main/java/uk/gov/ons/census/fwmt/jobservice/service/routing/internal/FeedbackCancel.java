@@ -67,7 +67,8 @@ public class FeedbackCancel implements InboundProcessor<FwmtCancelActionInstruct
       throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
         "Case Ref", "N/A",
-        "TM Action", "CLOSE");
+        "TM Action", "CLOSE",
+        "Source", "Internal");
 
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
     routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CANCEL_TM_JOB,
@@ -84,6 +85,7 @@ public class FeedbackCancel implements InboundProcessor<FwmtCancelActionInstruct
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
             "Case Ref", "N/A",
-            "Response Code", response.getStatusCode().name());
+            "Response Code", response.getStatusCode().name(),
+            "Source", "Internal");
   }
 }

@@ -16,6 +16,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
 
 import javax.transaction.Transactional;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -170,7 +171,8 @@ public class JobService {
   }
 
   @Transactional
-  public void processPause(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
+  public void processPause(FwmtActionInstruction rmRequest, Instant messageReceivedTime)
+      throws GatewayException, ParseException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
 

@@ -172,7 +172,7 @@ public class JobService {
 
   @Transactional
   public void processPause(FwmtActionInstruction rmRequest, Instant messageReceivedTime)
-      throws GatewayException, ParseException {
+      throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
 

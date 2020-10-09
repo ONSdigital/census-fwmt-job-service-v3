@@ -1,9 +1,9 @@
-package uk.gov.ons.census.fwmt.jobservice.service.routing.spg;
+package uk.gov.ons.census.fwmt.jobservice.service.routing.internal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
@@ -22,8 +22,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CANCEL_TM_JOB;
 
 @Qualifier("Cancel")
-@Component
-public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelActionInstruction> {
+@Service
+public class FeedbackCancel implements InboundProcessor<FwmtCancelActionInstruction> {
 
   @Autowired
   private CometRestClient cometRestClient;
@@ -39,9 +39,9 @@ public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelAction
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CANCEL.toString())
-      .surveyName("CENSUS")
-      .addressType("SPG")
-      .addressLevel("E")
+      .surveyName("FEEDBACK")
+      .addressType("FEEDBACK")
+      .addressLevel("F")
       .build();
 
   @Override
@@ -49,49 +49,43 @@ public class SpgCancelSiteProcessor implements InboundProcessor<FwmtCancelAction
     return key;
   }
 
-  // TODO Remove format on save
-  // TODO add ffa formatter (modify)
-  // TODO Find ignore formatting tag
-  // TODO Make eventManager Annotation
   @Override
   public boolean isValid(FwmtCancelActionInstruction rmRequest, GatewayCache cache) {
     try {
-      // relies on the validation of: SpgRouter, SpgCancelRouter
       return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL
-          && rmRequest.getSurveyName().equals("CENSUS")
-          && rmRequest.getAddressType().equals("SPG")
-          && rmRequest.getAddressLevel().equals("E")
+          && rmRequest.getSurveyName().equals("FEEDBACK")
+          && rmRequest.getAddressType().equals("FEEDBACK")
+          && rmRequest.getAddressLevel().equals("F")
           && cache != null;
     } catch (NullPointerException e) {
       return false;
     }
   }
 
-  // TODO Acceptance test should check delete is sent (new event)
-  // TODO Can event be added in class where its used, rather than config, or can it be added when used first time
   @Override
-  public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
+  public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
+      throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
         "Case Ref", "N/A",
         "TM Action", "CLOSE",
-        "Source", "RM");
+        "Source", "Internal");
 
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CANCEL_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CANCEL_TM_JOB,
+        "rmRequest", rmRequest.toString(),
+        "cache", (cache!=null)?cache.toString():"");
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    if (newCache == null) {
-      cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
-          .type(2).lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime).build());
-    } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime).build());
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
     }
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
             "Case Ref", "N/A",
-            "Response Code", response.getStatusCode().name());
+            "Response Code", response.getStatusCode().name(),
+            "Source", "Internal");
   }
 }

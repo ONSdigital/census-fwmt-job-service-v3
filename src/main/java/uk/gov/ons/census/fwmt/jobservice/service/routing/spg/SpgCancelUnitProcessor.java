@@ -71,7 +71,8 @@ public class SpgCancelUnitProcessor implements InboundProcessor<FwmtCancelAction
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
         "Case Ref", "N/A",
-        "TM Action", "CLOSE");
+        "TM Action", "CLOSE",
+        "Source", "RM");
     
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
     routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
@@ -84,8 +85,8 @@ public class SpgCancelUnitProcessor implements InboundProcessor<FwmtCancelAction
     }
     
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
-            "Case Ref", "N/A",
-            "Response Code", response.getStatusCode().name());
+        "Case Ref", "N/A",
+        "Response Code", response.getStatusCode().name(),
+        "Source", "RM");
   }
-
 }

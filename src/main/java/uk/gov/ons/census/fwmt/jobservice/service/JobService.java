@@ -16,8 +16,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
 
 import javax.transaction.Transactional;
-import java.text.ParseException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +110,7 @@ public class JobService {
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key);
     if (processors == null)
-      processors = Collections.emptyList();
+      processors = new ArrayList<>();
     else
       processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
 
@@ -145,7 +145,7 @@ public class JobService {
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key);
 
     if (processors == null)
-      processors = Collections.emptyList();
+      processors = new ArrayList<>();
     else
       processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
 
@@ -179,7 +179,7 @@ public class JobService {
     List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key);
 
     if (processors == null)
-      processors = Collections.emptyList();
+      processors = new ArrayList<>();
     else
       processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());    
     

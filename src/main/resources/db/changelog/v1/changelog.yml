@@ -62,4 +62,13 @@ databaseChangeLog:
             path: add_lastactioninstruction_and_time.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v8
+      author: Steve Scorfield
+      comment: Add individualCaseId
+      changes:
+        - sqlFile:
+            path: add_individual_case_id.sql
+            relativeToChangelogFile: true
+            splitStatements: false2
 

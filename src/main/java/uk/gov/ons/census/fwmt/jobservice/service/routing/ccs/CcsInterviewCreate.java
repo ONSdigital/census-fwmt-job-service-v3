@@ -17,6 +17,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.time.Instant;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
@@ -29,6 +31,9 @@ public class CcsInterviewCreate implements InboundProcessor<FwmtActionInstructio
       .actionInstruction(ActionInstructionType.CREATE.toString())
       .surveyName("CCS")
       .build();
+
+  @Value("${eq.url}")
+  private String eqUrl;
 
   @Autowired
   private CometRestClient cometRestClient;
@@ -55,9 +60,9 @@ public class CcsInterviewCreate implements InboundProcessor<FwmtActionInstructio
     }
   }
 
-  @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
-    CaseRequest tmRequest = CcsInterviewCreateConverter.convertCcsInterview(rmRequest, cache);
+  @Override public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
+      throws GatewayException {
+    CaseRequest tmRequest = CcsInterviewCreateConverter.convertCcsInterview(rmRequest, cache, eqUrl);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),
@@ -71,5 +76,6 @@ public class CcsInterviewCreate implements InboundProcessor<FwmtActionInstructio
             "Case Ref", rmRequest.getCaseRef(),
             "Response Code", response.getStatusCode().name(),
             "Survey Type", tmRequest.getSurveyType().toString());
+
   }
 }

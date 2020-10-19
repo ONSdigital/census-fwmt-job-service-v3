@@ -75,7 +75,7 @@ public class SpgCancelUnitProcessor implements InboundProcessor<FwmtCancelAction
         "Source", "RM");
     
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CREATE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache != null) {

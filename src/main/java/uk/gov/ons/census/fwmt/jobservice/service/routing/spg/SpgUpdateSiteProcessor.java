@@ -72,7 +72,7 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
 
     ReopenCaseRequest tmRequest = SpgUpdateConverter.convertSite(rmRequest, cache);
     ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache != null) {

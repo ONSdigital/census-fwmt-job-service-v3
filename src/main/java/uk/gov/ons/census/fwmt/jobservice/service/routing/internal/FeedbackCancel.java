@@ -71,7 +71,7 @@ public class FeedbackCancel implements InboundProcessor<FwmtCancelActionInstruct
         "Source", "Internal");
 
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CANCEL_TM_JOB,
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CANCEL_TM_JOB,
         "rmRequest", rmRequest.toString(),
         "cache", (cache!=null)?cache.toString():"");
 

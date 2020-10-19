@@ -17,10 +17,7 @@ import java.util.Objects;
 
 public class CcsInterviewCreateConverter  {
 
-  public static String eqUrl;
-
-  private CcsInterviewCreateConverter(@Value("${eq.url}") String eqUrl) {
-    CcsInterviewCreateConverter.eqUrl = eqUrl;
+  private CcsInterviewCreateConverter() {
   }
 
   public static CaseRequest.CaseRequestBuilder convertCcs(
@@ -29,7 +26,7 @@ public class CcsInterviewCreateConverter  {
 
     commonBuilder.type(CaseType.valueOf(ffu.getAddressType()));
     commonBuilder.surveyType(SurveyType.CCS_INT);
-    commonBuilder.category(ffu.getAddressType().equals("HH") ? "HH" : "CE");
+    commonBuilder.category("HH".equals(ffu.getAddressType()) ? "HH" : "CE");
 
     commonBuilder.estabType(ffu.getEstabType());
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
@@ -60,7 +57,7 @@ public class CcsInterviewCreateConverter  {
     return commonBuilder;
   }
 
-  public static CaseRequest convertCcsInterview(FwmtActionInstruction ffu, GatewayCache cache) {
+  public static CaseRequest convertCcsInterview(FwmtActionInstruction ffu, GatewayCache cache, String eqUrl) {
     return CcsInterviewCreateConverter
         .convertCcs(ffu, cache, CaseRequest.builder())
         .ccs(CcsCaseExtension.builder().questionnaireUrl(eqUrl).build())

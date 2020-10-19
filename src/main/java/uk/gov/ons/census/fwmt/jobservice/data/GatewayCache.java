@@ -5,17 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.Instant;
 
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@ToString
 @Table(name = "gateway_cache")
 public class GatewayCache {
   @Id
@@ -41,8 +44,14 @@ public class GatewayCache {
   @Column(name = "estab_uprn")
   public String estabUprn;
 
-  @Column(name ="type")
-  public int type;
+  @Column(name = "type")
+  public Integer type;
+
+  @Column(name = "last_action_instruction")
+  public String lastActionInstruction;
+
+  @Column(name = "last_action_time")
+  private Instant lastActionTime;
 
   @Column(name ="oa")
   public String oa;
@@ -53,4 +62,8 @@ public class GatewayCache {
         "existsInFwmt=" + this.existsInFwmt + ", " +
         "delivered=" + this.delivered + ")";
   }
+
+//  public void setLastActionTime(Date lastActionTime) {
+//    this.lastActionTime = new Date(lastActionTime.getTime());
+//  }
 }

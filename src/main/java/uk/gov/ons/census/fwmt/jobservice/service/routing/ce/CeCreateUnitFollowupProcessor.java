@@ -12,13 +12,15 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
-import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldRepublishProducer;
-import uk.gov.ons.census.fwmt.jobservice.service.CeFollowUpSchedulingService;
+import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldPublisher;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
+import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeCreateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
@@ -40,10 +42,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   private GatewayCacheService cacheService;
 
   @Autowired
-  private CeFollowUpSchedulingService config;
-
-  @Autowired
-  private RmFieldRepublishProducer rmFieldRepublishProducer;
+  private RmFieldPublisher rmFieldPublisher;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
@@ -77,7 +76,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
   // TODO what do we do with followUpService
   // TODO add test for secure
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     CaseRequest tmRequest;
 
     if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
@@ -90,8 +89,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
       ceSwitch.setCaseId(cacheService.getEstabCaseId(rmRequest.getEstabUprn()));
       ceSwitch.setSurveyType(SurveyType.CE_SITE);
 
-      rmFieldRepublishProducer.republish(ceSwitch);
-
+      rmFieldPublisher.publish(ceSwitch);
     }
 
     if (rmRequest.isSecureEstablishment()) {
@@ -104,15 +102,17 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
         tmRequest.getReference(), "Survey Type", tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
       cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).delivered(true).existsInFwmt(true)
-          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).build());
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     } else {
       cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
-          .existsInFwmt(true).build());
+          .existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref",

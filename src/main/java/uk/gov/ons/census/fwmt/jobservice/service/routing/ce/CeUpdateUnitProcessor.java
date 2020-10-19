@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.ons.census.fwmt.common.data.tm.CeCase;
 import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
@@ -17,6 +16,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.converter.ce.CeUpdateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_PRE_SENDING;
@@ -66,7 +67,7 @@ public class CeUpdateUnitProcessor implements InboundProcessor<FwmtActionInstruc
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     CeCasePatchRequest tmRequest;
 
     tmRequest = CeUpdateConverter.convertUnit(rmRequest);
@@ -75,7 +76,14 @@ public class CeUpdateUnitProcessor implements InboundProcessor<FwmtActionInstruc
         "Case Ref", rmRequest.getCaseRef());
 
     ResponseEntity<Void> response = cometRestClient.sendCeDetails(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
+    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
+    }
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,

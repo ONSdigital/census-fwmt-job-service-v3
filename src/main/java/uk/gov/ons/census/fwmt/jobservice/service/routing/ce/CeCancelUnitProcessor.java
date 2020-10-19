@@ -10,9 +10,12 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CANCEL_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CANCEL_PRE_SENDING;
@@ -30,6 +33,9 @@ public class CeCancelUnitProcessor implements InboundProcessor<FwmtCancelActionI
 
   @Autowired
   private RoutingValidator routingValidator;
+
+  @Autowired
+  private GatewayCacheService cacheService;
 
   private static ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CANCEL.toString())
@@ -57,13 +63,21 @@ public class CeCancelUnitProcessor implements InboundProcessor<FwmtCancelActionI
   }
 
   @Override
-  public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
         "Case Ref", "N/A",
-        "TM Action", "CLOSE");
+        "TM Action", "CLOSE",
+        "Source", "RM");
 
     ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CANCEL_TM_JOB);
+    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Cancel", FAILED_TO_CANCEL_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
+    }
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,

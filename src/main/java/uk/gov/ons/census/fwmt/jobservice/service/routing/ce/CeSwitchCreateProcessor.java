@@ -18,6 +18,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.time.Instant;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_REOPEN_ACK;
@@ -36,6 +38,8 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       .addressType("CE")
       .addressLevel(null)
       .build();
+
+  private static final String PROCESSING_CE_SWITCH_CREATE = "PROCESSING_CE_SWITCH_CREATE";
 
   @Autowired
   private CometRestClient cometRestClient;
@@ -60,18 +64,17 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       return rmRequest.getActionInstruction() == ActionInstructionType.SWITCH_CE_TYPE
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
-          && rmRequest.getAddressLevel() == null
-          && ((cache != null)
-          && (cache.existsInFwmt));
+          && rmRequest.getAddressLevel() == null;
     } catch (NullPointerException e) {
       return false;
     }
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     ReopenCaseRequest tmRequest;
 
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING_CE_SWITCH_CREATE);
     if (rmRequest.getSurveyType().equals(SurveyType.CE_EST_D)) {
       cache.setType(1);
       tmRequest = CommonSwitchConverter.convertEstabDeliver(rmRequest);
@@ -80,7 +83,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       cache.setType(1);
       tmRequest = CommonSwitchConverter.converEstabFollowup(rmRequest);
       processSwitch(cache, rmRequest, tmRequest);
-    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE) && cache.getType() != 2) {
+    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE) && (cache!=null) && cache.getType() != 2) {
       cache.setType(2);
       tmRequest = CommonSwitchConverter.convertSite(rmRequest);
       processSwitch(cache, rmRequest, tmRequest);
@@ -94,7 +97,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       processSwitch(cache, rmRequest, tmRequest);
     } else {
       eventManager.triggerErrorEvent(this.getClass(), "Not a recognised CE Switch SurveyType",
-          String.valueOf(rmRequest.getCaseId()), INCORRECT_SWITCH_SURVEY_TYPE);
+          String.valueOf(rmRequest.getCaseId()), INCORRECT_SWITCH_SURVEY_TYPE,  "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Incorrect CE Switch survey type");
     }
   }
@@ -106,7 +109,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
         rmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> closeResponse = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCode(closeResponse, rmRequest.getCaseId(), "Close", FAILED_TO_CLOSE_TM_JOB);
+    routingValidator.validateResponseCodePoo(closeResponse, rmRequest.getCaseId(), "Close", FAILED_TO_CLOSE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_ACK, "Survey Type",
         tmRequest.getSurveyType().toString());
@@ -115,9 +118,11 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
         tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> reopenResponse = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB);
+    routingValidator.validateResponseCodePoo(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
-    cacheService.save(cache.toBuilder().build());
+    if(cache != null) {
+      cacheService.save(cache.toBuilder().build());
+    }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_ACK, "Survey Type",
         tmRequest.getSurveyType().toString());

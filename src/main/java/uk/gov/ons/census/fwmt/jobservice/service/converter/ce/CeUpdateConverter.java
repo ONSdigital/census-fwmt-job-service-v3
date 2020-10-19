@@ -19,14 +19,10 @@ public final class CeUpdateConverter {
       expectedResponse = ffu.getCeExpectedCapacity();
     }
 
-    if (surveyType.equals("unit")) {
-      builder.actualResponses(actualResponse);
-      builder.expectedResponses(expectedResponse);
-    } else {
-      builder.ce1Complete(ffu.isCe1Complete());
-      builder.actualResponses(actualResponse);
-      builder.expectedResponses(expectedResponse);
-    }
+    builder.actualResponses(actualResponse);
+    builder.expectedResponses(expectedResponse);
+    builder.ce1Complete(ffu.isCe1Complete());
+
     return builder;
   }
 

@@ -17,6 +17,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
+import java.time.Instant;
+
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
@@ -29,6 +31,7 @@ public class HhCreateEnglandAndWales implements InboundProcessor<FwmtActionInstr
       .actionInstruction(ActionInstructionType.CREATE.toString())
       .surveyName("CENSUS")
       .addressType("HH")
+      .addressLevel("U")
       .build();
 
   @Autowired
@@ -62,7 +65,7 @@ public class HhCreateEnglandAndWales implements InboundProcessor<FwmtActionInstr
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     CaseRequest tmRequest = HhCreateConverter.convertHhEnglandAndWales(rmRequest, cache);
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_PRE_SENDING,
@@ -70,14 +73,18 @@ public class HhCreateEnglandAndWales implements InboundProcessor<FwmtActionInstr
         "Survey Type", tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB);
+    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
       cacheService.save(GatewayCache.builder().caseId(rmRequest.getCaseId()).existsInFwmt(true)
-          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(10).build());
+          .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(10)
+          .lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).build());
+      cacheService.save(newCache.toBuilder().existsInFwmt(true)
+          .lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     }
 
     eventManager

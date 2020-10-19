@@ -21,6 +21,7 @@ public final class SpgCreateConverter {
       FwmtActionInstruction ffu, GatewayCache cache, CaseRequest.CaseRequestBuilder builder) {
 
     CaseRequest.CaseRequestBuilder commonBuilder = CommonCreateConverter.convertCommon(ffu, cache, builder);
+    commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();
 

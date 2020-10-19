@@ -11,10 +11,13 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.spg.SpgUpdateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
+
+import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_UPDATE_PRE_SENDING;
@@ -40,6 +43,9 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
   @Autowired
   private RoutingValidator routingValidator;
 
+  @Autowired
+  private GatewayCacheService cacheService;
+
   @Override
   public ProcessorKey getKey() {
     return key;
@@ -60,13 +66,20 @@ public class SpgUpdateSiteProcessor implements InboundProcessor<FwmtActionInstru
   }
 
   @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache) throws GatewayException {
+  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
         "Case Ref", rmRequest.getCaseRef());
 
     ReopenCaseRequest tmRequest = SpgUpdateConverter.convertSite(rmRequest, cache);
     ResponseEntity<Void> response = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB);
+    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Update", FAILED_TO_UPDATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+
+    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+    if (newCache != null) {
+      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime)
+          .build());
+    }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_ACK,
         "Case Ref", rmRequest.getCaseRef(),

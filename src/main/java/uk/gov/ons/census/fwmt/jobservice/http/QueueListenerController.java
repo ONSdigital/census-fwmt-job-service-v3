@@ -1,8 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.http;
 
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +13,7 @@ public class QueueListenerController {
   @Autowired
   private ProcessRmFieldDlq processRMFieldDLQ;
 
-  @Autowired
-  @Qualifier("RM")
-  private SimpleMessageListenerContainer simpleMessageListenerContainer;
+//  private SimpleMessageListenerContainer simpleMessageListenerContainer;
 
   @GetMapping("/processDLQ")
   public ResponseEntity<String> startDLQProcessor() throws GatewayException {
@@ -25,15 +21,15 @@ public class QueueListenerController {
     return ResponseEntity.ok("DLQ listener started.");
   }
 
-  @GetMapping("/startListener")
-  public ResponseEntity<String> startListener() {
-    simpleMessageListenerContainer.start();
-    return ResponseEntity.ok("Queue listener started.");
-  }
+//  @GetMapping("/startListener")
+//  public ResponseEntity<String> startListener() {
+//    simpleMessageListenerContainer.start();
+//    return ResponseEntity.ok("Queue listener started.");
+//  }
 
-  @GetMapping("/stopListener")
-  public ResponseEntity<String> stopListener() {
-    simpleMessageListenerContainer.stop();
-    return ResponseEntity.ok("Queue listener stopped.");
-  }
+//  @GetMapping("/stopListener")
+//  public ResponseEntity<String> stopListener() {
+//    simpleMessageListenerContainer.stop();
+//    return ResponseEntity.ok("Queue listener stopped.");
+//  }
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
-import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
@@ -22,7 +22,7 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 
 @Qualifier("Cancel")
 @Service
-public class HhCancel implements InboundProcessor<FwmtActionInstruction> {
+public class HhCancel implements InboundProcessor<FwmtCancelActionInstruction> {
 
   private static final String PROCESSING = "PROCESSING";
 
@@ -54,8 +54,7 @@ public class HhCancel implements InboundProcessor<FwmtActionInstruction> {
     return key;
   }
 
-  @Override
-  public boolean isValid(FwmtActionInstruction rmRequest, GatewayCache cache) {
+  @Override public boolean isValid(FwmtCancelActionInstruction rmRequest, GatewayCache cache) {
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL
           && rmRequest.getSurveyName().equals("CENSUS")
@@ -67,33 +66,32 @@ public class HhCancel implements InboundProcessor<FwmtActionInstruction> {
     }
   }
 
-  @Override
-  public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws
-      GatewayException {
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
-        "type", "HH Cancel Case",
-        "action", "Cancel");
+  @Override public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
+      throws GatewayException {
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
+          "type", "HH Cancel Case",
+          "action", "Cancel");
 
-    CasePauseRequest tmRequest = HhCancelConvertor.buildCancel(rmRequest);
+      CasePauseRequest tmRequest = HhCancelConverter.buildCancel(rmRequest);
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
-        "Case Ref", rmRequest.getCaseRef());
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
+          "Case Ref", "NA");
 
-    ResponseEntity<Void> response = cometRestClient.sendPause(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Pause", FAILED_TO_CREATE_TM_JOB,
-        "tmRequest", tmRequest.toString(),
-        "rmRequest", rmRequest.toString(),
-        "cache", (cache!=null)?cache.toString():"");
+      ResponseEntity<Void> response = cometRestClient.sendPause(tmRequest, rmRequest.getCaseId());
+      routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Pause", FAILED_TO_CREATE_TM_JOB,
+          "tmRequest", tmRequest.toString(),
+          "rmRequest", rmRequest.toString(),
+          "cache", (cache!=null)?cache.toString():"");
 
-    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    if (newCache != null) {
-      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime)
-          .build());
+      GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+      if (newCache != null) {
+        cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+            .lastActionTime(messageReceivedTime)
+            .build());
+      }
+
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
+          "Case Ref", "NA",
+          "Response Code", response.getStatusCode().name());
     }
-
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
-        "Case Ref", rmRequest.getCaseRef(),
-        "Response Code", response.getStatusCode().name());
   }
-}

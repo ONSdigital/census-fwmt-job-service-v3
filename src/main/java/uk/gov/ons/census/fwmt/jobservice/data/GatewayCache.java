@@ -56,13 +56,13 @@ public class GatewayCache {
   @Column(name ="oa")
   public String oa;
 
-  @Column(name = "managerTitle")
+  @Column(name = "manager_title")
   public String managerTitle;
 
-  @Column(name = "managerFirstname")
+  @Column(name = "manager_firstname")
   public String managerFirstname;
 
-  @Column(name = "managerSurname")
+  @Column(name = "manager_surname")
   public String managerSurname;
 
   // display only the details related to request routing

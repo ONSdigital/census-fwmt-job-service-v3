@@ -31,13 +31,16 @@ public class CcsInterviewCreateConverter  {
     commonBuilder.estabType(ffu.getEstabType());
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
 
+    String title = (cache != null && cache.getManagerTitle() != null ? cache.getManagerTitle() : "");
+    String firstName = (cache != null && cache.getManagerFirstname() != null ? cache.getManagerFirstname() : "");
+    String surname = (cache != null && cache.getManagerSurname() != null ? cache.getManagerSurname() : "");
+
     Contact outContact = Contact.builder()
         .organisationName(ffu.getOrganisationName() != null ? ffu.getOrganisationName() : "")
-        .name((cache != null && cache.getManagerTitle() != null ? cache.getManagerTitle() : "")
-            + " " + (cache != null && cache.getManagerFirstname() != null ? cache.getManagerFirstname() : "")
-            + " " + (cache != null ? cache.getManagerSurname() != null ? cache.getManagerSurname() : ""))
+        .name(title + " " + firstName + " " + surname)
         .build();
 
+    
     commonBuilder.contact(outContact);
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();

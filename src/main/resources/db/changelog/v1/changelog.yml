@@ -86,6 +86,6 @@ databaseChangeLog:
       comment: Add manager info to gateway_cache
       changes:
         - sqlFile:
-            path: add_oa.sql
+            path: manager_details.sql
             relativeToChangelogFile: true
             splitStatements: false2

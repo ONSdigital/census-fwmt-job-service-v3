@@ -80,3 +80,12 @@ databaseChangeLog:
             path: add_oa.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v10
+      author: Jacob Harrison
+      comment: Add manager info to gateway_cache
+      changes:
+        - sqlFile:
+            path: add_oa.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

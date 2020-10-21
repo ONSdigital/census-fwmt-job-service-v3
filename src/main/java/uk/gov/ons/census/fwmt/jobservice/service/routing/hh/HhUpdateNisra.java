@@ -84,7 +84,7 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
         "Survey Type", tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Update", FAILED_TO_CREATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Update", FAILED_TO_CREATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     if (newCache != null) {
       cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
@@ -104,7 +104,7 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
           "Survey Type", tmRequest.getSurveyType().toString());
 
       response = cometRestClient.sendDeletePause(rmRequest.getCaseId());
-      routingValidator.validateResponseCodePoo(response, rmRequest.getCaseId(), "Delete", FAILED_TO_CREATE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+      routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Delete", FAILED_TO_CREATE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
       if (newCache != null) {
         cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())

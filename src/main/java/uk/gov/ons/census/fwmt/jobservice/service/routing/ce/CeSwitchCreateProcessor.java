@@ -109,7 +109,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
         rmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> closeResponse = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(closeResponse, rmRequest.getCaseId(), "Close", FAILED_TO_CLOSE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    routingValidator.validateResponseCode(closeResponse, rmRequest.getCaseId(), "Close", FAILED_TO_CLOSE_TM_JOB, "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_ACK, "Survey Type",
         tmRequest.getSurveyType().toString());
@@ -118,7 +118,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
         tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> reopenResponse = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCodePoo(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    routingValidator.validateResponseCode(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     if(cache != null) {
       cacheService.save(cache.toBuilder().build());

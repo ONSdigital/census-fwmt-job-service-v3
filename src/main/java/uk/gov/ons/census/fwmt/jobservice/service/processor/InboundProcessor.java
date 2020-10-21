@@ -11,4 +11,5 @@ public interface InboundProcessor<T> {
     boolean isValid(T rmRequest, GatewayCache cache);
 
     void process(T rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException;
+
 }

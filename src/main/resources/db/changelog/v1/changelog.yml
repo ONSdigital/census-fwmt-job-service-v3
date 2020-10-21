@@ -71,4 +71,21 @@ databaseChangeLog:
             path: add_individual_case_id.sql
             relativeToChangelogFile: true
             splitStatements: false2
-
+  - changeSet:
+      id: v9
+      author: Jacob Harrison
+      comment: Add oa to gateway_cache
+      changes:
+        - sqlFile:
+            path: add_oa.sql
+            relativeToChangelogFile: true
+            splitStatements: false2
+  - changeSet:
+      id: v10
+      author: Jacob Harrison
+      comment: Add manager info to gateway_cache
+      changes:
+        - sqlFile:
+            path: manager_details.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

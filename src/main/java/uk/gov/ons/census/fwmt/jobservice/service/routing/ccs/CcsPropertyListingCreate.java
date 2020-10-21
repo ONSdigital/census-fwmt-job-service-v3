@@ -30,7 +30,9 @@ public class CcsPropertyListingCreate implements InboundProcessor<FwmtActionInst
 
   private static final ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
-      .surveyName("CCS-PL")
+      .surveyName("CCS_PL")
+      .addressType(null)
+      .addressLevel(null)
       .build();
 
   @Autowired
@@ -54,7 +56,8 @@ public class CcsPropertyListingCreate implements InboundProcessor<FwmtActionInst
   public boolean isValid(FwmtActionInstruction rmRequest, GatewayCache cache) {
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CREATE
-          && rmRequest.getSurveyName().equals("CCS-PL");
+          && rmRequest.getSurveyName().equals("CCS_PL")
+          && cache == null;
     } catch (NullPointerException e) {
       return false;
     }

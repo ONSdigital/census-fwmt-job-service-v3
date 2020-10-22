@@ -22,7 +22,7 @@ public class CcsPropertyListingCreateConverter {
     commonBuilder.surveyType((ffu.getSurveyType()!=null)?ffu.getSurveyType():SurveyType.CCS_PL);
     commonBuilder.category("Not applicable");
 
-    commonBuilder.estabType((ffu.getEstabType()!=null)?ffu.getEstabType():"");
+    commonBuilder.estabType((ffu.getEstabType()!=null)?ffu.getEstabType():"HH");
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();

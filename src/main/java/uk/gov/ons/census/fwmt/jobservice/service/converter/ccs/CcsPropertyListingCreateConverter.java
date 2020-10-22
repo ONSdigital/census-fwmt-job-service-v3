@@ -27,6 +27,7 @@ public class CcsPropertyListingCreateConverter {
 
     commonBuilder.estabType((ffu.getEstabType()!=null)?ffu.getEstabType():"HH");
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
+    commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();
 

@@ -22,11 +22,13 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 
 @Qualifier("Cancel")
 @Service
-public class CcsInterviewCancel implements InboundProcessor<FwmtCancelActionInstruction> {
+public class CcsInterviewHHCancel implements InboundProcessor<FwmtCancelActionInstruction> {
 
   private static final ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CANCEL.toString())
       .surveyName("CENSUS")
+      .addressType("HH")
+      .addressLevel("U")
       .build();
 
   @Autowired
@@ -48,6 +50,8 @@ public class CcsInterviewCancel implements InboundProcessor<FwmtCancelActionInst
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL
           && rmRequest.getSurveyName().equals("CCS")
+          && rmRequest.getAddressType().equals("HH")
+          && rmRequest.getAddressLevel().equals("U")
           && cache != null;
     } catch (NullPointerException e) {
       return false;

@@ -58,7 +58,7 @@ public class CcsInterviewCECreate implements InboundProcessor<FwmtActionInstruct
           && rmRequest.getSurveyName().equals("CCS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("E")
-          && cache.existsInFwmt;
+          && cache!=null;
     } catch (NullPointerException e) {
       return false;
     }

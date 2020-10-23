@@ -26,7 +26,7 @@ public class CcsInterviewCECancel implements InboundProcessor<FwmtCancelActionIn
 
   private static final ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CANCEL.toString())
-      .surveyName("CENSUS")
+      .surveyName("CCS")
       .addressType("CE")
       .addressLevel("E")
       .build();

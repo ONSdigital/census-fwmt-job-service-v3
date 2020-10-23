@@ -25,11 +25,13 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILE
 
 @Qualifier("Create")
 @Service
-public class CcsInterviewCreate implements InboundProcessor<FwmtActionInstruction> {
+public class CcsInterviewHHCreate implements InboundProcessor<FwmtActionInstruction> {
 
   private static final ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.CREATE.toString())
       .surveyName("CCS")
+      .addressType("HH")
+      .addressLevel("U")
       .build();
 
   @Value("${eq.url}")
@@ -54,6 +56,8 @@ public class CcsInterviewCreate implements InboundProcessor<FwmtActionInstructio
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CREATE
           && rmRequest.getSurveyName().equals("CCS")
+          && rmRequest.getAddressType().equals("HH")
+          && rmRequest.getAddressLevel().equals("U")
           && cache.existsInFwmt;
     } catch (NullPointerException e) {
       return false;

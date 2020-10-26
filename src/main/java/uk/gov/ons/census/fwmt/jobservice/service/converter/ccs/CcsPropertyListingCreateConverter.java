@@ -11,6 +11,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateCo
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CcsPropertyListingCreateConverter {
 
@@ -31,12 +32,8 @@ public class CcsPropertyListingCreateConverter {
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();
 
-
-    List<String> addressLines = new ArrayList<>();
-    addressLines.add(ffu.getPostcode());
-
     Address outAddress = Address.builder()
-        .lines(addressLines)
+        .lines(List.of(ffu.getPostcode()))
         .postcode(ffu.getPostcode())
         .geography(outGeography)
         .build();

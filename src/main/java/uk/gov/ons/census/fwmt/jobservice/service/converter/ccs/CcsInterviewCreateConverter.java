@@ -24,7 +24,7 @@ public class CcsInterviewCreateConverter  {
       FwmtActionInstruction ffu, GatewayCache cache, CaseRequest.CaseRequestBuilder builder) {
     CaseRequest.CaseRequestBuilder commonBuilder = CommonCreateConverter.convertCommon(ffu, cache, builder);
 
-    commonBuilder.type(CaseType.valueOf(ffu.getAddressType()));
+    commonBuilder.type(CaseType.CCS);
     commonBuilder.surveyType(SurveyType.CCS_INT);
     commonBuilder.category("HH".equals(ffu.getAddressType()) ? "HH" : "CE");
 
@@ -65,10 +65,10 @@ public class CcsInterviewCreateConverter  {
     if (!"HH".equals(ffu.getAddressType())) {
       commonBuilder.ce(CeCaseExtension
           .builder()
-          .ce1Complete(false)
-          .deliveryRequired(false)
-          .actualResponses(0)
-          .expectedResponses(0)
+          .ce1Complete(ffu.isCe1Complete())
+          .deliveryRequired(ffu.isHandDeliver())
+          .actualResponses(ffu.getCeActualResponses() != null ? ffu.getCeActualResponses() : 0)
+          .expectedResponses(ffu.getCeExpectedCapacity() != null ? ffu.getCeExpectedCapacity() : 0)
           .build());
     }
 

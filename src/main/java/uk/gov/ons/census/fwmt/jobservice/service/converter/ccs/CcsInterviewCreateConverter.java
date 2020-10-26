@@ -5,6 +5,7 @@ import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.data.tm.CcsCaseExtension;
+import uk.gov.ons.census.fwmt.common.data.tm.CeCaseExtension;
 import uk.gov.ons.census.fwmt.common.data.tm.Contact;
 import uk.gov.ons.census.fwmt.common.data.tm.Geography;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
@@ -28,7 +29,12 @@ public class CcsInterviewCreateConverter  {
     commonBuilder.surveyType(SurveyType.CCS_INT);
     commonBuilder.category("HH".equals(ffu.getAddressType()) ? "HH" : "CE");
 
-    commonBuilder.estabType(ffu.getEstabType());
+    if (ffu.getEstabType() != null) {
+      commonBuilder.estabType(ffu.getEstabType());
+    } else {
+      commonBuilder.estabType(ffu.getAddressType());
+    }
+
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
 
     String title = (cache != null && cache.getManagerTitle() != null ? cache.getManagerTitle() : "");
@@ -40,7 +46,6 @@ public class CcsInterviewCreateConverter  {
         .name(title + " " + firstName + " " + surname)
         .build();
 
-    
     commonBuilder.contact(outContact);
 
     Geography outGeography = Geography.builder().oa(ffu.getOa()).build();
@@ -56,6 +61,16 @@ public class CcsInterviewCreateConverter  {
         .geography(outGeography)
         .build();
     commonBuilder.address(outAddress);
+
+    if (!"HH".equals(ffu.getAddressType())) {
+      commonBuilder.ce(CeCaseExtension
+          .builder()
+          .ce1Complete(false)
+          .deliveryRequired(false)
+          .actualResponses(0)
+          .expectedResponses(0)
+          .build());
+    }
 
     return commonBuilder;
   }

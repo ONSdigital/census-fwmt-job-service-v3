@@ -28,9 +28,13 @@ public class CcsInterviewCreateConverter  {
     commonBuilder.type(CaseType.valueOf(ffu.getAddressType()));
     commonBuilder.surveyType(SurveyType.CCS_INT);
     commonBuilder.category("HH".equals(ffu.getAddressType()) ? "HH" : "CE");
-    commonBuilder.estabType("HH".equals(ffu.getAddressType()) ? "HH" : "CE");
 
-    commonBuilder.estabType(ffu.getEstabType());
+    if (ffu.getEstabType() != null) {
+      commonBuilder.estabType(ffu.getEstabType());
+    } else {
+      commonBuilder.estabType(ffu.getAddressType());
+    }
+
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
 
     String title = (cache != null && cache.getManagerTitle() != null ? cache.getManagerTitle() : "");

@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.converter.ccs;
 
-import org.springframework.beans.factory.annotation.Value;
 import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
@@ -36,6 +35,7 @@ public class CcsInterviewCreateConverter  {
     }
 
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
+    commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 
     String title = (cache != null && cache.getManagerTitle() != null ? cache.getManagerTitle() : "");
     String firstName = (cache != null && cache.getManagerFirstname() != null ? cache.getManagerFirstname() : "");

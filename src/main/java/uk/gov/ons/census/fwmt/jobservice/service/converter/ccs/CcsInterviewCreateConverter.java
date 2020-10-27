@@ -80,12 +80,26 @@ public class CcsInterviewCreateConverter  {
     return CcsInterviewCreateConverter
         .convertCcs(ffu, cache, CaseRequest.builder())
         .ccs(CcsCaseExtension.builder().questionnaireUrl(eqUrl).build())
-        .specialInstructions(((cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) ?
-            cache.getAccessInfo()
-                + "\n" : ""))
-        .description(
-            ((cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) ? cache.getCareCodes()
-                + "\n" : ""))
+        .specialInstructions(getSpecialInstructions(cache))
+        .description(getDescription(cache))
         .build();
+  }
+
+  private static String getDescription(GatewayCache cache) {
+    StringBuilder description = new StringBuilder("");
+    if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
+      description.append(cache.getCareCodes()).append("\n");
+    }
+    return description.toString();
+  }
+
+  private static String getSpecialInstructions(GatewayCache cache) {
+    StringBuilder instruction = new StringBuilder("");
+    if (cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) {
+      instruction.append(cache.getAccessInfo());
+      instruction.append("\n");
+      instruction.append(getDescription(cache));
+    }
+    return instruction.toString();
   }
 }

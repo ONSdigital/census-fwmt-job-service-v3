@@ -44,6 +44,7 @@ public class CcsInterviewCreateConverter  {
     Contact outContact = Contact.builder()
         .organisationName(ffu.getOrganisationName() != null ? ffu.getOrganisationName() : "")
         .name(title + " " + firstName + " " + surname)
+        .phone(cache != null && cache.getManagerContactNumber() != null ? cache.getManagerContactNumber() : "")
         .build();
 
     commonBuilder.contact(outContact);

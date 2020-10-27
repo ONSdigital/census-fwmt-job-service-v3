@@ -89,3 +89,12 @@ databaseChangeLog:
             path: manager_details.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v11
+      author: Jacob Harrison
+      comment: Add manager phone to gateway_cache
+      changes:
+        - sqlFile:
+            path: manager_phone.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

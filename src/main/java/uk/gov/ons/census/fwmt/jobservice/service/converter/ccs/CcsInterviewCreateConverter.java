@@ -98,8 +98,8 @@ public class CcsInterviewCreateConverter  {
     if (cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) {
       instruction.append(cache.getAccessInfo());
       instruction.append("\n");
-      instruction.append(getDescription(cache));
     }
+    instruction.append(getDescription(cache));
     return instruction.toString();
   }
 }

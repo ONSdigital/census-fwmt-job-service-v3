@@ -63,6 +63,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
+          && rmRequest.getUprn() != null
           && ((cache == null
           && rmRequest.isHandDeliver())
           || (cache != null
@@ -108,7 +109,8 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
           .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime).build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
+      cacheService.save(newCache.toBuilder().existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+          .type(3).lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime).build());
     }
 

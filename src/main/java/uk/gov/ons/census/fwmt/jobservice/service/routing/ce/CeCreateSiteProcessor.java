@@ -58,6 +58,7 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("E")
+          && rmRequest.getUprn() != null
           && (cache == null
           || !cache.existsInFwmt)
           && cacheService.doesEstabUprnExist(rmRequest.getUprn());
@@ -88,7 +89,8 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
           .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(2).lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime).build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
+      cacheService.save(newCache.toBuilder().existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+          .type(2).lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime).build());
     }
 

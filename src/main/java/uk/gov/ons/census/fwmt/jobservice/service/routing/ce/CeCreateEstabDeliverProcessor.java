@@ -91,9 +91,9 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
           .lastActionTime(messageReceivedTime)
           .build());
     } else {
-      cacheService.save(newCache.toBuilder().existsInFwmt(true).lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime)
-          .build());
+      cacheService.save(newCache.toBuilder().existsInFwmt(true).uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+          .type(1).lastActionInstruction(rmRequest.getActionInstruction().toString())
+          .lastActionTime(messageReceivedTime).build());
     }
 
     eventManager

@@ -58,7 +58,6 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("E")
-          && rmRequest.getUprn() != null
           && (cache == null
           || !cache.existsInFwmt)
           && cacheService.doesEstabUprnExist(rmRequest.getUprn());

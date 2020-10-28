@@ -62,7 +62,6 @@ public class CeCreateEstabFollowupProcessor implements InboundProcessor<FwmtActi
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("E")
-          && rmRequest.getUprn() != null
           && !rmRequest.isHandDeliver()
           && (cache == null
           || cache.existsInFwmt)

@@ -62,7 +62,6 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("U")
-          && rmRequest.getUprn() != null
           && ((cache == null
           && !rmRequest.isHandDeliver())
           || (cache != null

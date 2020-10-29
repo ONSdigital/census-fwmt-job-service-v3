@@ -81,14 +81,14 @@ public class CcsInterviewCreateConverter  {
         .convertCcs(ffu, cache, CaseRequest.builder())
         .ccs(CcsCaseExtension.builder().questionnaireUrl(eqUrl).build())
         .specialInstructions(getSpecialInstructions(cache))
-        .description(getDescription(cache))
+        .description(getDescription(ffu))
         .build();
   }
 
-  private static String getDescription(GatewayCache cache) {
+  private static String getDescription(FwmtActionInstruction cache) {
     StringBuilder description = new StringBuilder("");
-    if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
-      description.append(cache.getCareCodes()).append("\n");
+    if ("CE".equals(cache.getAddressType()) && cache.getCeExpectedCapacity() != null) {
+      description.append("No of Residents: ").append(cache.getCeExpectedCapacity()).append("\n");
     }
     return description.toString();
   }
@@ -99,7 +99,6 @@ public class CcsInterviewCreateConverter  {
       instruction.append(cache.getAccessInfo());
       instruction.append("\n");
     }
-    instruction.append(getDescription(cache));
     return instruction.toString();
   }
 }

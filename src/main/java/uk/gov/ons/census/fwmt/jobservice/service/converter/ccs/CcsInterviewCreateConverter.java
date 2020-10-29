@@ -85,10 +85,10 @@ public class CcsInterviewCreateConverter  {
         .build();
   }
 
-  private static String getDescription(FwmtActionInstruction cache) {
+  private static String getDescription(FwmtActionInstruction ffu) {
     StringBuilder description = new StringBuilder("");
-    if ("CE".equals(cache.getAddressType()) && cache.getCeExpectedCapacity() != null) {
-      description.append("No of Residents: ").append(cache.getCeExpectedCapacity()).append("\n");
+    if ("CE".equals(ffu.getAddressType()) && ffu.getCeExpectedCapacity() != null) {
+      description.append("No of Residents: ").append(ffu.getCeExpectedCapacity()).append("\n");
     }
     return description.toString();
   }

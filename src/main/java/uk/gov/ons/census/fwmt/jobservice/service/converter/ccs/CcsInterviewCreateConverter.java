@@ -63,16 +63,6 @@ public class CcsInterviewCreateConverter  {
         .build();
     commonBuilder.address(outAddress);
 
-    if (!"HH".equals(ffu.getAddressType())) {
-      commonBuilder.ce(CeCaseExtension
-          .builder()
-          .ce1Complete(ffu.isCe1Complete())
-          .deliveryRequired(ffu.isHandDeliver())
-          .actualResponses(ffu.getCeActualResponses() != null ? ffu.getCeActualResponses() : 0)
-          .expectedResponses(ffu.getCeExpectedCapacity() != null ? ffu.getCeExpectedCapacity() : 0)
-          .build());
-    }
-
     return commonBuilder;
   }
 
@@ -81,16 +71,19 @@ public class CcsInterviewCreateConverter  {
         .convertCcs(ffu, cache, CaseRequest.builder())
         .ccs(CcsCaseExtension.builder().questionnaireUrl(eqUrl).build())
         .specialInstructions(getSpecialInstructions(cache))
-        .description(getDescription(ffu))
+        .description(getDescription(ffu, cache))
         .build();
   }
 
-  private static String getDescription(FwmtActionInstruction ffu) {
+  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache) {
     StringBuilder description = new StringBuilder("");
     if ("CE".equals(ffu.getAddressType())) {
       description
           .append("No of Residents: ")
-          .append(ffu.getCeExpectedCapacity() != null ? ffu.getCeExpectedCapacity() : "0")
+          .append(cache.getUsualResidents() != null ? cache.getUsualResidents() : "0")
+          .append("\n")
+          .append("Bedspaces: ")
+          .append(cache.getBedspaces() != null ? cache.getBedspaces() : "0")
           .append("\n");
     }
     return description.toString();

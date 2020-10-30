@@ -98,3 +98,12 @@ databaseChangeLog:
             path: manager_phone.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v12
+      author: Jacob Harrison
+      comment: Add usual residents and bedspaces
+      changes:
+        - sqlFile:
+            path: residents_and_bedspaces.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

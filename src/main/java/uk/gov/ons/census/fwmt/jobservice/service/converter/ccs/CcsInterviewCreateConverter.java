@@ -4,7 +4,6 @@ import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.data.tm.CcsCaseExtension;
-import uk.gov.ons.census.fwmt.common.data.tm.CeCaseExtension;
 import uk.gov.ons.census.fwmt.common.data.tm.Contact;
 import uk.gov.ons.census.fwmt.common.data.tm.Geography;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
@@ -15,7 +14,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateCo
 import java.util.List;
 import java.util.Objects;
 
-public class CcsInterviewCreateConverter  {
+public class CcsInterviewCreateConverter {
 
   private CcsInterviewCreateConverter() {
   }
@@ -76,7 +75,7 @@ public class CcsInterviewCreateConverter  {
   }
 
   private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache) {
-    StringBuilder description = new StringBuilder("");
+    StringBuilder description = new StringBuilder();
     if ("CE".equals(ffu.getAddressType())) {
       description
           .append("No of Residents: ")
@@ -90,9 +89,13 @@ public class CcsInterviewCreateConverter  {
   }
 
   private static String getSpecialInstructions(GatewayCache cache) {
-    StringBuilder instruction = new StringBuilder("");
+    StringBuilder instruction = new StringBuilder();
     if (cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) {
       instruction.append(cache.getAccessInfo());
+      instruction.append("\n");
+    }
+    if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
+      instruction.append(cache.getCareCodes());
       instruction.append("\n");
     }
     return instruction.toString();

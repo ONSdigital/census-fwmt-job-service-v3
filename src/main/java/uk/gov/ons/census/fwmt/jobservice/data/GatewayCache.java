@@ -68,6 +68,15 @@ public class GatewayCache {
   @Column(name = "manager_number")
   public String managerContactNumber;
 
+  @Column(name = "usual_residents")
+  public Integer usualResidents;
+
+  @Column(name = "bedspaces")
+  public Integer bedspaces;
+
+
+
+
   // display only the details related to request routing
   public String toRoutingString() {
     return "GatewayCache(" +

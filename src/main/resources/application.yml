@@ -59,7 +59,7 @@ rabbitmq:
   maxInterval: 45000
   maxRetries: 1
   prefetchCount: 500
-  concurrentConsumers: 5
+  concurrentConsumers: 10
   queues:
     rm:
       input: "RM.Field"

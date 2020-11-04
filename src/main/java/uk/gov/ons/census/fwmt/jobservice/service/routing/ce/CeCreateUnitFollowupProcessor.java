@@ -109,7 +109,7 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
           .uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).type(3).lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime).build());
     } else {
-      cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn())
+      cacheService.save(newCache.toBuilder().uprn(rmRequest.getUprn()).estabUprn(rmRequest.getEstabUprn()).existsInFwmt(true)
           .type(3).lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime).build());
     }

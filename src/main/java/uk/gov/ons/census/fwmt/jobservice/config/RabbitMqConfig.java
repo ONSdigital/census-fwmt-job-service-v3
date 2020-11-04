@@ -69,6 +69,7 @@ public class RabbitMqConfig {
     this.inputDlq = inputDlq;
     this.prefetchCount = prefetchCount;
   }
+
   @Bean
   public ConnectionFactory connectionFactory() {
     CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
@@ -77,11 +78,7 @@ public class RabbitMqConfig {
     cachingConnectionFactory.setUsername(username);
     return cachingConnectionFactory;
   }
-//  @Bean
-//  public Jackson2JsonMessageConverter messageConverter() {
-//    ObjectMapper objectMapper = new ObjectMapper();
-//    return new Jackson2JsonMessageConverter(objectMapper);
-//  }
+
   @Bean
   public AmqpAdmin amqpAdmin() {
     return new RabbitAdmin(connectionFactory());
@@ -93,6 +90,7 @@ public class RabbitMqConfig {
       jsonMessageConverter.setClassMapper(classMapper());
       return jsonMessageConverter;
     }
+
     @Bean
     @Qualifier("JS")
     public DefaultClassMapper classMapper() {
@@ -133,15 +131,6 @@ public class RabbitMqConfig {
   }
 
   @Bean
-  public Queue queue() {
-    Queue queue = QueueBuilder.durable(inputQueue)
-        .withArgument("x-dead-letter-exchange", "")
-        .withArgument("x-dead-letter-routing-key", inputDlq)
-        .build();
-    queue.setAdminsThatShouldDeclare(amqpAdmin());
-    return queue;
-  }
-  @Bean
   public Queue deadLetterQueue() {
     Queue queue = QueueBuilder.durable(inputDlq).build();
     queue.setAdminsThatShouldDeclare(amqpAdmin());
@@ -159,32 +148,5 @@ public class RabbitMqConfig {
       factory.setAdviceChain(adviceChain);
    
       return factory;
-  }  
-  
-  
-  //  @Bean
-  //  @Qualifier("RM")
-  //  public MessageListenerAdapter listenerAdapter(RmReceiver receiver) {
-  //    return new MessageListenerAdapter(receiver, "receiveMessage");
-  //  }
-  //
-  //  @Bean
-  //  @Qualifier("RM")
-  //  public SimpleMessageListenerContainer container(
-  //      ConnectionFactory connectionFactory,
-  //      @Qualifier("RM") MessageListenerAdapter listenerAdapter,
-  //      @Qualifier("JS") MessageConverter jsonMessageConverter,
-  //      RetryOperationsInterceptor retryOperationsInterceptor) {
-  //
-  //    listenerAdapter.setMessageConverter(jsonMessageConverter);
-  //
-  //    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-//      Advice[] adviceChain = {retryOperationsInterceptor};
-  //    container.setAdviceChain(adviceChain);
-  //    container.setConnectionFactory(connectionFactory);
-  //    container.setQueueNames(inputQueue);
-  //    container.setMessageListener(listenerAdapter);
-  //    container.setPrefetchCount(prefetchCount);
-  //    return container;
-  //  }
+  }
 }

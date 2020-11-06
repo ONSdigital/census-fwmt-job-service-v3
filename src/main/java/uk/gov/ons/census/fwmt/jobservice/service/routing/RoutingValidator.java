@@ -1,18 +1,17 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+
+import java.util.List;
 
 @Component
 public class RoutingValidator {
   private static final List<HttpStatus> validResponses = List
-      .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED);
+      .of(HttpStatus.OK, HttpStatus.CREATED, HttpStatus.ACCEPTED, HttpStatus.NO_CONTENT);
   private final GatewayEventManager eventManager;
 
   public RoutingValidator(GatewayEventManager eventManager) {

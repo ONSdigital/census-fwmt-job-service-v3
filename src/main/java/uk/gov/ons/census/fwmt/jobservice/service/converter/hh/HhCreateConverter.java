@@ -46,6 +46,8 @@ public final class HhCreateConverter {
     return HhCreateConverter
         .convertHH(ffu, cache, CaseRequest.builder())
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
+        .blankFormReturned(ffu.isBlankFormReturned())
+        .uaa(ffu.isUndeliveredAsAddress())
         .build();
   }
 
@@ -54,6 +56,8 @@ public final class HhCreateConverter {
         .convertHH(ffu, cache, CaseRequest.builder())
         .requiredOfficer(ffu.getFieldOfficerId())
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
+        .blankFormReturned(ffu.isBlankFormReturned())
+        .uaa(ffu.isUndeliveredAsAddress())
         .build();
   }
 }

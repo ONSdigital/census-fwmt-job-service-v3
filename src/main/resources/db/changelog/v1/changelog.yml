@@ -107,3 +107,12 @@ databaseChangeLog:
             path: residents_and_bedspaces.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v13
+      author: Steve Scorfield
+      comment: Increase varchar value of indivdual_case_id column
+      changes:
+        - sqlFile:
+            path: update_individual_case_id_varchar_value.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

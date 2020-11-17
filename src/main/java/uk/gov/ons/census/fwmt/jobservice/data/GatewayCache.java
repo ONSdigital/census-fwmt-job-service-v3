@@ -25,6 +25,9 @@ public class GatewayCache {
   @Column(name = "case_id", unique = true, nullable = false)
   public String caseId;
 
+  @Column(name = "original_case_id")
+  public String originalCaseId;
+
   @Column(name = "exists_in_fwmt")
   @JsonProperty("existsInFWMT")
   public boolean existsInFwmt;

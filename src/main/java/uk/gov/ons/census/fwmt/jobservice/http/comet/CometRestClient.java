@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +29,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
 
+@Slf4j
 @Component
 public class CometRestClient {
 
@@ -43,10 +45,8 @@ public class CometRestClient {
   private AuthenticationResult auth;
 
   // derived values
-  private final transient String basePath;
   private final transient String createPath;
   private final transient String closePath;
-  private final transient String deletePath;
   private final transient String pausePath;
   private final transient String reopenPath;
   private final transient String patchCeDetails;
@@ -64,10 +64,8 @@ public class CometRestClient {
     this.cometUrl = cometConfig.baseUrl + cometConfig.caseCreatePath;
     this.auth = null;
 
-    this.basePath = cometUrl + "{}";
     this.createPath = cometUrl + "{}";
     this.closePath = cometUrl + "{}/close";
-    this.deletePath = cometUrl + "{}/delete";
     this.patchCeDetails = cometUrl + "{}/cedetails";
     this.pausePath = cometUrl + "{}/pause";
     this.reopenPath = cometUrl + "{}/reopen";
@@ -91,6 +89,14 @@ public class CometRestClient {
       this.auth = future.get();
     } catch (MalformedURLException | InterruptedException | ExecutionException e) {
       String errorMsg = "Failed to Authenticate with Totalmobile";
+      log.error(errorMsg);
+
+      if( e instanceof InterruptedException){
+        log.error("InterruptedException Thrown : {}",((InterruptedException) e).getMessage());
+        // Restore interrupted state...
+        Thread.currentThread().interrupt();
+      }
+      
       gatewayEventManager
           .triggerErrorEvent(this.getClass(), errorMsg, "<N/A_CASE_ID>", FAILED_TM_AUTHENTICATION);
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, errorMsg, e);
@@ -126,7 +132,6 @@ public class CometRestClient {
   public ResponseEntity<Void> sendReopen(ReopenCaseRequest request, String caseId) throws GatewayException {
     HttpHeaders httpHeaders = makeAuthHeader();
     HttpEntity<ReopenCaseRequest> body = new HttpEntity<>(request, httpHeaders);
-    System.out.println(body.toString());
     String path = reopenPath.replace("{}", caseId);
     return restTemplate.exchange(path, HttpMethod.POST, body, Void.class);
   }

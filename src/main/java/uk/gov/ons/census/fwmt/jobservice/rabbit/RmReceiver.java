@@ -45,8 +45,9 @@ public class RmReceiver {
     //TODO trigger correct event CREATE or UPDATE
     long epochTimeStamp = Long.parseLong(timestamp);
     Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
-    System.out.println(receivedMessageTime);
-    System.out.println(message.getMessageProperties());
+
+    log.debug(" Message Received : \nTime {} \nProperties: {}", receivedMessageTime, message.getMessageProperties().toString());
+
     switch (rmRequest.getActionInstruction()) {
     case CREATE: {
       gatewayEventManager
@@ -62,7 +63,7 @@ public class RmReceiver {
       jobService.processCreate(rmRequest, receivedMessageTime);
       break;
     }
-    case UPDATE : {
+    case UPDATE: {
       gatewayEventManager
           .triggerEvent(rmRequest.getCaseId(), RM_UPDATE_REQUEST_RECEIVED,
               "Case Ref", rmRequest.getCaseRef());
@@ -82,11 +83,12 @@ public class RmReceiver {
 
   @RabbitHandler
   public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) throws GatewayException {
-      //TODO trigger correct event CANCEL
+    //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
     long epochTimeStamp = Long.parseLong(timestamp);
     Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
-    System.out.println(message.getMessageProperties());
+    log.debug("Cancel Message Recieved: {}", message.getMessageProperties().toString());
+
     if (rmRequest.getActionInstruction() == ActionInstructionType.CANCEL) {
       gatewayEventManager
           .triggerEvent(rmRequest.getCaseId(), RM_CANCEL_REQUEST_RECEIVED,
@@ -99,12 +101,12 @@ public class RmReceiver {
       throw new RuntimeException("Could not route Request");
     }
   }
-  
+
   public static void main(String[] args) {
-    DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ")
+    final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ")
         .withZone(ZoneId.systemDefault());
 
-System.out.println(DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(1600169507861L)));
+    log.info(" Main Class time stamp for RmReceiver", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(1600169507861L)));
   }
-  
+
 }

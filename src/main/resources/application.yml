@@ -111,3 +111,12 @@ ce:
 jobservice:
   transitionRules:
     path: classpath:/transitionRules.txt
+
+resthttp:
+  connection:
+    timeout: 200
+    requestTimeout: 100
+    socketTimeout: 1500
+    pool:
+      maxPerRoute: 20
+      maxTotal: 100

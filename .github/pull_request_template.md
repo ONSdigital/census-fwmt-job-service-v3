@@ -1,9 +1,8 @@
-# Related Issues
-- issue goes here
+# Issue Summary
+- link to jira ticket/feature?
 
 # Proposed Changes
-- change 1 
-- change 2
+- quick description of what changes were made 
 
 # Additional Info
 - any additional information or context

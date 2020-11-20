@@ -16,11 +16,4 @@
 
 # Screenshots
 
-Coverage - Before VS After
-Original                |  Updated
-:---------------------------------:|:-----------------------------:
-** original screenshot **.  |  ** updated screenshot **
 
-Sonarqube - Before VS AFter
-:---------------------------------:|:-----------------------------:
-** original screenshot **.  |  ** updated screenshot **

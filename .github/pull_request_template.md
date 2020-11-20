@@ -2,20 +2,22 @@
 - link to jira ticket/feature?
 
 # Proposed Changes
-- quick description of what changes were made 
+- Description of what changes were made 
 
 # Additional Info
-- How to reproduce? 
-
-# How it was tested
-- [ ] Unit tested
-- [ ] Acceptance 
-- [ ] Manually Tested
+- How to demonstrate functionality  
 
 # Checklist
 - [ ] Tests
-- [ ] Documentation Updated
-- [ ] Demo
+- [x] Sensitive Data not being logged
+- [ ] Documentation Updated ( where required)
+
+
+# How it was tested
+- [ ] Unit tested
+- [ ] Ran the acceptance tests
+- [ ] Manually Tested
+- [ ] Not tested becase my coding skills are flawless
+
 
 # Screenshots
-

@@ -5,7 +5,12 @@
 - quick description of what changes were made 
 
 # Additional Info
-- any additional information or context
+- How to reproduce? 
+
+# How it was tested
+- [ ] Unit tested
+- [ ] Acceptance 
+- [ ] Manually Tested
 
 # Checklist
 - [ ] Tests

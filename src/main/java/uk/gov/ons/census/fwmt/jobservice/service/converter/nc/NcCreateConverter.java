@@ -1,18 +1,32 @@
 package uk.gov.ons.census.fwmt.jobservice.service.converter.nc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.data.tm.Geography;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
+import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
+import uk.gov.ons.census.fwmt.jobservice.http.rm.RmRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
 public class NcCreateConverter {
+
+  @Autowired
+  private RmRestClient rmRestClient;
 
   private NcCreateConverter() {
   }
@@ -41,6 +55,7 @@ public class NcCreateConverter {
         .postcode(ffu.getPostcode())
         .geography(outGeography)
         .build();
+
     commonBuilder.address(outAddress);
 
     return commonBuilder;
@@ -61,6 +76,13 @@ public class NcCreateConverter {
       description.append(cache.getCareCodes());
       description.append("\n");
     }
+    if (ffu.getAddressType().equals(CaseType.HH.toString())) {
+      String householderDetails = new NcCreateConverter().getHouseholderDetails(ffu.getCaseId());
+      if (!householderDetails.isEmpty()) {
+        description.append(householderDetails);
+        description.append("\n");
+      }
+    }
     return description.toString();
   }
 
@@ -75,5 +97,72 @@ public class NcCreateConverter {
       instruction.append("\n");
     }
     return instruction.toString();
+  }
+
+  private String getHouseholderDetails(String caseId) {
+    String nameJson = "";
+    try {
+      nameJson = getAndSortRmRefusalCases(caseId);
+    } catch (GatewayException e) {
+
+    }
+    return nameJson;
+  }
+
+  private String getAndSortRmRefusalCases(String caseID) throws GatewayException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode caseEvents = null;
+    JSONArray recordsArray = null;
+    JSONArray sortedJsonArray = null;
+
+    String contact = "";
+
+    try {
+      caseEvents = objectMapper.readTree(rmRestClient.getCase(caseID).toString());
+    } catch (JsonProcessingException e) {
+
+    }
+
+    if (caseEvents != null &&
+        (caseEvents.get("refusalReceived") != null && caseEvents.get("refusalReceived").asText()
+            .equals("HARD_REFUSAL"))) {
+      recordsArray = new JSONArray(caseEvents.get("events"));
+
+      List<JSONObject> refusalsForCase = new ArrayList<>();
+      for (int i = 0; i < recordsArray.length(); i++) {
+
+        if (recordsArray.getJSONObject(i).get("eventType") == "HARD_REFUSAL") {
+          refusalsForCase.add(recordsArray.getJSONObject(i));
+        }
+      }
+
+      refusalsForCase.sort(new Comparator<>() {
+        private static final String dateNode = "createdDateTime";
+
+        @Override
+        public int compare(JSONObject dateTime1, JSONObject dateTime2) {
+          String firstDate = "";
+          String secondDate = "";
+          try {
+            firstDate = (String) dateTime1.get(dateNode);
+            secondDate = (String) dateTime2.get(dateNode);
+          } catch (JSONException e) {
+
+          }
+          return firstDate.compareTo(secondDate);
+        }
+      });
+
+      for (int i = 0; i < recordsArray.length(); i++) {
+        JSONArray eventPayload = null;
+        String getContact;
+
+        if (refusalsForCase.get(i).get("eventPayload") != null){
+          eventPayload.put(refusalsForCase.get(i).get("eventPayload"));
+        }
+
+      }
+    }
+    return "";
   }
 }

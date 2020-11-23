@@ -77,6 +77,9 @@ public class GatewayCache {
   @Column(name = "bedspaces")
   public Integer bedspaces;
 
+  @Column(name = "originating_case_id")
+  public String originatingCaseId;
+
   // display only the details related to request routing
   public String toRoutingString() {
     return "GatewayCache(" +

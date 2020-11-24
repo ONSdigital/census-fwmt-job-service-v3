@@ -55,9 +55,9 @@ public class CometRestClient {
       GatewayEventManager gatewayEventManager,
       RestTemplate restTemplate) {
     this.cometConfig = cometConfig;
+    this.gatewayEventManager = gatewayEventManager;
     this.restTemplate = restTemplate;
 
-    this.gatewayEventManager = gatewayEventManager;
     this.cometUrl = cometConfig.baseUrl + cometConfig.caseCreatePath;
     this.auth = null;
 

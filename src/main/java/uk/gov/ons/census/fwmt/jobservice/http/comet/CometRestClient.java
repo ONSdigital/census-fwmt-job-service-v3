@@ -53,7 +53,6 @@ public class CometRestClient {
 
   public CometRestClient(
       CometConfig cometConfig,
-      RestTemplateBuilder restTemplateBuilder,
       GatewayEventManager gatewayEventManager,
       RestTemplate restTemplate) {
     this.cometConfig = cometConfig;

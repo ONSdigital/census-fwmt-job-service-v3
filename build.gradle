@@ -118,6 +118,7 @@ dependencies {
     compile 'org.springframework:spring-aop'
     compile 'org.springframework.data:spring-data-redis'
     //compile 'org.springframework.data:spring-data-redis'
+    compile 'org.apache.httpcomponents:httpclient'
 
     // Data Formats
     compile 'org.apache.commons:commons-csv:1.6'

@@ -1,11 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.converter.nc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
@@ -14,22 +8,28 @@ import uk.gov.ons.census.fwmt.common.data.tm.Geography;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.rm.RmRestClient;
+import uk.gov.ons.census.fwmt.jobservice.nc.utils.NamedHouseholdDetails;
+import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
 public class NcCreateConverter {
 
+  private NcCreateConverter() {
+  }
+
+  @Autowired
+  private GatewayEventManager eventManager;
+
   @Autowired
   private RmRestClient rmRestClient;
 
-  private NcCreateConverter() {
-  }
+  public static final String UNABLE_TO_DECRYPT_RM_API_RESPONSE = "UNABLE_TO_DECRYPT_RM_API_RESPONSE";
 
   public static CaseRequest.CaseRequestBuilder convertNC(
       FwmtActionInstruction ffu, GatewayCache cache, CaseRequest.CaseRequestBuilder builder) {
@@ -39,6 +39,7 @@ public class NcCreateConverter {
     commonBuilder.type(CaseType.NC);
     commonBuilder.surveyType(SurveyType.NC);
     commonBuilder.category("HH");
+    commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 
     Geography outGeography = Geography
         .builder()
@@ -61,24 +62,25 @@ public class NcCreateConverter {
     return commonBuilder;
   }
 
-  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache) {
+  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, CaseDetailsDTO householder)
+      throws GatewayException {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
         .specialInstructions(getSpecialInstructions(cache))
-        .description(getDescription(ffu, cache))
+        .description(getDescription(ffu, cache, householder))
         .build();
   }
 
-  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache) {
+  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, CaseDetailsDTO householder) throws GatewayException {
     StringBuilder description = new StringBuilder();
     if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
       description.append(cache.getCareCodes());
       description.append("\n");
     }
-    if (ffu.getAddressType().equals(CaseType.HH.toString())) {
-      String householderDetails = new NcCreateConverter().getHouseholderDetails(ffu.getCaseId());
-      if (!householderDetails.isEmpty()) {
+    if (ffu.getAddressType().equals(CaseType.HH.toString()) && householder != null) {
+      String householderDetails = new NcCreateConverter().getHouseholderDetails(ffu.getCaseId(), householder);
+      if (householderDetails != null && !householderDetails.equals("")) {
         description.append(householderDetails);
         description.append("\n");
       }
@@ -99,70 +101,19 @@ public class NcCreateConverter {
     return instruction.toString();
   }
 
-  private String getHouseholderDetails(String caseId) {
-    String nameJson = "";
+  private String getHouseholderDetails(String caseId, CaseDetailsDTO houseHolder) throws GatewayException {
+    NamedHouseholdDetails namedHouseholdDetails = new NamedHouseholdDetails();
+    String houseHolderDetails = "";
     try {
-      nameJson = getAndSortRmRefusalCases(caseId);
-    } catch (GatewayException e) {
-
+      houseHolderDetails = namedHouseholdDetails.getAndSortRmRefusalCases(caseId, houseHolder);
+    } catch (GatewayException | NullPointerException e) {
+      eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder details from RM Case API response",
+          caseId, UNABLE_TO_DECRYPT_RM_API_RESPONSE);
+      throw new GatewayException(GatewayException.Fault.BAD_REQUEST,
+          "Unable to decrypt householder details from RM Case API response", caseId);
     }
-    return nameJson;
+    return houseHolderDetails;
   }
 
-  private String getAndSortRmRefusalCases(String caseID) throws GatewayException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode caseEvents = null;
-    JSONArray recordsArray = null;
-    JSONArray sortedJsonArray = null;
-
-    String contact = "";
-
-    try {
-      caseEvents = objectMapper.readTree(rmRestClient.getCase(caseID).toString());
-    } catch (JsonProcessingException e) {
-
-    }
-
-    if (caseEvents != null &&
-        (caseEvents.get("refusalReceived") != null && caseEvents.get("refusalReceived").asText()
-            .equals("HARD_REFUSAL"))) {
-      recordsArray = new JSONArray(caseEvents.get("events"));
-
-      List<JSONObject> refusalsForCase = new ArrayList<>();
-      for (int i = 0; i < recordsArray.length(); i++) {
-
-        if (recordsArray.getJSONObject(i).get("eventType") == "HARD_REFUSAL") {
-          refusalsForCase.add(recordsArray.getJSONObject(i));
-        }
-      }
-
-      refusalsForCase.sort(new Comparator<>() {
-        private static final String dateNode = "createdDateTime";
-
-        @Override
-        public int compare(JSONObject dateTime1, JSONObject dateTime2) {
-          String firstDate = "";
-          String secondDate = "";
-          try {
-            firstDate = (String) dateTime1.get(dateNode);
-            secondDate = (String) dateTime2.get(dateNode);
-          } catch (JSONException e) {
-
-          }
-          return firstDate.compareTo(secondDate);
-        }
-      });
-
-      for (int i = 0; i < recordsArray.length(); i++) {
-        JSONArray eventPayload = null;
-        String getContact;
-
-        if (refusalsForCase.get(i).get("eventPayload") != null){
-          eventPayload.put(refusalsForCase.get(i).get("eventPayload"));
-        }
-
-      }
-    }
-    return "";
-  }
 }
+

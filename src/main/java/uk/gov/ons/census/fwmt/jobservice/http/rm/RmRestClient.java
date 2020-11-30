@@ -3,7 +3,6 @@ package uk.gov.ons.census.fwmt.jobservice.http.rm;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
-import org.json.JSONObject;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +14,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClientResponseErrorHandler;
+import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsDTO;
 
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -47,7 +47,7 @@ public class RmRestClient {
     this.restTemplate = restTemplateBuilder.errorHandler(new CometRestClientResponseErrorHandler())
         .basicAuthentication(cometConfig.userName, cometConfig.password).build();
     this.gatewayEventManager = gatewayEventManager;
-    this.basePath = cometConfig.baseUrl + "case-details/";
+    this.basePath = cometConfig.baseUrl + "cases/case-details/";
     this.auth = null;
   }
 
@@ -87,8 +87,8 @@ public class RmRestClient {
     return httpHeaders;
   }
 
-  public JSONObject getCase(String caseId) throws GatewayException {
-    String basePathway = basePath + caseId + "?caseEvents=true";
+  public CaseDetailsDTO getCase(String caseId) throws GatewayException {
+    String basePathway = basePath + caseId;
     if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
       auth();
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -96,7 +96,7 @@ public class RmRestClient {
       httpHeaders.setBearerAuth(auth.getAccessToken());
 
     HttpEntity<?> body = new HttpEntity<>(httpHeaders);
-    ResponseEntity<JSONObject> request = restTemplate.exchange(basePathway, HttpMethod.GET, body, JSONObject.class);
+    ResponseEntity<CaseDetailsDTO> request = restTemplate.exchange(basePathway, HttpMethod.GET, body, CaseDetailsDTO.class);
 
     return request.getBody();
   }

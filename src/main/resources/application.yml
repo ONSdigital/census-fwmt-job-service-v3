@@ -17,14 +17,14 @@ spring:
     schema: classpath:/schema.sql
     continue-on-error: false
     username: postgres
-    password: postgres
+    password: password
     initialization-mode: always      
   liquibase:
     url: jdbc:postgresql://localhost:5432/postgres?currentSchema=fwmtg
     default-schema: fwmtg
     change-log: classpath:db/changelog/db.changelog-master.yml
     user: postgres
-    password: postgres
+    password: password
 #     enabled: false
 
 management:
@@ -90,6 +90,12 @@ rmapi:
   username: "user"
   password: "password"
   baseUrl: "http://localhost:8000/"
+
+decryption:
+  pgp:
+    privateKey: classpath:testPrivateKey.asc
+  password: "Cesnsus2021#"
+
 
 fwmt:
   workTypes:

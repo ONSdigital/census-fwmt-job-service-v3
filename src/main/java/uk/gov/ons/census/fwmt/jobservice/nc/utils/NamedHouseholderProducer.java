@@ -1,38 +1,36 @@
 package uk.gov.ons.census.fwmt.jobservice.nc.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsEventDTO;
-import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CollectionCaseDTO;
 import uk.gov.ons.census.fwmt.jobservice.refusal.dto.RefusalTypeDTO;
-import uk.gov.ons.census.fwmt.jobservice.transition.utils.MessageConverter;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public final class NamedHouseholdDetails {
-
-  public NamedHouseholdDetails() {}
+@Service
+public class NamedHouseholderProducer {
 
   @Autowired
   private GatewayEventManager eventManager;
 
-  @Value("${decryption.pgp.privateKey}")
+  @Value("${decryption.pgp}")
   private Resource testPrivateKey;
 
   @Value("${decryption.password}")
   private String testPassword;
 
-  public static final String UNABLE_TO_READ_RM_API_RESPONSE = "UNABLE_TO_READ_RM_API_RESPONSE";
-
   public String getAndSortRmRefusalCases(String caseId, CaseDetailsDTO houseHolder) throws GatewayException {
-    MessageConverter messageConverter = new MessageConverter();
     StringBuilder contact = new StringBuilder();
 
     if (houseHolder.getRefusalReceived() != null && houseHolder.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
@@ -55,24 +53,32 @@ public final class NamedHouseholdDetails {
               ? individualCaseDetail.getEventPayload() : "";
           String refusalEvent = individualCaseDetail.getEventType() != null ? individualCaseDetail.getEventType() : "";
           if (refusalEvent.equals(RefusalTypeDTO.HARD_REFUSAL.toString()) && !eventPayload.equals("") ) {
-            CollectionCaseDTO collectionCaseDTO = messageConverter.convertMessageToDTO(CollectionCaseDTO.class,
-                eventPayload);
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode collectionCase = null;
+            JsonNode householdContact = null;
+            try {
+              collectionCase = objectMapper.readTree(eventPayload.substring(1, eventPayload.length() -1));
+              householdContact = collectionCase.get("contact");
 
-            if (collectionCaseDTO != null && collectionCaseDTO.getIsHouseholder() != null) {
+            } catch (JsonProcessingException e) {
+
+            }
+
+            if (householdContact != null) {
               ByteArrayInputStream privateKeys = new ByteArrayInputStream(testPrivateKey.toString().getBytes(Charset.defaultCharset()));
               String decryptedFirstname = null;
               String decryptedSurname = null;
               String isHouseHolder;
 
-              if (collectionCaseDTO.getForeName() != null && !collectionCaseDTO.getForeName().equals("")) {
-                decryptedFirstname = DecryptNames.decryptFile(privateKeys, collectionCaseDTO.getForeName(),
+              if (!householdContact.get("forename").toString().equals("")) {
+                decryptedFirstname = DecryptNames.decryptFile(privateKeys, householdContact.get("forename").toString(),
                     testPassword.toCharArray());
               }
-              if (collectionCaseDTO.getSurname() != null && !collectionCaseDTO.getSurname().equals("")) {
-                decryptedSurname = DecryptNames.decryptFile(privateKeys, collectionCaseDTO.getSurname(),
+              if (!householdContact.get("surname").toString().equals("")) {
+                decryptedSurname = DecryptNames.decryptFile(privateKeys, householdContact.get("surname").toString(),
                     testPassword.toCharArray());
               }
-              if (collectionCaseDTO.getIsHouseholder().equals("true")) {
+              if (collectionCase.get("isHouseholder").toString().equals("true")) {
                 isHouseHolder = "Yes";
               } else {
                 isHouseHolder = "No";

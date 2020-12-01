@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.converter.nc;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
@@ -8,11 +7,7 @@ import uk.gov.ons.census.fwmt.common.data.tm.Geography;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
-import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
-import uk.gov.ons.census.fwmt.jobservice.http.rm.RmRestClient;
-import uk.gov.ons.census.fwmt.jobservice.nc.utils.NamedHouseholdDetails;
-import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
 
 import java.util.List;
@@ -22,14 +17,6 @@ public class NcCreateConverter {
 
   private NcCreateConverter() {
   }
-
-  @Autowired
-  private GatewayEventManager eventManager;
-
-  @Autowired
-  private RmRestClient rmRestClient;
-
-  public static final String UNABLE_TO_DECRYPT_RM_API_RESPONSE = "UNABLE_TO_DECRYPT_RM_API_RESPONSE";
 
   public static CaseRequest.CaseRequestBuilder convertNC(
       FwmtActionInstruction ffu, GatewayCache cache, CaseRequest.CaseRequestBuilder builder) {
@@ -62,7 +49,7 @@ public class NcCreateConverter {
     return commonBuilder;
   }
 
-  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, CaseDetailsDTO householder)
+  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder)
       throws GatewayException {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
@@ -72,16 +59,15 @@ public class NcCreateConverter {
         .build();
   }
 
-  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, CaseDetailsDTO householder) throws GatewayException {
+  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) throws GatewayException {
     StringBuilder description = new StringBuilder();
     if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
       description.append(cache.getCareCodes());
       description.append("\n");
     }
     if (ffu.getAddressType().equals(CaseType.HH.toString()) && householder != null) {
-      String householderDetails = new NcCreateConverter().getHouseholderDetails(ffu.getCaseId(), householder);
-      if (householderDetails != null && !householderDetails.equals("")) {
-        description.append(householderDetails);
+      if (!householder.equals("")) {
+        description.append(householder);
         description.append("\n");
       }
     }
@@ -99,20 +85,6 @@ public class NcCreateConverter {
       instruction.append("\n");
     }
     return instruction.toString();
-  }
-
-  private String getHouseholderDetails(String caseId, CaseDetailsDTO houseHolder) throws GatewayException {
-    NamedHouseholdDetails namedHouseholdDetails = new NamedHouseholdDetails();
-    String houseHolderDetails = "";
-    try {
-      houseHolderDetails = namedHouseholdDetails.getAndSortRmRefusalCases(caseId, houseHolder);
-    } catch (GatewayException | NullPointerException e) {
-      eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder details from RM Case API response",
-          caseId, UNABLE_TO_DECRYPT_RM_API_RESPONSE);
-      throw new GatewayException(GatewayException.Fault.BAD_REQUEST,
-          "Unable to decrypt householder details from RM Case API response", caseId);
-    }
-    return houseHolderDetails;
   }
 
 }

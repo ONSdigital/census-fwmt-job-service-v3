@@ -15,7 +15,9 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.Streams;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,6 +29,9 @@ import java.util.Iterator;
 
 public class DecryptNames {
 
+  @Autowired
+  private GatewayEventManager eventManager;
+
   public static String decryptFile(InputStream secretKeyFile, String householder, char[] passwd) throws GatewayException {
     PGPPrivateKey secretKey;
     PGPPublicKeyEncryptedData encryptedData = null;
@@ -36,6 +41,7 @@ public class DecryptNames {
       householder = householder.substring(1, householder.length() - 1);
       encryptedObjects = getEncryptedObjects(Base64.getDecoder().decode(householder));
     } catch (IOException e) {
+
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Failed to obtain decryption data");
     }
     while (encryptedObjects.hasNext()) {
@@ -48,8 +54,8 @@ public class DecryptNames {
         throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "failed to find secret key for: " + encryptedFileKeyId);
       }
     } catch (IOException | PGPException e) {
-//      throw new FsdrEncryptionException("failed to read secret key", e);
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Failed to obtain secret key", e);
+
+      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to obtain secret key");
 
     }
     try {
@@ -87,7 +93,6 @@ public class DecryptNames {
       PGPSecretKey k = secretKeys.next();
       long publicKeyId = k.getKeyID();
       if (encryptedFileKeyId == publicKeyId && !k.isPrivateKeyEmpty()) {
-
         key = k.extractPrivateKey(
             new JcePBESecretKeyDecryptorBuilder().setProvider(new BouncyCastleProvider()).build(password));
       }

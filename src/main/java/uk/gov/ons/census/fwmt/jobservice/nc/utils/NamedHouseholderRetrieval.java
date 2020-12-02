@@ -7,19 +7,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
+import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsEventDTO;
+import uk.gov.ons.census.fwmt.common.data.nc.RefusalTypeDTO;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsDTO;
-import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsEventDTO;
-import uk.gov.ons.census.fwmt.jobservice.refusal.dto.RefusalTypeDTO;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_DECRYPT_NAME;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_READ_EVENT_PAYLOAD;
+
 @Service
-public class NamedHouseholderProducer {
+public class NamedHouseholderRetrieval {
 
   @Autowired
   private GatewayEventManager eventManager;
@@ -54,29 +56,42 @@ public class NamedHouseholderProducer {
           String refusalEvent = individualCaseDetail.getEventType() != null ? individualCaseDetail.getEventType() : "";
           if (refusalEvent.equals(RefusalTypeDTO.HARD_REFUSAL.toString()) && !eventPayload.equals("") ) {
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode collectionCase = null;
-            JsonNode householdContact = null;
+            JsonNode collectionCase;
+            JsonNode householdContact;
             try {
               collectionCase = objectMapper.readTree(eventPayload.substring(1, eventPayload.length() -1));
               householdContact = collectionCase.get("contact");
 
             } catch (JsonProcessingException e) {
-
+              eventManager.triggerErrorEvent(this.getClass(), "Unable to read eventPayload", String.valueOf(caseId), UNABLE_TO_READ_EVENT_PAYLOAD,
+                  "eventPayload", eventPayload);
+              throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to read eventPayload");
             }
 
             if (householdContact != null) {
-              ByteArrayInputStream privateKeys = new ByteArrayInputStream(testPrivateKey.toString().getBytes(Charset.defaultCharset()));
               String decryptedFirstname = null;
               String decryptedSurname = null;
               String isHouseHolder;
 
               if (!householdContact.get("forename").toString().equals("")) {
-                decryptedFirstname = DecryptNames.decryptFile(privateKeys, householdContact.get("forename").toString(),
-                    testPassword.toCharArray());
+                try {
+                  decryptedFirstname = DecryptNames.decryptFile(testPrivateKey.getInputStream(), householdContact.get("forename").toString(),
+                      testPassword.toCharArray());
+                } catch (IOException e){
+                  eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder forename", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME,
+                      "forename", householdContact.get("forename").toString());
+                  throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householders forename");
+                }
               }
               if (!householdContact.get("surname").toString().equals("")) {
-                decryptedSurname = DecryptNames.decryptFile(privateKeys, householdContact.get("surname").toString(),
-                    testPassword.toCharArray());
+                try{
+                  decryptedSurname = DecryptNames.decryptFile(testPrivateKey.getInputStream(), householdContact.get("surname").toString(),
+                      testPassword.toCharArray());
+                } catch (IOException e){
+                  eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder surname", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME,
+                      "forename", householdContact.get("surname").toString());
+                  throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householders surname");
+                }
               }
               if (collectionCase.get("isHouseholder").toString().equals("true")) {
                 isHouseHolder = "Yes";
@@ -85,9 +100,9 @@ public class NamedHouseholderProducer {
               }
 
               if (decryptedSurname != null) {
-                contact.append(decryptedSurname);
+                contact.append(" " + decryptedSurname + " ");
                 if (decryptedFirstname != null) {
-                  contact.insert(0, decryptedFirstname);
+                  contact.insert(0, " " + decryptedFirstname);
                 }
                 // Do we need a placeholder in the description to say that this is the name of the householder?
                 // I've added one temporarily

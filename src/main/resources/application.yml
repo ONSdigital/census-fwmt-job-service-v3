@@ -92,8 +92,8 @@ rmapi:
   baseUrl: "http://localhost:8000/"
 
 decryption:
-  pgp: classpath:ons_census_rehearsal_gpg_key.private
-  password: Census2021
+  pgp: classpath:testPrivateKey.private
+  password: testJobService
 
 
 fwmt:

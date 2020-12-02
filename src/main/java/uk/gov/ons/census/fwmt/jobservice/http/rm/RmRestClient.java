@@ -10,11 +10,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClientResponseErrorHandler;
-import uk.gov.ons.census.fwmt.jobservice.refusal.dto.CaseDetailsDTO;
 
 import java.net.MalformedURLException;
 import java.util.Date;

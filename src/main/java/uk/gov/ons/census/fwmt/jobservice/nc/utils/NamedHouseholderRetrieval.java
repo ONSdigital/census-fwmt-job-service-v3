@@ -27,10 +27,10 @@ public class NamedHouseholderRetrieval {
   private GatewayEventManager eventManager;
 
   @Value("${decryption.pgp}")
-  private Resource testPrivateKey;
+  private Resource privateKey;
 
   @Value("${decryption.password}")
-  private String testPassword;
+  private String privateKeyPassword;
 
   public String getAndSortRmRefusalCases(String caseId, CaseDetailsDTO houseHolder) throws GatewayException {
     StringBuilder contact = new StringBuilder();
@@ -75,8 +75,9 @@ public class NamedHouseholderRetrieval {
 
               if (!householdContact.get("forename").toString().equals("")) {
                 try {
-                  decryptedFirstname = DecryptNames.decryptFile(testPrivateKey.getInputStream(), householdContact.get("forename").toString(),
-                      testPassword.toCharArray());
+                  decryptedFirstname = DecryptNames.decryptFile(
+                      privateKey.getInputStream(), householdContact.get("forename").toString(),
+                      privateKeyPassword.toCharArray());
                 } catch (IOException e){
                   eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder forename", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME,
                       "forename", householdContact.get("forename").toString());
@@ -85,8 +86,9 @@ public class NamedHouseholderRetrieval {
               }
               if (!householdContact.get("surname").toString().equals("")) {
                 try{
-                  decryptedSurname = DecryptNames.decryptFile(testPrivateKey.getInputStream(), householdContact.get("surname").toString(),
-                      testPassword.toCharArray());
+                  decryptedSurname = DecryptNames.decryptFile(
+                      privateKey.getInputStream(), householdContact.get("surname").toString(),
+                      privateKeyPassword.toCharArray());
                 } catch (IOException e){
                   eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder surname", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME,
                       "forename", householdContact.get("surname").toString());

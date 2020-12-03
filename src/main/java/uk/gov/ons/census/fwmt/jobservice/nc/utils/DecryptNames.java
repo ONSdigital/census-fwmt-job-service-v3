@@ -27,8 +27,9 @@ import java.util.Iterator;
 
 public class DecryptNames {
 
+
   public static String decryptFile(InputStream secretKeyFile, String householder, char[] passwd) throws GatewayException {
-    PGPPrivateKey secretKey;
+    PGPPrivateKey secretKey = null;
     PGPPublicKeyEncryptedData encryptedData = null;
     Iterator<PGPPublicKeyEncryptedData> encryptedObjects;
     long encryptedFileKeyId = 0;
@@ -39,19 +40,17 @@ public class DecryptNames {
 
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Failed to obtain decryption data");
     }
-    while (encryptedObjects.hasNext()) {
+    while (encryptedObjects.hasNext() && secretKey == null) {
       encryptedData = encryptedObjects.next();
       encryptedFileKeyId = encryptedData.getKeyID();
-    }
-    try {
-      secretKey = getSecretKey(secretKeyFile, passwd, encryptedFileKeyId);
-      if (secretKey == null) {
-        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "failed to find secret key for: " + encryptedFileKeyId);
+
+      try {
+        secretKey = getSecretKey(secretKeyFile, passwd, encryptedFileKeyId);
+      } catch (IOException | PGPException e) {
+
+        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to obtain secret key");
+
       }
-    } catch (IOException | PGPException e) {
-
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to obtain secret key");
-
     }
     try {
       InputStream decryptedData = encryptedData.getDataStream(
@@ -61,7 +60,7 @@ public class DecryptNames {
       Streams.pipeAll(pgpLiteralData.getInputStream(), out);
       return out.toString(Charset.defaultCharset());
     } catch (IOException | PGPException e) {
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Failed to stream decryption data");
+      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to stream decryption data");
     }
   }
 

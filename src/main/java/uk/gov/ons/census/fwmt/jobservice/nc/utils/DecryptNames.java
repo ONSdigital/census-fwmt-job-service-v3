@@ -15,9 +15,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.Streams;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
-import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,9 +26,6 @@ import java.util.Base64;
 import java.util.Iterator;
 
 public class DecryptNames {
-
-  @Autowired
-  private GatewayEventManager eventManager;
 
   public static String decryptFile(InputStream secretKeyFile, String householder, char[] passwd) throws GatewayException {
     PGPPrivateKey secretKey;

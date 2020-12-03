@@ -82,7 +82,7 @@ public class NamedHouseholderRetrieval {
                     privateKey.getInputStream(), householdContact.get("surname").toString(),
                     privateKeyPassword.toCharArray()) : "";
               } catch (IOException e){
-                eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder forename", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME);
+                eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder name", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME);
                 throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householder name");
               }
 

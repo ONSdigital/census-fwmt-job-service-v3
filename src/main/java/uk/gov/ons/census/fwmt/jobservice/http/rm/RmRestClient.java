@@ -77,16 +77,6 @@ public class RmRestClient {
     }
   }
 
-  private HttpHeaders makeAuthHeader() throws GatewayException {
-    if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
-      auth();
-    HttpHeaders httpHeaders = new HttpHeaders();
-    if (isAuthed()) {
-      httpHeaders.setBearerAuth(auth.getAccessToken());
-    }
-    return httpHeaders;
-  }
-
   public CaseDetailsDTO getCase(String caseId) throws GatewayException {
     String basePathway = basePath + caseId;
     if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())

@@ -11,8 +11,8 @@ public class DecryptConfig {
   public final Resource privateKey;
 
   public DecryptConfig(
-      @Value("${totalmobile.username}") String password,
-      @Value("${totalmobile.password}") Resource privateKey) {
+      @Value("${rmapi.username}") String password,
+      @Value("${rmapi.password}") Resource privateKey) {
     this.privateKey = privateKey;
     this.password = password;
   }

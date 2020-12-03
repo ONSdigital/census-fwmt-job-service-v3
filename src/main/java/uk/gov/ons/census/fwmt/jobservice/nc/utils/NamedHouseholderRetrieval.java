@@ -69,40 +69,27 @@ public class NamedHouseholderRetrieval {
             }
 
             if (householdContact != null) {
-              String decryptedFirstname = null;
-              String decryptedSurname = null;
+              String decryptedFirstname;
+              String decryptedSurname;
               String isHouseHolder;
 
-              if (!householdContact.get("forename").toString().equals("")) {
-                try {
-                  decryptedFirstname = DecryptNames.decryptFile(
-                      privateKey.getInputStream(), householdContact.get("forename").toString(),
-                      privateKeyPassword.toCharArray());
-                } catch (IOException e){
-                  eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder forename", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME,
-                      "forename", householdContact.get("forename").toString());
-                  throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householders forename");
-                }
-              }
-              if (!householdContact.get("surname").toString().equals("")) {
-                try{
-                  decryptedSurname = DecryptNames.decryptFile(
-                      privateKey.getInputStream(), householdContact.get("surname").toString(),
-                      privateKeyPassword.toCharArray());
-                } catch (IOException e){
-                  eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder surname", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME,
-                      "forename", householdContact.get("surname").toString());
-                  throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householders surname");
-                }
-              }
-              if (collectionCase.get("isHouseholder").toString().equals("true")) {
-                isHouseHolder = "Yes";
-              } else {
-                isHouseHolder = "No";
+              try {
+                decryptedFirstname = !householdContact.get("forename").toString().equals("") ? DecryptNames.decryptFile(
+                    privateKey.getInputStream(), householdContact.get("forename").toString(),
+                    privateKeyPassword.toCharArray()) : "";
+
+                decryptedSurname = !householdContact.get("surname").toString().equals("") ? DecryptNames.decryptFile(
+                    privateKey.getInputStream(), householdContact.get("surname").toString(),
+                    privateKeyPassword.toCharArray()) : "";
+              } catch (IOException e){
+                eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder forename", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME);
+                throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householder name");
               }
 
+              isHouseHolder =  collectionCase.get("isHouseholder") != null && collectionCase.get("isHouseholder").toString().equals("true") ? "Yes" : "No";
+
               if (decryptedSurname != null) {
-                contact.append(" " + decryptedSurname + " ");
+                contact.append(" ").append(decryptedSurname).append(" ");
                 if (decryptedFirstname != null) {
                   contact.insert(0, " " + decryptedFirstname);
                 }
@@ -110,6 +97,7 @@ public class NamedHouseholderRetrieval {
                 // I've added one temporarily
                 contact.insert(0, "Householder name = ");
                 contact.append("Named householder = ").append(isHouseHolder);
+                break;
               }
             }
           }

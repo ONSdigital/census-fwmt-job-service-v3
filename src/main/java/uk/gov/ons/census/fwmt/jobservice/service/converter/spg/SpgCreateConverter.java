@@ -14,6 +14,8 @@ import java.util.Objects;
 
 public final class SpgCreateConverter {
 
+  private final static String SECURE_SITE =  "Secure Site";
+
   private SpgCreateConverter() {
   }
 
@@ -52,15 +54,17 @@ public final class SpgCreateConverter {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Site)
         .reference("SECSS_" + ffu.getCaseRef())
-        .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
-            + "\n":"") + "Secure Site").build();
+        .description(getDescription(cache).concat(SECURE_SITE))
+        .specialInstructions(getSpecialInstructions(cache))
+        .build();
   }
   public static CaseRequest convertSecureUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Unit_F)    
         .reference("SECSU_" + ffu.getCaseRef())
-        .description(((cache!=null && cache.getCareCodes()!=null && !cache.getCareCodes().isEmpty())?cache.getCareCodes()
-            + "\n":"") + "Secure Site").build();
+        .description(getDescription(cache).concat(SECURE_SITE))
+        .specialInstructions(getSpecialInstructions(cache))
+        .build();
   }
 
   public static CaseRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) {
@@ -72,6 +76,8 @@ public final class SpgCreateConverter {
   public static CaseRequest convertUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Unit_D)
+        .description(getDescription(cache))
+        .specialInstructions(getSpecialInstructions(cache))
         .build();
   }
 
@@ -80,4 +86,24 @@ public final class SpgCreateConverter {
         .surveyType(SurveyType.SPG_Unit_F)
         .build();
   }
+
+  private static String getDescription(GatewayCache cache) {
+    if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
+      return cache.getCareCodes() + "\n";
+    }
+    return "";
+  }
+
+  private static String getSpecialInstructions(GatewayCache cache) {
+    StringBuilder instruction = new StringBuilder();
+    if (cache != null && cache.getAccessInfo() != null && !cache.getAccessInfo().isEmpty()) {
+      instruction.append(cache.getAccessInfo());
+      instruction.append("\n");
+    }
+    if (!getDescription(cache).isEmpty()) {
+      instruction.append(getDescription(cache));
+    }
+    return instruction.toString();
+  }
+
 }

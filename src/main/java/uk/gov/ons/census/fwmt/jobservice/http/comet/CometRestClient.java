@@ -19,7 +19,7 @@ import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
 
-import uk.gov.ons.census.fwmt.common.data.modelcase.ModelCase;
+import uk.gov.ons.census.fwmt.common.data.tm.Case;
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
@@ -152,7 +152,7 @@ public class CometRestClient {
     return restTemplate.exchange(path, HttpMethod.DELETE, body, Void.class);
   }
 
-  public ModelCase getCase(String caseId) throws GatewayException {
+  public Case getCase(String caseId) throws GatewayException {
     String basePathway = cometUrl + caseId;
     if ((!isAuthed() || isExpired()) && !cometConfig.clientId.isEmpty() && !cometConfig.clientSecret.isEmpty())
       auth();
@@ -161,7 +161,7 @@ public class CometRestClient {
       httpHeaders.setBearerAuth(auth.getAccessToken());
 
     HttpEntity<?> body = new HttpEntity<>(httpHeaders);
-    ResponseEntity<ModelCase> request = restTemplate.exchange(basePathway, HttpMethod.GET, body, ModelCase.class);
+    ResponseEntity<Case> request = restTemplate.exchange(basePathway, HttpMethod.GET, body, Case.class);
 
     return request.getBody();
   }

@@ -117,7 +117,6 @@ dependencies {
     compile 'org.springframework.retry:spring-retry'
     compile 'org.springframework:spring-aop'
     compile 'org.springframework.data:spring-data-redis'
-    //compile 'org.springframework.data:spring-data-redis'
     compile 'org.apache.httpcomponents:httpclient'
 
     // Data Formats
@@ -125,9 +124,6 @@ dependencies {
     compile 'org.yaml:snakeyaml'
     compile 'org.json:json:20180813'
     compile 'com.fasterxml.jackson.core:jackson-databind'
-    // compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-    // compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-    // compile 'com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4'
 
     // Data mapping
     compile 'ma.glasnost.orika:orika-core:1.5.4'
@@ -139,6 +135,7 @@ dependencies {
     compile 'org.jsoup:jsoup:1.11.3'
     compile 'redis.clients:jedis:3.2.0'
     compile 'com.rabbitmq:amqp-client'
+    compile group: 'com.mytaxi.spring.multirabbit', name: 'spring-multirabbit-lib', version: '2.1.0'
     compile 'com.microsoft.azure:adal4j:1.6.0'
     runtimeOnly 'org.postgresql:postgresql'
 

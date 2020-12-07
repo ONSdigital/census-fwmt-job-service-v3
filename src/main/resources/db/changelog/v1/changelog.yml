@@ -116,3 +116,12 @@ databaseChangeLog:
             path: update_individual_case_id_varchar_value.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v14
+      author: Jacob Harrison
+      comment: Add column original case ID for Non Compliance
+      changes:
+        - sqlFile:
+            path: add_column_original_case_id.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

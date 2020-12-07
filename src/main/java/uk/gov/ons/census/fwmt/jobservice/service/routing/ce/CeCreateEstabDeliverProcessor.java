@@ -61,7 +61,8 @@ public class CeCreateEstabDeliverProcessor implements InboundProcessor<FwmtActio
           && rmRequest.isHandDeliver()
           && (cache == null
           || !cache.existsInFwmt)
-          && !cacheService.doesEstabUprnExist(rmRequest.getUprn());
+          && !cacheService.doesEstabUprnExist(rmRequest.getUprn())
+          && !rmRequest.isNc();
     } catch (NullPointerException e) {
       return false;
     }

@@ -53,11 +53,17 @@ public class DecryptNames {
       }
     }
     try {
-      InputStream decryptedData = encryptedData.getDataStream(
-          new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(new BouncyCastleProvider()).build(secretKey));
+      InputStream decryptedData = null;
+      if (encryptedData != null) {
+        decryptedData = encryptedData.getDataStream(
+            new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(new BouncyCastleProvider()).build(secretKey));
+      }
       PGPLiteralData pgpLiteralData = asLiteral(decryptedData);
       final ByteArrayOutputStream out = new ByteArrayOutputStream();
-      Streams.pipeAll(pgpLiteralData.getInputStream(), out);
+      if (pgpLiteralData != null) {
+        Streams.pipeAll(pgpLiteralData.getInputStream(), out);
+      }
+
       return out.toString(Charset.defaultCharset());
     } catch (IOException | PGPException e) {
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to stream decryption data");

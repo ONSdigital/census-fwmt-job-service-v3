@@ -19,6 +19,8 @@ import java.util.List;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_DECRYPT_NAME;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_READ_EVENT_PAYLOAD;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.DECRYPTED_HH_NAMES;
+
 
 @Service
 public class NamedHouseholderRetrieval {
@@ -97,6 +99,7 @@ public class NamedHouseholderRetrieval {
                 // I've added one temporarily
                 contact.insert(0, "Householder name = ");
                 contact.append("Named householder = ").append(isHouseHolder);
+                eventManager.triggerEvent(caseId,DECRYPTED_HH_NAMES);
                 break;
               }
             }

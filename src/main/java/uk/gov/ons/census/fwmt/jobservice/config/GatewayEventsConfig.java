@@ -45,6 +45,9 @@ public class GatewayEventsConfig {
   public static final String CONVERT_SPG_UNIT_UPDATE_TO_CREATE = "CONVERT_SPG_UNIT_UPDATE_TO_CREATE";
   public static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";
 
+  public static final String DECRYPTED_HH_NAMES = "DECRYPTED_HH_NAMES";
+
+
   private final boolean useJsonLogging;
 
   public GatewayEventsConfig(@Value("#{'${logging.profile}' == 'CLOUD'}") boolean useJsonLogging) {

@@ -58,7 +58,8 @@ public class HhCreateEnglandAndWales implements InboundProcessor<FwmtActionInstr
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("HH")
           && !rmRequest.getOa().startsWith("N")
-          && (cache == null || !cache.existsInFwmt);
+          && (cache == null || !cache.existsInFwmt)
+          && !rmRequest.isNc();
     } catch (NullPointerException e) {
       return false;
     }

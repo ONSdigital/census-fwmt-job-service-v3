@@ -69,7 +69,7 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
       throws GatewayException {
     String newCaseId = String.valueOf(UUID.randomUUID());
 
-    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache);
+    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, null);
 
     eventManager.triggerEvent(newCaseId, COMET_CREATE_PRE_SENDING,
         "Original case id", rmRequest.getCaseId(),

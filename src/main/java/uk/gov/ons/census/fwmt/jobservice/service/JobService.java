@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CONVERT_SPG_UNIT_UPDATE_TO_CREATE;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTING_FAILED;
 
 @Slf4j
 @Service
@@ -56,8 +57,6 @@ public class JobService {
   @Autowired  
   @Qualifier("PauseProcessorMap") 
   private Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> pauseProcessorMap; 
-  
-  public static final String ROUTING_FAILED = "ROUTING_FAILED";
 
   @Transactional
   public void processCreate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {

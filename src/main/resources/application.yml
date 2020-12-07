@@ -86,6 +86,15 @@ totalmobile:
     case:
       create:
         path: "cases/"
+rmapi:
+  username: "user"
+  password: "password"
+  baseUrl: "http://localhost:8000/"
+
+decryption:
+  pgp: classpath:testPrivateKey.private
+  password: testJobService
+
 
 fwmt:
   workTypes:
@@ -111,3 +120,12 @@ ce:
 jobservice:
   transitionRules:
     path: classpath:/transitionRules.txt
+
+resthttp:
+  connection:
+    timeout: 200
+    requestTimeout: 100
+    socketTimeout: 1500
+    pool:
+      maxPerRoute: 20
+      maxTotal: 100

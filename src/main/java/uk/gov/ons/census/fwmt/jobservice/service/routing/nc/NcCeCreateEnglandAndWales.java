@@ -57,7 +57,8 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CREATE
           && rmRequest.getSurveyName().equals("CENSUS")
-          && !rmRequest.getOa().startsWith("N");
+          && !rmRequest.getOa().startsWith("N")
+          && rmRequest.isNc();
     } catch (NullPointerException e) {
       return false;
     }

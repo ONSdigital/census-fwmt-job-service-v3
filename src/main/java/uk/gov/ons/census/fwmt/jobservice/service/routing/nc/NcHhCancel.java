@@ -46,14 +46,9 @@ public class NcHhCancel implements InboundProcessor<FwmtCancelActionInstruction>
     return key;
   }
 
-  //  When actionInstruction = "CANCEL"
-  //  and surveyName = "CENSUS"
-  //  and nc = true
-  //  and cache.originatingCaseId = caseId
-  //
-  //  // Note, the originatingCaseId is a new field to be created in cache for NC
-  //  //       it is the original HH Case Id and is to map to a new NC Case Id
-  //  //       this cancel MUST send the NC Case Id to TM!
+    // Note, the originatingCaseId is a new field to be created in cache for NC
+    //       it is the original HH Case Id and is to map to a new NC Case Id
+    //       this cancel MUST send the NC Case Id to TM!
 
   @Override
   public boolean isValid(FwmtCancelActionInstruction rmRequest, GatewayCache cache) {
@@ -62,6 +57,7 @@ public class NcHhCancel implements InboundProcessor<FwmtCancelActionInstruction>
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("HH")
           && rmRequest.getAddressLevel().equals("U")
+          && rmRequest.isNc()
           && cache.getOriginalCaseId().equals(rmRequest.getCaseId());
     } catch (NullPointerException e) {
       return false;

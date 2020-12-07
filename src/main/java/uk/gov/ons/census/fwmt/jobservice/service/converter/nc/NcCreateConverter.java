@@ -5,6 +5,7 @@ import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.data.tm.Geography;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
+import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
@@ -25,6 +26,7 @@ public class NcCreateConverter {
     commonBuilder.type(CaseType.NC);
     commonBuilder.surveyType(SurveyType.NC);
     commonBuilder.category("HH");
+    commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 
     Geography outGeography = Geography
         .builder()
@@ -41,25 +43,33 @@ public class NcCreateConverter {
         .postcode(ffu.getPostcode())
         .geography(outGeography)
         .build();
+
     commonBuilder.address(outAddress);
 
     return commonBuilder;
   }
 
-  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache) {
+  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder)
+      throws GatewayException {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
         .specialInstructions(getSpecialInstructions(cache))
-        .description(getDescription(ffu, cache))
+        .description(getDescription(ffu, cache, householder))
         .build();
   }
 
-  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache) {
+  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) throws GatewayException {
     StringBuilder description = new StringBuilder();
     if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
       description.append(cache.getCareCodes());
       description.append("\n");
+    }
+    if (ffu.getAddressType().equals(CaseType.HH.toString()) && householder != null) {
+      if (!householder.equals("")) {
+        description.append(householder);
+        description.append("\n");
+      }
     }
     return description.toString();
   }
@@ -76,4 +86,6 @@ public class NcCreateConverter {
     }
     return instruction.toString();
   }
+
 }
+

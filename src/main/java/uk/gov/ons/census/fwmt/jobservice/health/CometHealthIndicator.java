@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,22 +21,18 @@ public class CometHealthIndicator extends AbstractHealthIndicator {
   private final String swaggerUrl;
   private final RestTemplate restTemplate;
 
-  public CometHealthIndicator(GatewayEventManager gatewayEventManager, RestTemplateBuilder restTemplateBuilder,
-      CometConfig cometConfig
-  ) {
+  public CometHealthIndicator(GatewayEventManager gatewayEventManager,
+                              RestTemplateBuilder restTemplateBuilder,
+                              CometConfig cometConfig,
+                              RestTemplate restTemplate) {
     this.gatewayEventManager = gatewayEventManager;
     this.swaggerUrl = cometConfig.baseUrl + cometConfig.healthCheckPath;
-    this.restTemplate = restTemplateBuilder.build();
-  }
-
-  @Bean(name = "TM Anon")
-  public RestTemplate restTemplate() {
-    return restTemplate;
+    this.restTemplate = restTemplate;
   }
 
   @Override protected void doHealthCheck(Health.Builder builder) {
     try {
-      HttpStatus responseCode = restTemplate.exchange(swaggerUrl, HttpMethod.GET, null, Void.class).getStatusCode();
+      HttpStatus responseCode = this.restTemplate.exchange(swaggerUrl, HttpMethod.GET, null, Void.class).getStatusCode();
 
       if (responseCode.is2xxSuccessful()) {
         builder.up().withDetail(responseCode.toString(), String.class).build();

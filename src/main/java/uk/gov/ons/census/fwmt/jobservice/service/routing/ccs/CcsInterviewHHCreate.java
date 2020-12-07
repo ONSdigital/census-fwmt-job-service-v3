@@ -82,7 +82,7 @@ public class CcsInterviewHHCreate implements InboundProcessor<FwmtActionInstruct
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache != null) {
-      cacheService.save(GatewayCache.builder()
+      cacheService.save(newCache.toBuilder()
           .caseId(rmRequest.getCaseId())
           .existsInFwmt(true)
           .lastActionInstruction(rmRequest.getActionInstruction().toString())

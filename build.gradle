@@ -92,6 +92,12 @@ dependencies {
     compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.40-RELEASE'
     compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.22-RELEASE'
 
+
+    // Decryption
+    compile 'org.bouncycastle:bcprov-jdk15on:1.61'
+    compile 'org.bouncycastle:bcpg-jdk15on:1.61'
+
+
     // General Libraries
     compile 'com.google.guava:guava:27.0.1-jre'
     //    compile 'org.apache.commons:commons-lang3'
@@ -114,6 +120,7 @@ dependencies {
     compile 'org.springframework:spring-aop'
     compile 'org.springframework.data:spring-data-redis'
     //compile 'org.springframework.data:spring-data-redis'
+    compile 'org.apache.httpcomponents:httpclient'
 
     // Data Formats
     compile 'org.apache.commons:commons-csv:1.6'

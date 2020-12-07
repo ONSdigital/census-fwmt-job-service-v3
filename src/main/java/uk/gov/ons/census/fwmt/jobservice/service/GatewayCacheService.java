@@ -5,8 +5,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.repository.GatewayCacheRepository;
 
-import java.util.List;
-
 /**
  * This class is bare-bones because it's a simple connector between the rest of the code and the caching implementation
  * Please don't subvert this class by touching the GatewayCacheRepository
@@ -31,7 +29,7 @@ public class GatewayCacheService {
   };
 
   public boolean doesEstabUprnAndTypeExist(String estabUprn, int type) {
-    return repository.existsByEstabUprnAndType(estabUprn, type);}
+    return repository.existsByUprnAndType(estabUprn, type);}
 
   public String getEstabCaseId(String estabUprn) {
     return repository.findByEstabUprn(estabUprn);

@@ -11,6 +11,9 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
+import uk.gov.ons.census.fwmt.jobservice.http.rm.RmRestClient;
+import uk.gov.ons.census.fwmt.jobservice.nc.utils.NamedHouseholderRetrieval;
+import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.nc.NcCreateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
@@ -42,10 +45,16 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   private GatewayEventManager eventManager;
 
   @Autowired
+  private RmRestClient rmRestClient;
+
+  @Autowired
   private RoutingValidator routingValidator;
 
   @Autowired
   private GatewayCacheService cacheService;
+
+  @Autowired
+  private NamedHouseholderRetrieval namedHouseholderRetrieval;
 
   @Override
   public ProcessorKey getKey() {
@@ -67,9 +76,11 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
+    CaseDetailsDTO houseHolderDetails = rmRestClient.getCase(rmRequest.getCaseId());
     String newCaseId = String.valueOf(UUID.randomUUID());
+    String householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(rmRequest.getCaseId(), houseHolderDetails);
 
-    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache);
+    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, householder);
 
     eventManager.triggerEvent(newCaseId, COMET_CREATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),

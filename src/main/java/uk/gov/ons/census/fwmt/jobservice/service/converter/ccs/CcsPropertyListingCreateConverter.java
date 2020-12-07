@@ -9,9 +9,7 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CcsPropertyListingCreateConverter {
 
@@ -26,7 +24,7 @@ public class CcsPropertyListingCreateConverter {
     commonBuilder.surveyType((ffu.getSurveyType()!=null)?ffu.getSurveyType():SurveyType.CCS_PL);
     commonBuilder.category("Not applicable");
 
-    commonBuilder.estabType((ffu.getEstabType()!=null)?ffu.getEstabType():"HH");
+    commonBuilder.estabType((ffu.getEstabType()!=null)?ffu.getEstabType():"PL");
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
     commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 

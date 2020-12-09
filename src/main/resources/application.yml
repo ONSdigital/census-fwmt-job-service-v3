@@ -26,6 +26,23 @@ spring:
     user: postgres
     password: postgres
 #     enabled: false
+  rabbitmq:
+    username: "guest"
+    password: "guest"
+    hostname: "localhost"
+    port: 5672
+    virtualHost: "/"
+    initialInterval: 5000
+    multiplier: 3.0
+    maxInterval: 45000
+    maxRetries: 1
+    prefetchCount: 500
+    concurrentConsumers: 10
+    queues:
+      rm:
+        input: "RM.Field"
+        dlq: "RM.FieldDLQ"
+        exchange: "adapter-outbound-exchange"
 
 management:
   # Place /info and /health in the root
@@ -48,23 +65,7 @@ logging:
     org.hibernate: INFO
     org.apache.commons.dbcp2: INFO
 
-rabbitmq:
-  username: "guest"
-  password: "guest"
-  hostname: "localhost"
-  port: 5672
-  virtualHost: "/"
-  initialInterval: 5000
-  multiplier: 3.0
-  maxInterval: 45000
-  maxRetries: 1
-  prefetchCount: 500
-  concurrentConsumers: 10
-  queues:
-    rm:
-      input: "RM.Field"
-      dlq: "RM.FieldDLQ"
-      exchange: "adapter-outbound-exchange"
+
 
 redis:
   host: "localhost"
@@ -129,3 +130,6 @@ resthttp:
     pool:
       maxPerRoute: 20
       maxTotal: 100
+
+app:
+  testing: false

@@ -1,5 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.health;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -7,7 +8,7 @@ import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-import uk.gov.ons.census.fwmt.jobservice.config.RabbitMqConfig;
+//import uk.gov.ons.census.fwmt.jobservice.config.RabbitMqConfig;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
 
@@ -29,14 +31,14 @@ public class RabbitQueuesHealthIndicator extends AbstractHealthIndicator {
   private final GatewayEventManager gatewayEventManager;
 
   private RabbitAdmin rabbitAdmin;
-
-  public RabbitQueuesHealthIndicator(@Qualifier("connectionFactory") ConnectionFactory connectionFactory,
-      RabbitMqConfig config, GatewayEventManager gatewayEventManager) {
-    this.queues = Arrays.asList(config.inputQueue, config.inputDlq);
-    this.connectionFactory = connectionFactory;
-    this.gatewayEventManager = gatewayEventManager;
-    this.rabbitAdmin = null;
-  }
+//
+//  public RabbitQueuesHealthIndicator(@Qualifier("connectionFactory") ConnectionFactory connectionFactory,
+//      RabbitMqConfig config, GatewayEventManager gatewayEventManager) {
+//    this.queues = Arrays.asList(config.inputQueue, config.inputDlq);
+//    this.connectionFactory = connectionFactory;
+//    this.gatewayEventManager = gatewayEventManager;
+//    this.rabbitAdmin = null;
+//  }
 
   private boolean checkQueue(String queueName) {
     Properties properties = rabbitAdmin.getQueueProperties(queueName);

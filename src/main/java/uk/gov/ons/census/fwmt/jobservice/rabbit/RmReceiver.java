@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Component
-@RabbitListener(queues = "${rabbitmq.queues.rm.input}", containerFactory = "retryContainerFactory", concurrency = "${rabbitmq.concurrentConsumers}")
+@RabbitListener(queues = "${spring.rabbitmq.queues.rm.input}", containerFactory = "retryContainerFactory", concurrency = "${spring.rabbitmq.concurrentConsumers}")
 public class RmReceiver {
 
   public static final String RM_CREATE_REQUEST_RECEIVED = "RM_CREATE_REQUEST_RECEIVED";

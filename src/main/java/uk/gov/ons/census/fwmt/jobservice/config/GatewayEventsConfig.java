@@ -1,18 +1,23 @@
 package uk.gov.ons.census.fwmt.jobservice.config;
 
 import com.godaddy.logging.LoggingConfigs;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
+import uk.gov.ons.census.fwmt.events.producer.GatewayLoggingEventProducer;
+import uk.gov.ons.census.fwmt.events.producer.RabbitMQGatewayEventProducer;
 import uk.gov.ons.census.fwmt.jobservice.Application;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.Function;
 
+@Slf4j
 @Configuration
 public class GatewayEventsConfig {
 
@@ -45,18 +50,24 @@ public class GatewayEventsConfig {
   public static final String CONVERT_SPG_UNIT_UPDATE_TO_CREATE = "CONVERT_SPG_UNIT_UPDATE_TO_CREATE";
   public static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";
 
-  private final boolean useJsonLogging;
-
-  public GatewayEventsConfig(@Value("#{'${logging.profile}' == 'CLOUD'}") boolean useJsonLogging) {
-    this.useJsonLogging = useJsonLogging;
-  }
+  @Value("#{'${logging.profile}' == 'CLOUD'}")
+  private boolean useJsonLogging;
+  @Value("${app.testing}")
+  private boolean testing;
 
   @Bean
-  public GatewayEventManager gatewayEventManager() {
-    GatewayEventManager gatewayEventManager = new GatewayEventManager();
+  public GatewayEventManager gatewayEventManager(GatewayLoggingEventProducer gatewayLoggingEventProducer, RabbitMQGatewayEventProducer testProducer) {
+
+    final GatewayEventManager gatewayEventManager;
+    if (testing) {
+      log.warn("\n\n \t IMPORTANT - Test Mode: ON        \n \t\t Service is initiated in test mode which, this should not occur in production \n\n");
+      gatewayEventManager = new GatewayEventManager(Arrays.asList(gatewayLoggingEventProducer, testProducer));
+    } else {
+      log.warn("\n\n \t IMPORTANT - Test Mode: OFF   \n\n");
+      gatewayEventManager = new GatewayEventManager(Arrays.asList(gatewayLoggingEventProducer, testProducer));
+    }
+
     gatewayEventManager.setSource(Application.APPLICATION_NAME);
-
-
     return gatewayEventManager;
   }
 

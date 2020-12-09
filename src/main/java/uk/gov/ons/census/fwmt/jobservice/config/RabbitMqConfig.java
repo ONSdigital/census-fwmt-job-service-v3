@@ -44,18 +44,18 @@ public class RabbitMqConfig {
   private final int prefetchCount;
   
   public RabbitMqConfig(
-      @Value("${rabbitmq.username}") String username,
-      @Value("${rabbitmq.password}") String password,
-      @Value("${rabbitmq.hostname}") String hostname,
-      @Value("${rabbitmq.port}") int port,
-      @Value("${rabbitmq.virtualHost}") String virtualHost,
-      @Value("${rabbitmq.initialInterval}") int initialInterval,
-      @Value("${rabbitmq.multiplier}") double multiplier,
-      @Value("${rabbitmq.maxInterval}") int maxInterval,
-      @Value("${rabbitmq.maxRetries:1}") int maxRetries,
-      @Value("${rabbitmq.prefetchCount}") int prefetchCount,
-      @Value("${rabbitmq.queues.rm.input}") String inputQueue,
-      @Value("${rabbitmq.queues.rm.dlq}") String inputDlq) {
+      @Value("${spring.rabbitmq.username}") String username,
+      @Value("${spring.rabbitmq.password}") String password,
+      @Value("${spring.rabbitmq.hostname}") String hostname,
+      @Value("${spring.rabbitmq.port}") int port,
+      @Value("${spring.rabbitmq.virtualHost}") String virtualHost,
+      @Value("${spring.rabbitmq.initialInterval}") int initialInterval,
+      @Value("${spring.rabbitmq.multiplier}") double multiplier,
+      @Value("${spring.rabbitmq.maxInterval}") int maxInterval,
+      @Value("${spring.rabbitmq.maxRetries:1}") int maxRetries,
+      @Value("${spring.rabbitmq.prefetchCount}") int prefetchCount,
+      @Value("${spring.rabbitmq.queues.rm.input}") String inputQueue,
+      @Value("${spring.rabbitmq.queues.rm.dlq}") String inputDlq) {
     this.username = username;
     this.password = password;
     this.hostname = hostname;
@@ -69,6 +69,7 @@ public class RabbitMqConfig {
     this.inputDlq = inputDlq;
     this.prefetchCount = prefetchCount;
   }
+
   @Bean
   public ConnectionFactory connectionFactory() {
     CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
@@ -77,11 +78,7 @@ public class RabbitMqConfig {
     cachingConnectionFactory.setUsername(username);
     return cachingConnectionFactory;
   }
-//  @Bean
-//  public Jackson2JsonMessageConverter messageConverter() {
-//    ObjectMapper objectMapper = new ObjectMapper();
-//    return new Jackson2JsonMessageConverter(objectMapper);
-//  }
+
   @Bean
   public AmqpAdmin amqpAdmin() {
     return new RabbitAdmin(connectionFactory());

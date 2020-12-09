@@ -17,14 +17,14 @@ spring:
     schema: classpath:/schema.sql
     continue-on-error: false
     username: postgres
-    password: password
+    password: postgres
     initialization-mode: always      
   liquibase:
     url: jdbc:postgresql://localhost:5432/postgres?currentSchema=fwmtg
     default-schema: fwmtg
     change-log: classpath:db/changelog/db.changelog-master.yml
     user: postgres
-    password: password
+    password: postgres
 #     enabled: false
 
 management:

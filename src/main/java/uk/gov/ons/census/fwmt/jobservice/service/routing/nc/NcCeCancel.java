@@ -55,8 +55,8 @@ public class NcCeCancel implements InboundProcessor<FwmtCancelActionInstruction>
     try {
       return rmRequest.getActionInstruction() == ActionInstructionType.CANCEL
           && rmRequest.getSurveyName().equals("CENSUS")
-          && rmRequest.getAddressType().equals("HH")
-          && rmRequest.getAddressLevel().equals("U")
+          && rmRequest.getAddressType().equals("CE")
+          && rmRequest.getAddressLevel().equals("E")
           && rmRequest.isNc()
           && cache.getOriginalCaseId().equals(rmRequest.getCaseId());
     } catch (NullPointerException e) {

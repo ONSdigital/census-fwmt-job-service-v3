@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.spg;
 
-import uk.gov.ons.census.fwmt.common.data.modelcase.CeCaseExtension;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 

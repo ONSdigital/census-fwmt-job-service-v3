@@ -132,8 +132,6 @@ dependencies {
         exclude module: 'commons-logging'
     }
     compile 'org.jsoup:jsoup:1.11.3'
-    compile 'com.rabbitmq:amqp-client'
-//    compile group: 'com.mytaxi.spring.multirabbit', name: 'spring-multirabbit-lib', version: '2.1.0'
     compile 'com.microsoft.azure:adal4j:1.6.0'
     runtimeOnly 'org.postgresql:postgresql'
 
@@ -147,7 +145,6 @@ dependencies {
     // Meta
     compile 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    // testAnnotationProcessor 'org.projectlombok:lombok'
 
     // Testing Framework
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

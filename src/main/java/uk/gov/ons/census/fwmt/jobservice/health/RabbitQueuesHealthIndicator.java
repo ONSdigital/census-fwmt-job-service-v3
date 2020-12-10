@@ -3,14 +3,11 @@ package uk.gov.ons.census.fwmt.jobservice.health;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
-//import uk.gov.ons.census.fwmt.jobservice.config.RabbitMqConfig;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;

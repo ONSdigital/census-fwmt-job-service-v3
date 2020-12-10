@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.support.RetryTemplate;
@@ -78,7 +79,8 @@ public class RabbitMqConfig {
   }
 
   @Bean("rmConnectionFactory")
-  public ConnectionFactory connectionFactory() {
+  @Primary
+  public ConnectionFactory rmConnectionFactory() {
     CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
     cachingConnectionFactory.setVirtualHost(virtualHost);
     cachingConnectionFactory.setPassword(password);
@@ -88,7 +90,7 @@ public class RabbitMqConfig {
 
   @Bean
   public AmqpAdmin amqpAdmin() {
-    return new RabbitAdmin(connectionFactory());
+    return new RabbitAdmin(rmConnectionFactory());
   }
 
   @Bean
@@ -157,7 +159,7 @@ public class RabbitMqConfig {
   }
 
   @Bean
-  public SimpleRabbitListenerContainerFactory retryContainerFactory(
+  public SimpleRabbitListenerContainerFactory rmContainerFactory(
       @Qualifier("rmConnectionFactory") ConnectionFactory connectionFactory, RetryOperationsInterceptor interceptor,
       @Qualifier("JS") MessageConverter jsonMessageConverter) {
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();

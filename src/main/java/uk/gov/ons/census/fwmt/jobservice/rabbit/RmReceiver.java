@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
@@ -31,6 +33,10 @@ public class RmReceiver {
   private static final String RM_PAUSE_REQUEST_RECEIVED = "RM_PAUSE_REQUEST_RECEIVED";
 
   @Autowired
+  @Qualifier("GW_EVENT_RT")
+  private RabbitTemplate gatewayRabbitTemplate;
+
+  @Autowired
   private final JobService jobService;
   @Autowired
   private final GatewayEventManager gatewayEventManager;
@@ -40,50 +46,63 @@ public class RmReceiver {
     this.gatewayEventManager = gatewayEventManager;
   }
 
+  public static void main(String[] args) {
+    DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ")
+        .withZone(ZoneId.systemDefault());
+
+    System.out.println(DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(1600169507861L)));
+  }
+
   @RabbitHandler
   public void receiveCreateMessage(FwmtActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) throws GatewayException {
     //TODO trigger correct event CREATE or UPDATE
-    long epochTimeStamp = Long.parseLong(timestamp);
-    Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
-    System.out.println(receivedMessageTime);
-    System.out.println(message.getMessageProperties());
-    switch (rmRequest.getActionInstruction()) {
-    case CREATE: {
-      gatewayEventManager
-          .triggerEvent(rmRequest.getCaseId(), RM_CREATE_REQUEST_RECEIVED,
-              "Case Ref", rmRequest.getCaseRef());
-      jobService.processCreate(rmRequest, receivedMessageTime);
-      break;
-    }
-    case SWITCH_CE_TYPE: {
-      gatewayEventManager
-          .triggerEvent(rmRequest.getCaseId(), RM_CREATE_SWITCH_REQUEST_RECEIVED,
-              "Case Ref", rmRequest.getCaseRef());
-      jobService.processCreate(rmRequest, receivedMessageTime);
-      break;
-    }
-    case UPDATE : {
-      gatewayEventManager
-          .triggerEvent(rmRequest.getCaseId(), RM_UPDATE_REQUEST_RECEIVED,
-              "Case Ref", rmRequest.getCaseRef());
-      jobService.processUpdate(rmRequest, receivedMessageTime);
-      break;
-    }
-    case PAUSE: {
-      gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,
-          "Case Ref", rmRequest.getCaseRef());
-      jobService.processPause(rmRequest, receivedMessageTime);
-      break;
-    }
-    default:
-      break; //TODO THROW ROUTUNG FAILURE
+    try {
+      long epochTimeStamp = Long.parseLong(timestamp);
+      Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
+      System.out.println(receivedMessageTime);
+      System.out.println(message.getMessageProperties());
+      switch (rmRequest.getActionInstruction()) {
+      case CREATE: {
+        gatewayEventManager
+            .triggerEvent(rmRequest.getCaseId(), RM_CREATE_REQUEST_RECEIVED,
+                "Case Ref", rmRequest.getCaseRef());
+        jobService.processCreate(rmRequest, receivedMessageTime);
+        break;
+      }
+      case SWITCH_CE_TYPE: {
+        gatewayEventManager
+            .triggerEvent(rmRequest.getCaseId(), RM_CREATE_SWITCH_REQUEST_RECEIVED,
+                "Case Ref", rmRequest.getCaseRef());
+        jobService.processCreate(rmRequest, receivedMessageTime);
+        break;
+      }
+      case UPDATE: {
+        gatewayEventManager
+            .triggerEvent(rmRequest.getCaseId(), RM_UPDATE_REQUEST_RECEIVED,
+                "Case Ref", rmRequest.getCaseRef());
+        jobService.processUpdate(rmRequest, receivedMessageTime);
+        break;
+      }
+      case PAUSE: {
+        gatewayEventManager.triggerEvent(rmRequest.getCaseId(), RM_PAUSE_REQUEST_RECEIVED,
+            "Case Ref", rmRequest.getCaseRef());
+        jobService.processPause(rmRequest, receivedMessageTime);
+        break;
+      }
+      default:
+        break; //TODO THROW ROUTUNG FAILURE
+      }
+    } catch (Exception e) {
+      log.error("Error sending message - {}", e.getMessage());
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "GW.ErrorQ", message);
     }
   }
 
   @RabbitHandler
   public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) throws GatewayException {
-      //TODO trigger correct event CANCEL
+    //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
+    try {
     long epochTimeStamp = Long.parseLong(timestamp);
     Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
     System.out.println(message.getMessageProperties());
@@ -98,13 +117,10 @@ public class RmReceiver {
               "Action Request", rmRequest.getActionInstruction().toString());
       throw new RuntimeException("Could not route Request");
     }
+    } catch (Exception e) {
+      log.error("Error sending message - {}", e.getMessage());
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "GW.ErrorQ", message);
+    }
   }
-  
-  public static void main(String[] args) {
-    DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ")
-        .withZone(ZoneId.systemDefault());
 
-System.out.println(DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(1600169507861L)));
-  }
-  
 }

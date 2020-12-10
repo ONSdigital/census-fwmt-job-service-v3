@@ -108,6 +108,7 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
           .caseId(newCaseId)
           .originalCaseId(rmRequest.getCaseId())
           .existsInFwmt(true)
+          .type(10)
           .lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime)
           .build());

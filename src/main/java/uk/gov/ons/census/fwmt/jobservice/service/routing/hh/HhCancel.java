@@ -61,6 +61,7 @@ public class HhCancel implements InboundProcessor<FwmtCancelActionInstruction> {
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("HH")
           && rmRequest.getAddressLevel().equals("U")
+          && !rmRequest.isNc()
           && (cache != null && cache.existsInFwmt);
     } catch (NullPointerException e) {
       return false;

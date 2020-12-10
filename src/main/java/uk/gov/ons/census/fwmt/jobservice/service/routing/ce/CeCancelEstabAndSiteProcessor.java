@@ -56,6 +56,7 @@ public class CeCancelEstabAndSiteProcessor implements InboundProcessor<FwmtCance
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("CE")
           && rmRequest.getAddressLevel().equals("E")
+          && !rmRequest.isNc()
           && cache != null;
     } catch (NullPointerException e) {
       return false;

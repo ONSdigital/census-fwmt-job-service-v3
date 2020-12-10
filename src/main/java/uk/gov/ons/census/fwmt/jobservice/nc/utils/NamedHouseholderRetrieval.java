@@ -36,8 +36,13 @@ public class NamedHouseholderRetrieval {
 
   public String getAndSortRmRefusalCases(String caseId, CaseDetailsDTO houseHolder) throws GatewayException {
     StringBuilder contact = new StringBuilder();
+    boolean isHardRefusal = false;
 
-    if (houseHolder.getRefusalReceived() != null && houseHolder.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
+    if (houseHolder != null && houseHolder.getRefusalReceived() != null){
+      isHardRefusal = houseHolder.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL);
+    }
+
+    if (isHardRefusal) {
       List<CaseDetailsEventDTO> caseEventDetails;
       caseEventDetails = houseHolder.getEvents();
 
@@ -83,7 +88,7 @@ public class NamedHouseholderRetrieval {
                 decryptedSurname = !householdContact.get("surname").toString().equals("") ? DecryptNames.decryptFile(
                     privateKey.getInputStream(), householdContact.get("surname").toString(),
                     privateKeyPassword.toCharArray()) : "";
-              } catch (IOException e){
+              } catch (IOException | NullPointerException e){
                 eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder name", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME);
                 throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householder name");
               }

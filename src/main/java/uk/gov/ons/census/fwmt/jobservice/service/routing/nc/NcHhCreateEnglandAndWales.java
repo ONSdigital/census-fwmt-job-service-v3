@@ -76,7 +76,14 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
-    CaseDetailsDTO houseHolderDetails = rmRestClient.getCase(rmRequest.getCaseId());
+    CaseDetailsDTO houseHolderDetails;
+
+    try {
+      houseHolderDetails = rmRestClient.getCase(rmRequest.getCaseId());
+    } catch (RuntimeException e) {
+      houseHolderDetails = null;
+    }
+
     String newCaseId = String.valueOf(UUID.randomUUID());
     String householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(rmRequest.getCaseId(), houseHolderDetails);
 

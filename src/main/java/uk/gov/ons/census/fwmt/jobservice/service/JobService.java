@@ -140,6 +140,10 @@ public class JobService {
   public void processCancel(FwmtCancelActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
 
+    if (cache.getOriginalCaseId() != null && cache.getOriginalCaseId().equals(rmRequest.getCaseId())) {
+      rmRequest.setNc(true);
+    }
+
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key);
 

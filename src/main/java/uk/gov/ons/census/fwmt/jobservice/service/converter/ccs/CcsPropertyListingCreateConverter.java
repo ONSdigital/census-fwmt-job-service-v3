@@ -24,7 +24,7 @@ public class CcsPropertyListingCreateConverter {
     commonBuilder.surveyType((ffu.getSurveyType()!=null)?ffu.getSurveyType():SurveyType.CCS_PL);
     commonBuilder.category("Not applicable");
 
-    commonBuilder.estabType((ffu.getEstabType()!=null)?ffu.getEstabType():"PL");
+    commonBuilder.estabType("PL");
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
     commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
 

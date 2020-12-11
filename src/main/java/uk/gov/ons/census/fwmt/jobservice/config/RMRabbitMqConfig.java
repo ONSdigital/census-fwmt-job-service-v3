@@ -1,13 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.config;
 
-import org.aopalliance.aop.Advice;
-import org.springframework.amqp.core.AmqpAdmin;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.QueueBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -16,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.support.RetryTemplate;
@@ -28,9 +23,9 @@ import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 
 import java.util.HashMap;
 import java.util.Map;
-
+@Slf4j
 @Configuration
-public class RabbitMqConfig {
+public class RMRabbitMqConfig {
   public final String inputQueue;
   public final String inputDlq;
   private final String username;
@@ -44,7 +39,7 @@ public class RabbitMqConfig {
   private final int maxRetries;
   private final int prefetchCount;
 
-  public RabbitMqConfig(
+  public RMRabbitMqConfig(
       @Value("${app.rabbitmq.rm.username}") String username,
       @Value("${app.rabbitmq.rm.password}") String password,
       @Value("${app.rabbitmq.rm.host}") String hostname,
@@ -72,14 +67,13 @@ public class RabbitMqConfig {
   }
 
   @Bean("rmRabbitTemplate")
-  public RabbitTemplate rabbitTemplate(@Qualifier("rmConnectionFactory") ConnectionFactory gatewayConnectionFactory, @Qualifier("JS") MessageConverter messageConverter) {
-    RabbitTemplate template = new RabbitTemplate(gatewayConnectionFactory);
+  public RabbitTemplate rabbitTemplate(@Qualifier("rmConnectionFactory") ConnectionFactory rmConnectionFactory, @Qualifier("JS") MessageConverter messageConverter) {
+    RabbitTemplate template = new RabbitTemplate(rmConnectionFactory);
     template.setMessageConverter(messageConverter);
     return template;
   }
 
   @Bean("rmConnectionFactory")
-  @Primary
   public ConnectionFactory rmConnectionFactory() {
     CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
     cachingConnectionFactory.setVirtualHost(virtualHost);
@@ -88,10 +82,6 @@ public class RabbitMqConfig {
     return cachingConnectionFactory;
   }
 
-  @Bean
-  public AmqpAdmin amqpAdmin() {
-    return new RabbitAdmin(rmConnectionFactory());
-  }
 
   @Bean
   @Qualifier("JS")
@@ -142,31 +132,14 @@ public class RabbitMqConfig {
   }
 
   @Bean
-  public Queue queue() {
-    Queue queue = QueueBuilder.durable(inputQueue)
-        .withArgument("x-dead-letter-exchange", "")
-        .withArgument("x-dead-letter-routing-key", inputDlq)
-        .build();
-    queue.setAdminsThatShouldDeclare(amqpAdmin());
-    return queue;
-  }
-
-  @Bean
-  public Queue deadLetterQueue() {
-    Queue queue = QueueBuilder.durable(inputDlq).build();
-    queue.setAdminsThatShouldDeclare(amqpAdmin());
-    return queue;
-  }
-
-  @Bean
   public SimpleRabbitListenerContainerFactory rmContainerFactory(
       @Qualifier("rmConnectionFactory") ConnectionFactory connectionFactory, RetryOperationsInterceptor interceptor,
       @Qualifier("JS") MessageConverter jsonMessageConverter) {
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
     factory.setMessageConverter(jsonMessageConverter);
-    Advice[] adviceChain = {interceptor};
-    factory.setAdviceChain(adviceChain);
+//    Advice[] adviceChain = {interceptor};
+//    factory.setAdviceChain(adviceChain);
 
     return factory;
   }

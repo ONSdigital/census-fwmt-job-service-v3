@@ -94,7 +94,7 @@ public class RmReceiver {
       }
     } catch (Exception e) {
       log.error("Error sending message - {}", e.getMessage());
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "GW.ErrorQ", message);
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
     }
   }
 

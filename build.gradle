@@ -89,7 +89,7 @@ dependencyManagement {
 dependencies {
     // Custom Libraries
     compile 'uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.17-RELEASE'
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:beta.0.45-RELEASE'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:beta.0.45-SANPSHOT'
     compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.20-RELEASE'
 
     // Decryption

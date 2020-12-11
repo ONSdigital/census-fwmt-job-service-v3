@@ -78,9 +78,14 @@ public class NamedHouseholderRetrieval {
             if (householdContact != null) {
               String decryptedFirstname;
               String decryptedSurname;
+              String decryptedTitle;
               String isHouseHolder;
 
               try {
+                decryptedTitle = !householdContact.get("title").toString().equals("") ? DecryptNames.decryptFile(
+                    privateKey.getInputStream(), householdContact.get("title").toString(),
+                    privateKeyPassword.toCharArray()) : "";
+
                 decryptedFirstname = !householdContact.get("forename").toString().equals("") ? DecryptNames.decryptFile(
                     privateKey.getInputStream(), householdContact.get("forename").toString(),
                     privateKeyPassword.toCharArray()) : "";
@@ -96,13 +101,16 @@ public class NamedHouseholderRetrieval {
               isHouseHolder =  collectionCase.get("isHouseholder") != null && collectionCase.get("isHouseholder").toString().equals("true") ? "Yes" : "No";
 
               if (decryptedSurname != null) {
-                contact.append(" ").append(decryptedSurname).append(" ");
-                if (decryptedFirstname != null) {
-                  contact.insert(0, " " + decryptedFirstname);
+                contact.insert(0, "Name =");
+                if (decryptedTitle != null) {
+                  contact.append(" ").append(decryptedTitle);
                 }
+                if (decryptedFirstname != null) {
+                  contact.append(" ").append(decryptedFirstname);
+                }
+                contact.append(" ").append(decryptedSurname).append("\n");
                 // Do we need a placeholder in the description to say that this is the name of the householder?
                 // I've added one temporarily
-                contact.insert(0, "Householder name = ");
                 contact.append("Named householder = ").append(isHouseHolder);
                 eventManager.triggerEvent(caseId,DECRYPTED_HH_NAMES);
                 break;

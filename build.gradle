@@ -89,9 +89,8 @@ dependencyManagement {
 dependencies {
     // Custom Libraries
     compile 'uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.17-RELEASE'
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.40-RELEASE'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.48-RELEASE'
     compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.22-RELEASE'
-
 
     // Decryption
     compile 'org.bouncycastle:bcprov-jdk15on:1.61'
@@ -118,8 +117,6 @@ dependencies {
     compile 'org.springframework:spring-jdbc'
     compile 'org.springframework.retry:spring-retry'
     compile 'org.springframework:spring-aop'
-    compile 'org.springframework.data:spring-data-redis'
-    //compile 'org.springframework.data:spring-data-redis'
     compile 'org.apache.httpcomponents:httpclient'
 
     // Data Formats
@@ -127,9 +124,6 @@ dependencies {
     compile 'org.yaml:snakeyaml'
     compile 'org.json:json:20180813'
     compile 'com.fasterxml.jackson.core:jackson-databind'
-    // compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-    // compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-    // compile 'com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4'
 
     // Data mapping
     compile 'ma.glasnost.orika:orika-core:1.5.4'
@@ -139,8 +133,6 @@ dependencies {
         exclude module: 'commons-logging'
     }
     compile 'org.jsoup:jsoup:1.11.3'
-    compile 'redis.clients:jedis:3.2.0'
-    compile 'com.rabbitmq:amqp-client'
     compile 'com.microsoft.azure:adal4j:1.6.0'
     runtimeOnly 'org.postgresql:postgresql'
 
@@ -154,7 +146,6 @@ dependencies {
     // Meta
     compile 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    // testAnnotationProcessor 'org.projectlombok:lombok'
 
     // Testing Framework
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

@@ -18,14 +18,14 @@ spring:
     continue-on-error: false
     username: postgres
     password: postgres
-    initialization-mode: always      
+    initialization-mode: always
   liquibase:
     url: jdbc:postgresql://localhost:5432/postgres?currentSchema=fwmtg
     default-schema: fwmtg
     change-log: classpath:db/changelog/db.changelog-master.yml
     user: postgres
     password: postgres
-#     enabled: false
+  #     enabled: false
 
 management:
   # Place /info and /health in the root
@@ -48,29 +48,6 @@ logging:
     org.hibernate: INFO
     org.apache.commons.dbcp2: INFO
 
-rabbitmq:
-  username: "guest"
-  password: "guest"
-  hostname: "localhost"
-  port: 5672
-  virtualHost: "/"
-  initialInterval: 5000
-  multiplier: 3.0
-  maxInterval: 45000
-  maxRetries: 1
-  prefetchCount: 500
-  concurrentConsumers: 10
-  queues:
-    rm:
-      input: "RM.Field"
-      dlq: "RM.FieldDLQ"
-      exchange: "adapter-outbound-exchange"
-
-redis:
-  host: "localhost"
-  port: 6379
-  password: "password"
-  database: 2
 
 totalmobile:
   username: "user"
@@ -106,7 +83,7 @@ fwmt:
       duration: 5
     ohs:
       duration: 5
-      
+
 eq:
   url: "https://fieldservice-ENV_NAME.census-gcp.onsdigital.uk/launch/"
 
@@ -114,8 +91,8 @@ spg:
   followUpDate: 11111
 
 ce:
-   followUpDate: "01/05/2020"
-   startDate: "01/05/2020"
+  followUpDate: "01/05/2020"
+  startDate: "01/05/2020"
 
 jobservice:
   transitionRules:
@@ -129,3 +106,40 @@ resthttp:
     pool:
       maxPerRoute: 20
       maxTotal: 100
+
+app:
+  testing: false
+  rabbitmq:
+    gw:
+      username: "guest"
+      password: "guest"
+      host: "localhost"
+      port: 5672
+      virtualHost: "/"
+      initialInterval: 5000
+      multiplier: 3.0
+      maxInterval: 45000
+      maxRetries: 1
+      prefetchCount: 500
+      concurrentConsumers: 10
+      exchanges:
+        error: "GW.Error.Exchange"
+      queues:
+        error: "GW.ErrorQ"
+    rm:
+      username: "guest"
+      password: "guest"
+      host: "localhost"
+      port: 5672
+      virtualHost: "/"
+      initialInterval: 5000
+      multiplier: 3.0
+      maxInterval: 45000
+      maxRetries: 1
+      prefetchCount: 500
+      concurrentConsumers: 10
+      queues:
+        rm:
+          input: "RM.Field"
+#          dlq: "RM.FieldDLQ"
+#          exchange: "adapter-outbound-exchange"

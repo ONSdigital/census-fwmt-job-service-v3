@@ -1,9 +1,13 @@
 package uk.gov.ons.census.fwmt.jobservice.config;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -15,19 +19,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.support.RetryTemplate;
+
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.census.fwmt.common.retry.DefaultListenerSupport;
 import uk.gov.ons.census.fwmt.common.retry.GatewayMessageRecover;
 import uk.gov.ons.census.fwmt.common.retry.GatewayRetryPolicy;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
-
-import java.util.HashMap;
-import java.util.Map;
 @Slf4j
 @Configuration
 public class RMRabbitMqConfig {
   public final String inputQueue;
-  public final String inputDlq;
+//  public final String inputDlq;
   private final String username;
   private final String password;
   private final String hostname;
@@ -50,8 +53,7 @@ public class RMRabbitMqConfig {
       @Value("${app.rabbitmq.rm.maxInterval}") int maxInterval,
       @Value("${app.rabbitmq.rm.maxRetries:1}") int maxRetries,
       @Value("${app.rabbitmq.rm.prefetchCount}") int prefetchCount,
-      @Value("${app.rabbitmq.rm.queues.rm.input}") String inputQueue,
-      @Value("${app.rabbitmq.rm.queues.rm.dlq}") String inputDlq) {
+      @Value("${app.rabbitmq.rm.queues.rm.input}") String inputQueue) {
     this.username = username;
     this.password = password;
     this.hostname = hostname;
@@ -62,7 +64,7 @@ public class RMRabbitMqConfig {
     this.maxInterval = maxInterval;
     this.maxRetries = maxRetries;
     this.inputQueue = inputQueue;
-    this.inputDlq = inputDlq;
+//    this.inputDlq = inputDlq;
     this.prefetchCount = prefetchCount;
   }
 
@@ -82,6 +84,10 @@ public class RMRabbitMqConfig {
     return cachingConnectionFactory;
   }
 
+  @Bean("rmRabbitAdmin")
+  public AmqpAdmin amqpAdmin(@Qualifier("rmConnectionFactory") ConnectionFactory rmConnectionFactory) {
+    return new RabbitAdmin(rmConnectionFactory);
+  }
 
   @Bean
   @Qualifier("JS")

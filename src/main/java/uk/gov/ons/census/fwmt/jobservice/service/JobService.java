@@ -138,15 +138,23 @@ public class JobService {
 
   @Transactional
   public void processCancel(FwmtCancelActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
-    final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
+    GatewayCache cache = cacheService.getByOriginatingCaseId(rmRequest.getCaseId());
+
+    if (cache != null) {
+      rmRequest.setNc(true);
+    } else {
+      cache = cacheService.getById(rmRequest.getCaseId());
+    }
 
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key);
 
     if (processors == null)
       processors = new ArrayList<>();
-    else
-      processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
+    else {
+      final GatewayCache finalCache = cache;
+      processors = processors.stream().filter(p -> p.isValid(rmRequest, finalCache)).collect(Collectors.toList());
+    }
 
     if (processors.size() == 0 && cache != null && !cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
       // TODO throw routing error & exit;

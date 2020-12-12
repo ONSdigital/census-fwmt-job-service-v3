@@ -1,7 +1,9 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.nc;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
@@ -17,6 +19,8 @@ import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CANCEL_TM_JOB;
 
+@Qualifier("Cancel")
+@Service
 public class NcHhCancel implements InboundProcessor<FwmtCancelActionInstruction> {
 
   public static final String COMET_CANCEL_PRE_SENDING = "COMET_CANCEL_PRE_SENDING";
@@ -46,14 +50,9 @@ public class NcHhCancel implements InboundProcessor<FwmtCancelActionInstruction>
     return key;
   }
 
-  //  When actionInstruction = "CANCEL"
-  //  and surveyName = "CENSUS"
-  //  and nc = true
-  //  and cache.originatingCaseId = caseId
-  //
-  //  // Note, the originatingCaseId is a new field to be created in cache for NC
-  //  //       it is the original HH Case Id and is to map to a new NC Case Id
-  //  //       this cancel MUST send the NC Case Id to TM!
+    // Note, the originatingCaseId is a new field to be created in cache for NC
+    //       it is the original HH Case Id and is to map to a new NC Case Id
+    //       this cancel MUST send the NC Case Id to TM!
 
   @Override
   public boolean isValid(FwmtCancelActionInstruction rmRequest, GatewayCache cache) {
@@ -62,6 +61,7 @@ public class NcHhCancel implements InboundProcessor<FwmtCancelActionInstruction>
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("HH")
           && rmRequest.getAddressLevel().equals("U")
+          && rmRequest.isNc()
           && cache.getOriginalCaseId().equals(rmRequest.getCaseId());
     } catch (NullPointerException e) {
       return false;
@@ -83,9 +83,8 @@ public class NcHhCancel implements InboundProcessor<FwmtCancelActionInstruction>
         "rmRequest", rmRequest.toString(),
         "cache", (cache!=null)?cache.toString():"");
 
-    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    if (newCache != null) {
-      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+    if (cache != null) {
+      cacheService.save(cache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime)
           .build());
     }

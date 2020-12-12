@@ -19,6 +19,8 @@ import java.util.List;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_DECRYPT_NAME;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_READ_EVENT_PAYLOAD;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.DECRYPTED_HH_NAMES;
+
 
 @Service
 public class NamedHouseholderRetrieval {
@@ -34,8 +36,13 @@ public class NamedHouseholderRetrieval {
 
   public String getAndSortRmRefusalCases(String caseId, CaseDetailsDTO houseHolder) throws GatewayException {
     StringBuilder contact = new StringBuilder();
+    boolean isHardRefusal = false;
 
-    if (houseHolder.getRefusalReceived() != null && houseHolder.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
+    if (houseHolder != null && houseHolder.getRefusalReceived() != null){
+      isHardRefusal = houseHolder.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL);
+    }
+
+    if (isHardRefusal) {
       List<CaseDetailsEventDTO> caseEventDetails;
       caseEventDetails = houseHolder.getEvents();
 
@@ -71,9 +78,14 @@ public class NamedHouseholderRetrieval {
             if (householdContact != null) {
               String decryptedFirstname;
               String decryptedSurname;
+              String decryptedTitle;
               String isHouseHolder;
 
               try {
+                decryptedTitle = !householdContact.get("title").toString().equals("") ? DecryptNames.decryptFile(
+                    privateKey.getInputStream(), householdContact.get("title").toString(),
+                    privateKeyPassword.toCharArray()) : "";
+
                 decryptedFirstname = !householdContact.get("forename").toString().equals("") ? DecryptNames.decryptFile(
                     privateKey.getInputStream(), householdContact.get("forename").toString(),
                     privateKeyPassword.toCharArray()) : "";
@@ -81,7 +93,7 @@ public class NamedHouseholderRetrieval {
                 decryptedSurname = !householdContact.get("surname").toString().equals("") ? DecryptNames.decryptFile(
                     privateKey.getInputStream(), householdContact.get("surname").toString(),
                     privateKeyPassword.toCharArray()) : "";
-              } catch (IOException e){
+              } catch (IOException | NullPointerException e){
                 eventManager.triggerErrorEvent(this.getClass(), "Unable to decrypt householder name", String.valueOf(caseId), UNABLE_TO_DECRYPT_NAME);
                 throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Unable to decrypt the householder name");
               }
@@ -89,14 +101,18 @@ public class NamedHouseholderRetrieval {
               isHouseHolder =  collectionCase.get("isHouseholder") != null && collectionCase.get("isHouseholder").toString().equals("true") ? "Yes" : "No";
 
               if (decryptedSurname != null) {
-                contact.append(" ").append(decryptedSurname).append(" ");
-                if (decryptedFirstname != null) {
-                  contact.insert(0, " " + decryptedFirstname);
+                contact.insert(0, "Name =");
+                if (decryptedTitle != null) {
+                  contact.append(" ").append(decryptedTitle);
                 }
+                if (decryptedFirstname != null) {
+                  contact.append(" ").append(decryptedFirstname);
+                }
+                contact.append(" ").append(decryptedSurname).append("\n");
                 // Do we need a placeholder in the description to say that this is the name of the householder?
                 // I've added one temporarily
-                contact.insert(0, "Householder name = ");
                 contact.append("Named householder = ").append(isHouseHolder);
+                eventManager.triggerEvent(caseId,DECRYPTED_HH_NAMES);
                 break;
               }
             }

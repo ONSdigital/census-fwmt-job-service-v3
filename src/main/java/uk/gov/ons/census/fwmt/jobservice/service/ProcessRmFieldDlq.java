@@ -26,17 +26,17 @@ public class ProcessRmFieldDlq {
   }
 
   public void processDlq() throws GatewayException {
-    try {
-      int messageCount = (int) amqpAdmin.getQueueProperties(config.inputDlq).get("QUEUE_MESSAGE_COUNT");
-
-      for (int i = 0; i < messageCount; i++) {
-        Message message = rabbitTemplate.receive(config.inputDlq);
-
-        rabbitTemplate.send(config.inputQueue, message);
-      }
-    } catch (NullPointerException e) {
-      throw new GatewayException(GatewayException.Fault.BAD_REQUEST, "No messages in queue");
-    }
+//    try {
+//      int messageCount = (int) amqpAdmin.getQueueProperties(config.inputDlq).get("QUEUE_MESSAGE_COUNT");
+//
+//      for (int i = 0; i < messageCount; i++) {
+//        Message message = rabbitTemplate.receive(config.inputDlq);
+//
+//        rabbitTemplate.send(config.inputQueue, message);
+//      }
+//    } catch (NullPointerException e) {
+//      throw new GatewayException(GatewayException.Fault.BAD_REQUEST, "No messages in queue");
+//    }
   }
 
 }

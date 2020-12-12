@@ -52,8 +52,12 @@ public class GatewayEventsConfig {
 
   @Value("#{'${logging.profile}' == 'CLOUD'}")
   private boolean useJsonLogging;
+
   @Value("${app.testing}")
   private boolean testing;
+  
+  public static final String DECRYPTED_HH_NAMES = "DECRYPTED_HH_NAMES";
+
 
   @Bean
   public GatewayEventManager gatewayEventManager(GatewayLoggingEventProducer gatewayLoggingEventProducer, RabbitMQGatewayEventProducer testProducer) {

@@ -76,7 +76,16 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
-    CaseDetailsDTO houseHolderDetails = rmRestClient.getCase(rmRequest.getCaseId());
+    CaseDetailsDTO houseHolderDetails;
+    String accessInfo = null;
+    String careCodes = null;
+
+    try {
+      houseHolderDetails = rmRestClient.getCase(rmRequest.getCaseId());
+    } catch (RuntimeException e) {
+      houseHolderDetails = null;
+    }
+
     String newCaseId = String.valueOf(UUID.randomUUID());
     String householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(rmRequest.getCaseId(), houseHolderDetails);
 
@@ -95,12 +104,21 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
         "cache", (cache != null) ? cache.toString() : "");
 
     GatewayCache newCache = cacheService.getById(newCaseId);
+
+    if (cache != null) {
+      careCodes =  cache.getCareCodes();
+      accessInfo = cache.getAccessInfo();
+    }
+
     if (newCache == null) {
       cacheService.save(GatewayCache
           .builder()
           .caseId(newCaseId)
           .originalCaseId(rmRequest.getCaseId())
           .existsInFwmt(true)
+          .type(10)
+          .careCodes(careCodes)
+          .accessInfo(accessInfo)
           .lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime)
           .build());

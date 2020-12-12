@@ -68,6 +68,8 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
     String newCaseId = String.valueOf(UUID.randomUUID());
+    String accessInfo = null;
+    String careCodes = null;
 
     CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, null);
 
@@ -84,12 +86,21 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
         "cache", (cache != null) ? cache.toString() : "");
 
     GatewayCache newCache = cacheService.getById(newCaseId);
+
+    if (cache != null) {
+      careCodes =  cache.getCareCodes();
+      accessInfo = cache.getAccessInfo();
+    }
+
     if (newCache == null) {
       cacheService.save(GatewayCache
           .builder()
           .caseId(newCaseId)
           .originalCaseId(rmRequest.getCaseId())
           .existsInFwmt(true)
+          .careCodes(careCodes)
+          .accessInfo(accessInfo)
+          .type(1)
           .lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime)
           .build());

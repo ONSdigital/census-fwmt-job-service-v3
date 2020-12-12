@@ -54,7 +54,7 @@ public final class SpgCreateConverter {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Site)
         .reference("SECSS_" + ffu.getCaseRef())
-        .description(getDescription(cache).concat(SECURE_SITE))
+        .description(getCareCodes(cache).concat(SECURE_SITE))
         .specialInstructions(getSpecialInstructions(cache))
         .build();
   }
@@ -62,7 +62,7 @@ public final class SpgCreateConverter {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Unit_F)    
         .reference("SECSU_" + ffu.getCaseRef())
-        .description(getDescription(cache).concat(SECURE_SITE))
+        .description(getCareCodes(cache).concat(SECURE_SITE))
         .specialInstructions(getSpecialInstructions(cache))
         .build();
   }
@@ -76,7 +76,7 @@ public final class SpgCreateConverter {
   public static CaseRequest convertUnitDeliver(FwmtActionInstruction ffu, GatewayCache cache) {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Unit_D)
-        .description(getDescription(cache))
+        .description(getCareCodes(cache))
         .specialInstructions(getSpecialInstructions(cache))
         .build();
   }
@@ -87,7 +87,7 @@ public final class SpgCreateConverter {
         .build();
   }
 
-  private static String getDescription(GatewayCache cache) {
+  private static String getCareCodes(GatewayCache cache) {
     if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
       return cache.getCareCodes() + "\n";
     }
@@ -100,9 +100,10 @@ public final class SpgCreateConverter {
       instruction.append(cache.getAccessInfo());
       instruction.append("\n");
     }
-    if (!getDescription(cache).isEmpty()) {
-      instruction.append(getDescription(cache));
+    if (!getCareCodes(cache).isEmpty()) {
+      instruction.append(getCareCodes(cache));
     }
+
     return instruction.toString();
   }
 

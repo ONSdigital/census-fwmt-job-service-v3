@@ -114,7 +114,7 @@ app:
       username: "guest"
       password: "guest"
       host: "localhost"
-      port: 5673
+      port: 5672
       virtualHost: "/"
       initialInterval: 5000
       multiplier: 3.0
@@ -141,5 +141,5 @@ app:
       queues:
         rm:
           input: "RM.Field"
-          dlq: "RM.FieldDLQ"
-          exchange: "adapter-outbound-exchange"
+#          dlq: "RM.FieldDLQ"
+#          exchange: "adapter-outbound-exchange"

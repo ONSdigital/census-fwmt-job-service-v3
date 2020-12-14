@@ -1,8 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -19,13 +17,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.support.RetryTemplate;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.ons.census.fwmt.common.retry.DefaultListenerSupport;
 import uk.gov.ons.census.fwmt.common.retry.GatewayMessageRecover;
 import uk.gov.ons.census.fwmt.common.retry.GatewayRetryPolicy;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
+
+import java.util.HashMap;
+import java.util.Map;
 @Slf4j
 @Configuration
 public class RMRabbitMqConfig {
@@ -75,7 +74,7 @@ public class RMRabbitMqConfig {
     return template;
   }
 
-  @Bean("rmConnectionFactory")
+  @Bean("rmConnectionFactory")  
   public ConnectionFactory rmConnectionFactory() {
     CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(hostname, port);
     cachingConnectionFactory.setVirtualHost(virtualHost);

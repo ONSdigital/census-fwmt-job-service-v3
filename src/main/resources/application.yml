@@ -102,7 +102,7 @@ resthttp:
   connection:
     timeout: 2000
     requestTimeout: 1000
-    socketTimeout: 1500
+    socketTimeout: 5000
     pool:
       maxPerRoute: 20
       maxTotal: 100

@@ -93,7 +93,7 @@ public class RmReceiver {
         break; //TODO THROW ROUTUNG FAILURE
       }
     } catch (Exception e) {
-      log.error("Error sending message - {}", e.getMessage());
+      log.error("- Create Message - Error sending message - {}", e.getMessage(),e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
     }
   }
@@ -118,7 +118,7 @@ public class RmReceiver {
       throw new RuntimeException("Could not route Request");
     }
     } catch (Exception e) {
-      log.error("Error sending message - {}", e.getMessage());
+      log.error(" - Cancel Message  - Error sending message - {}", e.getMessage(), e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
     }
   }

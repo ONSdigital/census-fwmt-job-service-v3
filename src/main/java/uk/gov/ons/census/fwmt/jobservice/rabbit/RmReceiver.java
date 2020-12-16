@@ -93,7 +93,7 @@ public class RmReceiver {
         break; //TODO THROW ROUTUNG FAILURE
       }
     } catch (Exception e) {
-      log.error("- Create Message - Error sending message - {}", e.getMessage(),e);
+      log.error("- Create Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
     }
   }
@@ -103,22 +103,22 @@ public class RmReceiver {
     //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
     try {
-    long epochTimeStamp = Long.parseLong(timestamp);
-    Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
-    System.out.println(message.getMessageProperties());
-    if (rmRequest.getActionInstruction() == ActionInstructionType.CANCEL) {
-      gatewayEventManager
-          .triggerEvent(rmRequest.getCaseId(), RM_CANCEL_REQUEST_RECEIVED,
-              "Case Ref", "N/A");
-      jobService.processCancel(rmRequest, receivedMessageTime);
-    } else {
-      gatewayEventManager
-          .triggerErrorEvent(this.getClass(), "Could not route Request", rmRequest.getCaseId(), FAILED_TO_ROUTE_REQUEST,
-              "Action Request", rmRequest.getActionInstruction().toString());
-      throw new RuntimeException("Could not route Request");
-    }
+      long epochTimeStamp = Long.parseLong(timestamp);
+      Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
+      System.out.println(message.getMessageProperties());
+      if (rmRequest.getActionInstruction() == ActionInstructionType.CANCEL) {
+        gatewayEventManager
+            .triggerEvent(rmRequest.getCaseId(), RM_CANCEL_REQUEST_RECEIVED,
+                "Case Ref", "N/A");
+        jobService.processCancel(rmRequest, receivedMessageTime);
+      } else {
+        gatewayEventManager
+            .triggerErrorEvent(this.getClass(), "Could not route Request", rmRequest.getCaseId(), FAILED_TO_ROUTE_REQUEST,
+                "Action Request", rmRequest.getActionInstruction().toString());
+        throw new RuntimeException("Could not route Request");
+      }
     } catch (Exception e) {
-      log.error(" - Cancel Message  - Error sending message - {}", e.getMessage(), e);
+      log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
     }
   }

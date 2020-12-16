@@ -100,8 +100,8 @@ jobservice:
 
 resthttp:
   connection:
-    timeout: 200
-    requestTimeout: 100
+    timeout: 2000
+    requestTimeout: 1000
     socketTimeout: 1500
     pool:
       maxPerRoute: 20

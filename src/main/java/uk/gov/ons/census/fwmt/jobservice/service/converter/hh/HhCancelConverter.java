@@ -8,16 +8,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+;
+
 public final class HhCancelConverter {
 
   private HhCancelConverter(){
   }
 
   public static CasePauseRequest buildCancel(FwmtCancelActionInstruction ffu) {
-    Date currentDate = null;
+    String currentDate = "";
     SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy", Locale.ENGLISH);
     try {
-      currentDate = dateFormat.parse(dateFormat.format(new Date(System.currentTimeMillis())));
+      currentDate = dateFormat.parse(dateFormat.format(new Date(System.currentTimeMillis()))).toString();
     } catch (ParseException e) {
       String error = e.toString();
       System.out.println(error);

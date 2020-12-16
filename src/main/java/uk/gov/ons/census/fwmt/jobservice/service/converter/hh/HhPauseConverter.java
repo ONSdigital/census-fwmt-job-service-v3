@@ -11,7 +11,7 @@ public final class HhPauseConverter {
   public static CasePauseRequest buildPause(FwmtActionInstruction ffu) {
     return CasePauseRequest.builder()
         .code(ffu.getPauseCode())
-        .effectiveFrom(ffu.getPauseFrom())
+        .effectiveFrom(ffu.getPauseFrom().toString())
         .reason(ffu.getPauseReason())
         .build();
   }

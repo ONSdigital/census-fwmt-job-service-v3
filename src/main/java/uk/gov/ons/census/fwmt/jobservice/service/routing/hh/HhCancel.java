@@ -77,7 +77,8 @@ public class HhCancel implements InboundProcessor<FwmtCancelActionInstruction> {
       CasePauseRequest tmRequest = HhCancelConverter.buildCancel(rmRequest);
 
       eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
-          "Case Ref", "NA");
+          "Case Ref", "NA",
+          "TM Action", "CLOSE");
 
       ResponseEntity<Void> response = cometRestClient.sendPause(tmRequest, rmRequest.getCaseId());
       routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Pause", FAILED_TO_CREATE_TM_JOB,

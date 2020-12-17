@@ -3,7 +3,6 @@ package uk.gov.ons.census.fwmt.jobservice.service.converter.hh;
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -17,13 +16,8 @@ public final class HhCancelConverter {
 
   public static CasePauseRequest buildCancel(FwmtCancelActionInstruction ffu) {
     String currentDate = "";
-    SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy", Locale.ENGLISH);
-    try {
-      currentDate = dateFormat.parse(dateFormat.format(new Date(System.currentTimeMillis()))).toString();
-    } catch (ParseException e) {
-      String error = e.toString();
-      System.out.println(error);
-    }
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+    currentDate = dateFormat.format(new Date(System.currentTimeMillis()));
     
     return CasePauseRequest.builder()
           .code("inf")

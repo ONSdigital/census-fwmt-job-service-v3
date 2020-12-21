@@ -13,7 +13,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableScheduling
 @EnableSwagger2
 @EnableJpaRepositories("uk.gov.ons.census.fwmt.jobservice.repository")
-@ComponentScan({"uk.gov.ons.census.fwmt.jobservice", "uk.gov.ons.census.fwmt.events"})
+@ComponentScan({"uk.gov.ons.census.fwmt.jobservice", "uk.gov.ons.census.fwmt.events",
+    "uk.gov.census.ffa.storage.utils"})
 public class Application {
 
   public static final String APPLICATION_NAME = "FWMT Gateway Job Service";

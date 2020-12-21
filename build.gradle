@@ -95,6 +95,7 @@ dependencies {
     // Decryption
     compile 'org.bouncycastle:bcprov-jdk15on:1.61'
     compile 'org.bouncycastle:bcpg-jdk15on:1.61'
+    compile("uk.gov.ons.census.ffa:census-ffa-storage-utils:0.0.1-RELEASE")
 
 
     // General Libraries

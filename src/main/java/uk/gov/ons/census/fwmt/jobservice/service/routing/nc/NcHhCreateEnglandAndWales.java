@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.census.fwmt.common.data.nc.RefusalTypeDTO;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
@@ -79,6 +80,7 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
     CaseDetailsDTO houseHolderDetails;
     String accessInfo = null;
     String careCodes = null;
+    String householder = "";
 
     try {
       houseHolderDetails = rmRestClient.getCase(rmRequest.getCaseId());
@@ -87,7 +89,9 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
     }
 
     String newCaseId = String.valueOf(UUID.randomUUID());
-    String householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(rmRequest.getCaseId(), houseHolderDetails);
+    if (houseHolderDetails != null && houseHolderDetails.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
+      householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(rmRequest.getCaseId(), houseHolderDetails);
+    }
 
     CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, householder);
 

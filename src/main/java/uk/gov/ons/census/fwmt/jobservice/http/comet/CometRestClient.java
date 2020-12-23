@@ -9,16 +9,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.ons.census.fwmt.common.data.tm.Case;
-import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
-import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
-import uk.gov.ons.census.fwmt.common.data.tm.CeCasePatchRequest;
-import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
+import uk.gov.ons.census.fwmt.common.data.tm.*;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.config.CometConfig;
 
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -53,11 +50,12 @@ public class CometRestClient {
   public CometRestClient(
       CometConfig cometConfig,
       GatewayEventManager gatewayEventManager,
-      RestTemplate restTemplate) {
+      RestTemplate restTemplate,
+      CometPerfRequestInterceptor cometPerfRequestInterceptor) {
     this.cometConfig = cometConfig;
     this.gatewayEventManager = gatewayEventManager;
     this.restTemplate = restTemplate;
-
+    this.restTemplate.setInterceptors(Arrays.asList(cometPerfRequestInterceptor));
     this.cometUrl = cometConfig.baseUrl + cometConfig.caseCreatePath;
     this.auth = null;
 

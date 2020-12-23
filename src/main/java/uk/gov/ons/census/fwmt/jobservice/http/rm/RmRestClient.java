@@ -3,6 +3,7 @@ package uk.gov.ons.census.fwmt.jobservice.http.rm;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,7 +40,9 @@ public class RmRestClient {
 
   public static final String FAILED_TM_AUTHENTICATION = "FAILED_TM_AUTHENTICATION";
 
+
   public RmRestClient(
+      @Value("${rmapi.baseUrl}") String baseUrl,
       CometConfig cometConfig,
       RestTemplateBuilder restTemplateBuilder,
       GatewayEventManager gatewayEventManager) {
@@ -47,7 +50,7 @@ public class RmRestClient {
     this.restTemplate = restTemplateBuilder.errorHandler(new CometRestClientResponseErrorHandler())
         .basicAuthentication(cometConfig.userName, cometConfig.password).build();
     this.gatewayEventManager = gatewayEventManager;
-    this.basePath = cometConfig.baseUrl + "cases/case-details/";
+    this.basePath = baseUrl + "cases/case-details/";
     this.auth = null;
   }
 

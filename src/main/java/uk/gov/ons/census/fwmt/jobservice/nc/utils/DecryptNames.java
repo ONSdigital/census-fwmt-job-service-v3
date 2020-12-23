@@ -27,17 +27,14 @@ import java.util.Iterator;
 
 public class DecryptNames {
 
-
   public static String decryptFile(InputStream secretKeyFile, String householder, char[] passwd) throws GatewayException {
     PGPPrivateKey secretKey = null;
     PGPPublicKeyEncryptedData encryptedData = null;
     Iterator<PGPPublicKeyEncryptedData> encryptedObjects;
     long encryptedFileKeyId = 0;
     try {
-      householder = householder.substring(1, householder.length() - 1);
       encryptedObjects = getEncryptedObjects(Base64.getDecoder().decode(householder));
     } catch (IOException e) {
-
       throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Failed to obtain decryption data");
     }
     while (encryptedObjects.hasNext() && secretKey == null) {
@@ -47,9 +44,7 @@ public class DecryptNames {
       try {
         secretKey = getSecretKey(secretKeyFile, passwd, encryptedFileKeyId);
       } catch (IOException | PGPException e) {
-
         throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to obtain secret key");
-
       }
     }
     try {

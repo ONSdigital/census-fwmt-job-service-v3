@@ -17,9 +17,10 @@ public class CometPerfRequestInterceptor implements ClientHttpRequestInterceptor
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
     final StopWatch stopwatch = new StopWatch();
+    stopwatch.start();
     final ClientHttpResponse response = execution.execute(request, body);
     stopwatch.stop();
-    log.info("TM Request tm_uri= {} , tm_request_type={} , tm_response_time = {} ,tm_response_code = {}", request.getURI(), request.getMethod(), stopwatch.getTotalTimeMillis());
+    log.info("TM Request tm_request_uri= {} , tm_request_type={} , tm_response_time = {}(ms) ,tm_response_code = {}", request.getURI(), request.getMethod(), stopwatch.getTotalTimeMillis());
     return response;
   }
 }

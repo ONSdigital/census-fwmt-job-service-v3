@@ -18,6 +18,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
 public class CeSwitchCreateProcessorTest {
@@ -57,8 +58,8 @@ public class CeSwitchCreateProcessorTest {
   }
 
   @Test
-  @DisplayName("Should handle type - CE_EST_D ")
-  public void shouldMessageForCE_EST_D() {
-
+  @DisplayName("Should set usualResident count to 0 when a valid CE_SITE is received")
+  public void shouldHandleCE() {
+    fail("Not implemented");
   }
 }

@@ -87,6 +87,8 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
       cache.setType(2);
       tmRequest = CommonSwitchConverter.convertSite(rmRequest);
       processSwitch(cache, rmRequest, tmRequest);
+    } else if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE) && (cache!=null) && cache.getType() == 2) {
+      eventManager.triggerEvent(rmRequest.getCaseId(), "Case is already a site");
     } else if (rmRequest.getSurveyType().equals(SurveyType.CE_UNIT_D)) {
       cache.setType(3);
       tmRequest = CommonSwitchConverter.convertUnitDeliver(rmRequest);
@@ -121,7 +123,11 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
     routingValidator.validateResponseCode(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     if(cache != null) {
-      cacheService.save(cache.toBuilder().build());
+      if (rmRequest.getAddressType().equals(SurveyType.CE_SITE.toString())) {
+        cacheService.save(cache.toBuilder().usualResidents(0).build());
+      } else {
+        cacheService.save(cache.toBuilder().build());
+      }
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_ACK, "Survey Type",

@@ -123,7 +123,7 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
     routingValidator.validateResponseCode(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
 
     if(cache != null) {
-      if (rmRequest.getAddressType().equals(SurveyType.CE_SITE.toString())) {
+      if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
         cacheService.save(cache.toBuilder().usualResidents(0).build());
       } else {
         cacheService.save(cache.toBuilder().build());

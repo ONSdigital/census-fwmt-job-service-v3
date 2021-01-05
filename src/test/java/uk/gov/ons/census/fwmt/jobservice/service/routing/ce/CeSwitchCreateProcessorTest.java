@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +19,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
+
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class CeSwitchCreateProcessorTest {
@@ -35,6 +39,9 @@ public class CeSwitchCreateProcessorTest {
 
   @Mock
   private GatewayCacheService cacheService;
+
+  @Captor
+  private ArgumentCaptor<GatewayCache> spiedCache;
 
   private FwmtActionInstruction createInstruction() {
     return FwmtActionInstruction.builder().caseRef("345").build();
@@ -62,8 +69,9 @@ public class CeSwitchCreateProcessorTest {
     instruction.setSurveyType(SurveyType.CE_SITE);
     instruction.setCaseId("1234");
     GatewayCache cache = createGatewayCache("1234", 1, 10);
-    cacheService.save(cache);
     ceSwitchCreateProcessor.process(instruction, cache, Instant.now());
-    Assertions.assertEquals(0, cache.getUsualResidents());
+    verify(cacheService).save(spiedCache.capture());
+    int usualResidents = spiedCache.getValue().usualResidents;
+    Assertions.assertEquals(0, usualResidents);
   }
 }

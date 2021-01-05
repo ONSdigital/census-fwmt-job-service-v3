@@ -18,8 +18,6 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 @ExtendWith(MockitoExtension.class)
 public class CeSwitchCreateProcessorTest {
 
@@ -42,8 +40,8 @@ public class CeSwitchCreateProcessorTest {
     return FwmtActionInstruction.builder().caseRef("345").build();
   }
 
-  private GatewayCache createGatewayCache() {
-    return GatewayCache.builder().caseId("").build();
+  private GatewayCache createGatewayCache(String caseId, int type, int usualResidents) {
+    return GatewayCache.builder().caseId(caseId).type(type).usualResidents(usualResidents).build();
   }
 
   @Test
@@ -53,13 +51,19 @@ public class CeSwitchCreateProcessorTest {
     instruction.setSurveyType(SurveyType.AC);
     instruction.setCaseId("1234");
     Assertions.assertThrows(GatewayException.class, () -> {
-      ceSwitchCreateProcessor.process(instruction, createGatewayCache(), Instant.now());
+      ceSwitchCreateProcessor.process(instruction, createGatewayCache("",0,0), Instant.now());
     });
   }
 
   @Test
   @DisplayName("Should set usualResident count to 0 when a valid CE_SITE is received")
-  public void shouldHandleCE() {
-    fail("Not implemented");
+  public void shouldHandleCE() throws GatewayException {
+    final FwmtActionInstruction instruction = createInstruction();
+    instruction.setSurveyType(SurveyType.CE_SITE);
+    instruction.setCaseId("1234");
+    GatewayCache cache = createGatewayCache("1234", 1, 10);
+    cacheService.save(cache);
+    ceSwitchCreateProcessor.process(instruction, cache, Instant.now());
+    Assertions.assertEquals(0, cache.getUsualResidents());
   }
 }

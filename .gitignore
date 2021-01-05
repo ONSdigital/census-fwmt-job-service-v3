@@ -38,3 +38,6 @@ local.properties
 .project
 .classpath
 .vscode/
+
+/GatewayEventsConfig.java
+

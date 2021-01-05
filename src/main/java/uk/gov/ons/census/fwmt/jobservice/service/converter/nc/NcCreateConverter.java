@@ -22,7 +22,7 @@ public class NcCreateConverter {
       FwmtActionInstruction ffu, GatewayCache cache, CaseRequest.CaseRequestBuilder builder) {
     CaseRequest.CaseRequestBuilder commonBuilder = CommonCreateConverter.convertCommon(ffu, cache, builder);
 
-    commonBuilder.reference("NC" + ffu.getCaseRef());
+    commonBuilder.reference(ffu.getCaseRef());
     commonBuilder.type(CaseType.NC);
     commonBuilder.surveyType(SurveyType.NC);
     commonBuilder.category("HH");

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.common.data.nc.RefusalTypeDTO;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
@@ -14,7 +15,6 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.http.rm.RmRestClient;
 import uk.gov.ons.census.fwmt.jobservice.nc.utils.NamedHouseholderRetrieval;
-import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.nc.NcCreateConverter;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
@@ -22,7 +22,6 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
@@ -81,33 +80,33 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
     String accessInfo = null;
     String careCodes = null;
     String householder = "";
+    String caseId = rmRequest.getCaseId();
 
     try {
-      houseHolderDetails = rmRestClient.getCase(rmRequest.getCaseId());
+      houseHolderDetails = rmRestClient.getCase(rmRequest.getOldCaseId());
     } catch (RuntimeException e) {
       houseHolderDetails = null;
     }
 
-    String newCaseId = String.valueOf(UUID.randomUUID());
     if (houseHolderDetails != null && houseHolderDetails.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
-      householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(rmRequest.getCaseId(), houseHolderDetails);
+      householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(caseId, houseHolderDetails);
     }
 
     CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, householder);
 
-    eventManager.triggerEvent(newCaseId, COMET_CREATE_PRE_SENDING,
+    eventManager.triggerEvent(caseId, COMET_CREATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),
         "Original case id", rmRequest.getCaseId(),
         "Survey Type", tmRequest.getSurveyType().toString());
 
-    ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, newCaseId);
-    routingValidator.validateResponseCode(response, newCaseId,
+    ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, caseId);
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(),
         "Create", FAILED_TO_CREATE_TM_JOB,
         "tmRequest", tmRequest.toString(),
         "rmRequest", rmRequest.toString(),
         "cache", (cache != null) ? cache.toString() : "");
 
-    GatewayCache newCache = cacheService.getById(newCaseId);
+    GatewayCache newCache = cacheService.getById(caseId);
 
     if (cache != null) {
       careCodes =  cache.getCareCodes();
@@ -117,8 +116,8 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
     if (newCache == null) {
       cacheService.save(GatewayCache
           .builder()
-          .caseId(newCaseId)
-          .originalCaseId(rmRequest.getCaseId())
+          .caseId(caseId)
+          .originalCaseId(rmRequest.getOldCaseId())
           .existsInFwmt(true)
           .type(10)
           .careCodes(careCodes)
@@ -129,7 +128,7 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
     }
 
     eventManager
-        .triggerEvent(newCaseId, COMET_CREATE_ACK,
+        .triggerEvent(caseId, COMET_CREATE_ACK,
             "Original case id", rmRequest.getCaseId(),
             "Case Ref", rmRequest.getCaseRef(),
             "Response Code", response.getStatusCode().name(),

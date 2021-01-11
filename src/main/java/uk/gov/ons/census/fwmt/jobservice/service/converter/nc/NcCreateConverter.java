@@ -49,13 +49,14 @@ public class NcCreateConverter {
     return commonBuilder;
   }
 
-  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder)
+  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
+      GatewayCache previousDetails)
       throws GatewayException {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
-        .specialInstructions(getSpecialInstructions(cache))
-        .description(getDescription(ffu, cache, householder))
+        .specialInstructions(getSpecialInstructions(previousDetails))
+        .description(getDescription(ffu, previousDetails, householder))
         .build();
   }
 

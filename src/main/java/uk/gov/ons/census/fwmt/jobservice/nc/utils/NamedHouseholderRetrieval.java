@@ -74,33 +74,31 @@ public class NamedHouseholderRetrieval {
     String decryptedTitle;
     String isHouseHolder;
 
-    decryptedTitle = refusalContact.getTitle() != null && !refusalContact.getTitle().equals("") ? DecryptNames.decryptFile(
-        storageUtils.getFileInputStream(privateKeyUri), refusalContact.getTitle(),
-        privateKeyPassword.toCharArray()) : "";
-
-    decryptedFirstname = refusalContact.getForename() != null && !refusalContact.getForename().equals("") ? DecryptNames.decryptFile(
-        storageUtils.getFileInputStream(privateKeyUri),  refusalContact.getForename(),
-        privateKeyPassword.toCharArray()) : "";
-
-    decryptedSurname = refusalContact.getSurname() != null && !refusalContact.getSurname().equals("") ? DecryptNames.decryptFile(
-        storageUtils.getFileInputStream(privateKeyUri), refusalContact.getSurname(),
-        privateKeyPassword.toCharArray()) : "";
-
     isHouseHolder = householdContact.getIsHouseholder().equals("true") ? "Yes" : "No";
 
-    if (!decryptedSurname.equals("") || !decryptedFirstname.equals("") || !decryptedTitle.equals("") ) {
-      contact.insert(0, "Name =");
-      if (!decryptedTitle.equals("")) {
-        contact.append(" ").append(decryptedTitle);
-      }
-      if (!decryptedFirstname.equals("")) {
-        contact.append(" ").append(decryptedFirstname);
-      }
-      contact.append(" ").append(decryptedSurname).append("\n");
-      contact.append("Named householder = ").append(isHouseHolder);
-      eventManager.triggerEvent(caseId,DECRYPTED_HH_NAMES);
-      return contact.toString();
+    if (refusalContact.getTitle() != null && !refusalContact.getTitle().equals("")) {
+      decryptedTitle = DecryptNames.decryptFile(
+          storageUtils.getFileInputStream(privateKeyUri), refusalContact.getTitle(),
+          privateKeyPassword.toCharArray());
+      contact.append(" ").append(decryptedTitle);
     }
-    return "";
+    if (refusalContact.getForename() != null && !refusalContact.getForename().equals("")) {
+      decryptedFirstname = DecryptNames.decryptFile(
+          storageUtils.getFileInputStream(privateKeyUri),  refusalContact.getForename(),
+          privateKeyPassword.toCharArray());
+      contact.append(" ").append(decryptedFirstname);
+    }
+    if (refusalContact.getSurname() != null && !refusalContact.getSurname().equals("")) {
+      decryptedSurname = DecryptNames.decryptFile(
+          storageUtils.getFileInputStream(privateKeyUri), refusalContact.getSurname(),
+          privateKeyPassword.toCharArray());
+      contact.append(" ").append(decryptedSurname);
+    }
+    if(!contact.toString().equals("")) {
+      contact.append("\n");
+    }
+    contact.append("Named householder = ").append(isHouseHolder);
+    eventManager.triggerEvent(caseId,DECRYPTED_HH_NAMES);
+    return contact.toString();
   }
 }

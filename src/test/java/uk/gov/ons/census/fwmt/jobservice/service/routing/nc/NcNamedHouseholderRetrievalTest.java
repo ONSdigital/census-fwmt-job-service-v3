@@ -15,6 +15,7 @@ import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsEventDTO;
 import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsEventHardRefusal;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.helper.NcCaseDetailsDtoBuilder;
 import uk.gov.ons.census.fwmt.jobservice.nc.utils.NamedHouseholderRetrieval;
 
@@ -35,6 +36,9 @@ public class NcNamedHouseholderRetrievalTest {
   @Mock
   private URI uri;
 
+  @Mock
+  private GatewayEventManager eventManager;
+
   @Test
   @SuppressWarnings("unchecked")
   @DisplayName("When a empty name is received, we should send an empty name")
@@ -45,6 +49,6 @@ public class NcNamedHouseholderRetrievalTest {
     ReflectionTestUtils.setField(namedHouseholderRetrieval, "privateKey", "test/resources/testPrivateKey.private");
     when(objectMapper.readValue(caseDetailsEventDTO.get(0).getEventPayload(), CaseDetailsEventHardRefusal.class)).thenReturn(caseDetailsEventHardRefusal);
     String returnedHouseholder = namedHouseholderRetrieval.getAndSortRmRefusalCases(caseDetailsDTO.getCaseId().toString(), caseDetailsDTO);
-    Assertions.assertEquals("", returnedHouseholder);
+    Assertions.assertEquals("Named householder = No", returnedHouseholder);
   }
 }

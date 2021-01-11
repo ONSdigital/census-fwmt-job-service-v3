@@ -1,0 +1,11 @@
+{
+  "queues":[
+    {
+      "name": "GW.Permanent.ErrorQ",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ]
+}

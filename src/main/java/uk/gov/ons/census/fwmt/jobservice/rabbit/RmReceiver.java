@@ -60,8 +60,6 @@ public class RmReceiver {
     try {
       long epochTimeStamp = Long.parseLong(timestamp);
       Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
-      System.out.println(receivedMessageTime);
-      System.out.println(message.getMessageProperties());
       switch (rmRequest.getActionInstruction()) {
       case CREATE: {
         gatewayEventManager
@@ -100,7 +98,7 @@ public class RmReceiver {
   }
 
   @RabbitHandler
-  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message)  {
+  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) {
     //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
     try {
@@ -118,11 +116,12 @@ public class RmReceiver {
                 "Action Request", rmRequest.getActionInstruction().toString());
         throw new RuntimeException("Could not route Request");
       }
-    }catch(RestClientException e ){
-      log.error("Cannot connect to TM -  Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.transient.error", message);
-    }
-    catch (Exception e) {
+    } catch (RestClientException e) {
+      log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
+
+      log.error("Not implemented yet ");
+
+    } catch (Exception e) {
       log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
     }

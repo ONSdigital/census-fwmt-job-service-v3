@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+
 @ExtendWith(MockitoExtension.class)
 public class NcCreateProcessorTest {
 
@@ -38,6 +39,9 @@ public class NcCreateProcessorTest {
 
   @Mock
   private GatewayCacheService cacheService;
+
+  @Mock
+  private GatewayCache gatewayCache;
 
   @Mock
   private GatewayEventManager eventManager;

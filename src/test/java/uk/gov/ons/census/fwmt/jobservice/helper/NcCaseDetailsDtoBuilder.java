@@ -2,6 +2,8 @@ package uk.gov.ons.census.fwmt.jobservice.helper;
 
 import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsEventDTO;
+import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsEventHardRefusal;
+import uk.gov.ons.census.fwmt.common.data.nc.RefusalContact;
 import uk.gov.ons.census.fwmt.common.data.nc.RefusalTypeDTO;
 
 import java.time.OffsetDateTime;
@@ -23,5 +25,16 @@ public class NcCaseDetailsDtoBuilder {
     caseDetailsDTO.setRefusalReceived(RefusalTypeDTO.HARD_REFUSAL);
     caseDetailsDTO.setEvents(caseDetailsEvenDtoList);
     return caseDetailsDTO;
+  }
+
+  public CaseDetailsEventHardRefusal createCaseDetailsEventHardRefusal() {
+    CaseDetailsEventHardRefusal caseDetailsEventHardRefusal = new CaseDetailsEventHardRefusal();
+    RefusalContact refusalContact = new RefusalContact();
+    refusalContact.setForename("");
+    refusalContact.setSurname("");
+    refusalContact.setTitle("");
+    caseDetailsEventHardRefusal.setIsHouseholder("false");
+    caseDetailsEventHardRefusal.setContact(refusalContact);
+    return caseDetailsEventHardRefusal;
   }
 }

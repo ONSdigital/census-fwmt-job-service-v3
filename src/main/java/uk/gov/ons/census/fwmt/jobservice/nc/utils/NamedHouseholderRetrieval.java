@@ -88,7 +88,7 @@ public class NamedHouseholderRetrieval {
 
     isHouseHolder = householdContact.getIsHouseholder().equals("true") ? "Yes" : "No";
 
-    if (!decryptedSurname.equals("")) {
+    if (!decryptedSurname.equals("") || !decryptedFirstname.equals("") || !decryptedTitle.equals("") ) {
       contact.insert(0, "Name =");
       if (!decryptedTitle.equals("")) {
         contact.append(" ").append(decryptedTitle);

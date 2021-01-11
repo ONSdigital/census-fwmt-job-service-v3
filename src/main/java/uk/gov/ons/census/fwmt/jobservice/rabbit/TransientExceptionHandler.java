@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Slf4j
 @Component
 public class TransientExceptionHandler {
@@ -20,7 +18,11 @@ public class TransientExceptionHandler {
 
   public void handleMessage(Message message) {
     Integer retryCount = message.getMessageProperties().getHeader("retryCount");
-    retryCount = (null== retryCount) ? retryCount=1 : ++retryCount;
+    if(null == retryCount){
+      retryCount =1;
+    }else {
+      retryCount ++;
+    }
     message.getMessageProperties().setHeader("retryCount",retryCount);
     if(retryCount >MAX_RETRY_COUNT){
       log.error("Retry limit exceeded and message has been routed to permanent queue");

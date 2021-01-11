@@ -124,8 +124,14 @@ app:
       concurrentConsumers: 10
       exchanges:
         error: "GW.Error.Exchange"
+      routingkey:
+        perm: "gw.permanent.error"
+        trans: "gw.transient.error"
       queues:
-        error: "GW.ErrorQ"
+          errorPer: "GW.Permanent.ErrorQ"
+          errorTrans: "GW.Transient.ErrorQ"
+#      queues:
+#        error: "GW.ErrorQ"
     rm:
       username: "guest"
       password: "guest"

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -99,7 +100,7 @@ public class RmReceiver {
   }
 
   @RabbitHandler
-  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) throws GatewayException {
+  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message)  {
     //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
     try {
@@ -117,9 +118,13 @@ public class RmReceiver {
                 "Action Request", rmRequest.getActionInstruction().toString());
         throw new RuntimeException("Could not route Request");
       }
-    } catch (Exception e) {
+    }catch(RestClientException e ){
+      log.error("Cannot connect to TM -  Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.transient.error", message);
+    }
+    catch (Exception e) {
       log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
     }
   }
 

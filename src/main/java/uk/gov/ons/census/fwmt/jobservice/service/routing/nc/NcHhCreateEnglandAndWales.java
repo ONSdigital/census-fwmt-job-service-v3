@@ -90,7 +90,8 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
       houseHolderDetails = null;
     }
 
-    if (houseHolderDetails != null && houseHolderDetails.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
+    if (houseHolderDetails != null && houseHolderDetails.getRefusalReceived() != null
+        && houseHolderDetails.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
       householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(caseId, houseHolderDetails);
     }
 

@@ -1,8 +1,11 @@
 package uk.gov.ons.census.fwmt.jobservice.rabbit;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -10,8 +13,12 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+
 import static org.aspectj.bridge.MessageUtil.fail;
+
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,6 +27,9 @@ class TransientExceptionHandlerTest {
   @InjectMocks
   private TransientExceptionHandler transientExceptionHandler;
 
+  @Captor
+  private ArgumentCaptor<Message> messageArgumentCaptor;
+
   @Mock
   private RabbitTemplate rabbitTemplate;
 
@@ -27,33 +37,48 @@ class TransientExceptionHandlerTest {
   @Test
   void shouldPushMessageToTransientQueue() {
 
-    final Message message = createMessage();
+    final Message message = createMessage(null);
     transientExceptionHandler.handleMessage(message);
     verify(rabbitTemplate).convertAndSend(eq("GW.Error.Exchange"), eq("gw.transient.error"), eq(message));
   }
 
-  @DisplayName("Should set the fail count to Zero if first time messages has been handled ")
+  @DisplayName("Should set the retryCount to one if first time messages has been handled ")
   @Test
   void shouldSetFailCount() {
-    fail("Not implemented yet");
+    final Message message = createMessage(null);
+    transientExceptionHandler.handleMessage(message);
+    verify(rabbitTemplate).convertAndSend(anyString(),anyString(),messageArgumentCaptor.capture());
+    Message resultMessage = messageArgumentCaptor.getValue();
+    int retryCount = resultMessage.getMessageProperties().getHeader("retryCount");
+    Assertions.assertEquals(1,retryCount);
   }
 
-  @DisplayName("Should increment the fail count if message has been rejected before ")
+  @DisplayName("Should increment the retryCount if message has been rejected before ")
   @Test
   void shouldIncrementFailCount() {
-    fail("Not implemented yet");
+    final Message message = createMessage(1);
+    transientExceptionHandler.handleMessage(message);
+    verify(rabbitTemplate).convertAndSend(anyString(),anyString(),messageArgumentCaptor.capture());
+    Message resultMessage = messageArgumentCaptor.getValue();
+    int retryCount = resultMessage.getMessageProperties().getHeader("retryCount");
+    Assertions.assertEquals(2,retryCount);
   }
 
   @DisplayName("Should send failed message to perm queue if it has been processed more times than the maximum")
   @Test
   void shouldSendMessaageToPerm() {
-    fail("Not implemented yet");
+
+    final Message message = createMessage(3);
+    transientExceptionHandler.handleMessage(message);
+    verify(rabbitTemplate).convertAndSend(eq("GW.Error.Exchange"), eq("gw.permanent.error"), eq(message));
+    verify(rabbitTemplate,never()).convertAndSend(eq("GW.Error.Exchange"), eq("gw.transient.error"), eq(message));
   }
 
 
-  private Message createMessage() {
+  private Message createMessage(Integer retryCount) {
     final MessageProperties messageProperties = createQueueProperties();
     final Message message = new Message("dummydata".getBytes(), messageProperties);
+    messageProperties.setHeader("retryCount",retryCount);
     return message;
   }
 

@@ -70,7 +70,7 @@ public class NcCreateProcessorTest {
   }
 
   @Test
-  @DisplayName("Should not error if a null refusal value")
+  @DisplayName("Should not error if a null refusal value is present")
   public void shoudlHandleNullRefusalValue() throws GatewayException {
     final FwmtActionInstruction instruction = new NcActionInstructionBuilder().createNcActionInstruction();
     final CaseDetailsDTO caseDetailsDTO = new CaseDetailsDTO();

@@ -1,4 +1,4 @@
-  gw-defination.json
+
     {
     "queues":[
     {
@@ -58,17 +58,17 @@
       "arguments": {}
     },
     {
-      "source": "GW.Permanent.ErrorQ",
+      "source": "GW.Error.ExchangeQ",
       "vhost": "/",
-      "destination": "GW.ErrorQ",
+      "destination": "GW.Permanent.ErrorQ",
       "destination_type": "queue",
       "routing_key": "gw.Permanent.error",
       "arguments": {}
     },
     {
-      "source": "GW.Transient.ErrorQ",
+      "source": "GW.Error.Exchange",
       "vhost": "/",
-      "destination": "GW.ErrorQ",
+      "destination": "GW.Transient.ErrorQ",
       "destination_type": "queue",
       "routing_key": "gw.transient.error",
       "arguments": {}

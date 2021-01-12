@@ -6,7 +6,6 @@ import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.data.tm.Geography;
 import uk.gov.ons.census.fwmt.common.data.tm.Location;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
@@ -63,8 +62,7 @@ public class NcCreateConverter {
   }
 
   public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
-      GatewayCache previousDetails)
-      throws GatewayException {
+      GatewayCache previousDetails) {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
@@ -73,17 +71,15 @@ public class NcCreateConverter {
         .build();
   }
 
-  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) throws GatewayException {
+  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) {
     StringBuilder description = new StringBuilder();
     if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
       description.append(cache.getCareCodes());
       description.append("\n");
     }
-    if (ffu.getAddressType().equals(CaseType.HH.toString()) && householder != null) {
-      if (!householder.equals("")) {
-        description.append(householder);
-        description.append("\n");
-      }
+    if (ffu.getAddressType().equals(CaseType.HH.toString()) && householder != null && !householder.equals("")) {
+      description.append(householder);
+      description.append("\n");
     }
     return description.toString();
   }

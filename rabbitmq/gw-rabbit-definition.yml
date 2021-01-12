@@ -61,7 +61,7 @@
       "vhost": "/",
       "destination": "GW.Permanent.ErrorQ",
       "destination_type": "queue",
-      "routing_key": "gw.Permanent.error",
+      "routing_key": "gw.permanent.error",
       "arguments": { }
     },
     {

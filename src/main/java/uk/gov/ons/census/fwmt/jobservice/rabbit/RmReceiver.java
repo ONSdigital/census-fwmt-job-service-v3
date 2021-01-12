@@ -34,6 +34,9 @@ public class RmReceiver {
   private static final String RM_PAUSE_REQUEST_RECEIVED = "RM_PAUSE_REQUEST_RECEIVED";
 
   @Autowired
+  private TransientExceptionHandler transientExceptionHandler;
+
+  @Autowired
   @Qualifier("GW_EVENT_RT")
   private RabbitTemplate gatewayRabbitTemplate;
 
@@ -91,9 +94,12 @@ public class RmReceiver {
       default:
         break; //TODO THROW ROUTUNG FAILURE
       }
+    } catch (RestClientException e) {
+      log.error("- Create Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
+      transientExceptionHandler.handleMessage(message);
     } catch (Exception e) {
       log.error("- Create Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
     }
   }
 
@@ -118,9 +124,7 @@ public class RmReceiver {
       }
     } catch (RestClientException e) {
       log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
-
-      log.error("Not implemented yet ");
-
+      transientExceptionHandler.handleMessage(message);
     } catch (Exception e) {
       log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);

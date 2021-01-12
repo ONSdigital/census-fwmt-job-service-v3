@@ -39,4 +39,17 @@ public class NcCreateConverterTest {
     Assertions.assertEquals(gatewayCache.careCodes + "\n", caseRequest.getDescription());
     Assertions.assertEquals(expectedSpecialInstructions, caseRequest.getSpecialInstructions());
   }
+
+  @Test
+  @DisplayName("Should send estabType, coordCode, location, uaa and blankFormReturned")
+  public void shouldSendEstabTypeCoordCodeLoaction() throws GatewayException {
+    final FwmtActionInstruction ncInstruction = new NcActionInstructionBuilder().createNcActionInstruction();
+    CaseRequest caseRequest = NcCreateConverter.convertNcEnglandAndWales(ncInstruction, null, "", gatewayCache);
+    Assertions.assertEquals(ncInstruction.getEstabType(), caseRequest.getEstabType());
+    Assertions.assertEquals(ncInstruction.getFieldCoordinatorId(), caseRequest.getCoordCode());
+    Assertions.assertEquals(ncInstruction.getLatitude(), caseRequest.getLocation().getLat());
+    Assertions.assertEquals(ncInstruction.getLongitude(), caseRequest.getLocation().get_long());
+    Assertions.assertEquals(ncInstruction.isUndeliveredAsAddress(), caseRequest.isUaa());
+    Assertions.assertEquals(ncInstruction.isBlankFormReturned(), caseRequest.isBlankFormReturned());
+  }
 }

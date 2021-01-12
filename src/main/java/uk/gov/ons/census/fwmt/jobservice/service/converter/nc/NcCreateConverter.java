@@ -56,6 +56,8 @@ public class NcCreateConverter {
         .build();
 
     commonBuilder.address(outAddress);
+    commonBuilder.uaa(ffu.isUndeliveredAsAddress());
+    commonBuilder.blankFormReturned(ffu.isBlankFormReturned());
 
     return commonBuilder;
   }

@@ -26,6 +26,8 @@ public class NcActionInstructionBuilder {
     actionInstruction.setFieldCoordinatorId("Test123");
     actionInstruction.setLatitude(50.0000);
     actionInstruction.setLongitude(1.0000);
+    actionInstruction.setBlankFormReturned(true);
+    actionInstruction.setUndeliveredAsAddress(true);
     return actionInstruction;
   }
 }

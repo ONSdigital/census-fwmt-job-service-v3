@@ -95,6 +95,7 @@ public class NamedHouseholderRetrieval {
       contact.append(" ").append(decryptedSurname);
     }
     if(!contact.toString().equals("")) {
+      contact.insert(0, "Name =");
       contact.append("\n");
     }
     contact.append("Named householder = ").append(isHouseHolder);

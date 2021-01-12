@@ -4,6 +4,7 @@ import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.data.tm.Geography;
+import uk.gov.ons.census.fwmt.common.data.tm.Location;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -26,7 +27,17 @@ public class NcCreateConverter {
     commonBuilder.type(CaseType.NC);
     commonBuilder.surveyType(SurveyType.NC);
     commonBuilder.category("HH");
+    commonBuilder.estabType(ffu.getEstabType());
+    commonBuilder.coordCode(ffu.getFieldCoordinatorId());
     commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
+
+    Location location = Location
+        .builder()
+        .lat(ffu.getLatitude())
+        ._long(ffu.getLongitude())
+        .build();
+
+    commonBuilder.location(location);
 
     Geography outGeography = Geography
         .builder()

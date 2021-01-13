@@ -10,16 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
-
-import static org.aspectj.bridge.MessageUtil.fail;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static uk.gov.ons.census.fwmt.jobservice.rabbit.RabbitTestUtils.createMessage;
 
 @ExtendWith(MockitoExtension.class)
 class TransientExceptionHandlerTest {
@@ -75,15 +72,7 @@ class TransientExceptionHandlerTest {
   }
 
 
-  private Message createMessage(Integer retryCount) {
-    final MessageProperties messageProperties = createQueueProperties();
-    final Message message = new Message("dummydata".getBytes(), messageProperties);
-    messageProperties.setHeader("retryCount",retryCount);
-    return message;
-  }
 
-  private MessageProperties createQueueProperties() {
-    MessageProperties queueProperties = new MessageProperties();
-    return queueProperties;
-  }
+
+
 }

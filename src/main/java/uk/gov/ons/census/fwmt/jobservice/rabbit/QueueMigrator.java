@@ -34,7 +34,7 @@ public class QueueMigrator {
         while (itemsToProcess > 0) {
           final Message message = template.receive(originQ);
           if (message != null) {
-            template.send(message);
+            template.send(destRoutingKey,message);
           }
           itemsToProcess--;
         }

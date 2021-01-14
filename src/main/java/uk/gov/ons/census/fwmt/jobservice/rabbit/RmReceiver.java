@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -31,6 +32,9 @@ public class RmReceiver {
   public static final String RM_CANCEL_REQUEST_RECEIVED = "RM_CANCEL_REQUEST_RECEIVED";
   private static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";
   private static final String RM_PAUSE_REQUEST_RECEIVED = "RM_PAUSE_REQUEST_RECEIVED";
+
+  @Autowired
+  private TransientExceptionHandler transientExceptionHandler;
 
   @Autowired
   @Qualifier("GW_EVENT_RT")
@@ -59,8 +63,6 @@ public class RmReceiver {
     try {
       long epochTimeStamp = Long.parseLong(timestamp);
       Instant receivedMessageTime = Instant.ofEpochMilli(epochTimeStamp);
-      System.out.println(receivedMessageTime);
-      System.out.println(message.getMessageProperties());
       switch (rmRequest.getActionInstruction()) {
       case CREATE: {
         gatewayEventManager
@@ -92,14 +94,17 @@ public class RmReceiver {
       default:
         break; //TODO THROW ROUTUNG FAILURE
       }
+    } catch (RestClientException e) {
+      log.error("- Create Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
+      transientExceptionHandler.handleMessage(message);
     } catch (Exception e) {
       log.error("- Create Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
     }
   }
 
   @RabbitHandler
-  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) throws GatewayException {
+  public void receiveCancelMessage(FwmtCancelActionInstruction rmRequest, @Header("timestamp") String timestamp, Message message) {
     //TODO trigger correct event CANCEL
     //TODO THROW ROUTUNG FAILURE
     try {
@@ -117,9 +122,12 @@ public class RmReceiver {
                 "Action Request", rmRequest.getActionInstruction().toString());
         throw new RuntimeException("Could not route Request");
       }
+    } catch (RestClientException e) {
+      log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
+      transientExceptionHandler.handleMessage(message);
     } catch (Exception e) {
       log.error("- Cancel Message - Error sending message - {}  error - {} ", rmRequest, e.getMessage(), e);
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.receiver.error", message);
+      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
     }
   }
 

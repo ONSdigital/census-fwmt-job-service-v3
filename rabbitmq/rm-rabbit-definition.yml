@@ -1,11 +1,18 @@
 {
-  "queues":[
+  "queues": [
     {
       "name": "RM.Field",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": { }
+    },
+    {
+      "name": "RM.Field",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": { }
     }
   ]
 }

@@ -6,13 +6,6 @@
       "durable": true,
       "auto_delete": false,
       "arguments": { }
-    },
-    {
-      "name": "RM.Field",
-      "vhost": "/",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": { }
     }
   ]
 }

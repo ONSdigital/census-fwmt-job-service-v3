@@ -1,11 +1,13 @@
 package uk.gov.ons.census.fwmt.jobservice.rabbit;
-
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component
@@ -14,7 +16,23 @@ public class TransientExceptionHandler {
   @Qualifier("GW_EVENT_RT")
   private RabbitTemplate gatewayRabbitTemplate;
 
-  public static final int MAX_RETRY_COUNT = 3;
+  @Value("${app.rabbitmq.gw.maxRetryCount}")
+  private int maxRetryCount;
+  @Value("${app.rabbitmq.gw.exchanges.error}")
+  private String errorExchange;
+  @Value("${app.rabbitmq.gw.routingkey.perm}")
+  private String permanentRoutingKey;
+  @Value("${app.rabbitmq.gw.routingkey.trans}")
+  private String transientRoutingKey;
+
+
+  @PostConstruct
+  public void TransientExceptionHandler(){
+   log.info("TransientExceptionHandler maxRetryCount :{}" , maxRetryCount);
+   log.info("TransientExceptionHandler errorExchange :{}", errorExchange);
+   log.info("TransientExceptionHandler permanent routing key :{}", permanentRoutingKey);
+   log.info("TransientExceptionHandler transient routing key :{}", transientRoutingKey);
+  }
 
   public void handleMessage(Message message) {
     Integer retryCount = message.getMessageProperties().getHeader("retryCount");
@@ -23,12 +41,14 @@ public class TransientExceptionHandler {
     }else {
       retryCount ++;
     }
+    log.info("TransientExceptionHandler retryCount :{}" ,  retryCount);
     message.getMessageProperties().setHeader("retryCount",retryCount);
-    if(retryCount >MAX_RETRY_COUNT){
+
+    if(retryCount >maxRetryCount){
       log.error("Retry limit exceeded and message has been routed to permanent queue");
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
+      gatewayRabbitTemplate.convertAndSend(errorExchange, permanentRoutingKey, message);
     }else {
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.transient.error", message);
+      gatewayRabbitTemplate.convertAndSend(errorExchange, transientRoutingKey, message);
     }
   }
 }

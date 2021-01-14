@@ -122,6 +122,7 @@ app:
       maxRetries: 1
       prefetchCount: 500
       concurrentConsumers: 10
+      maxRetryCount: 5
       exchanges:
         error: "GW.Error.Exchange"
       routingkey:

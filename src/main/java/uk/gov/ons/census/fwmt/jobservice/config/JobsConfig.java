@@ -15,7 +15,7 @@ public class JobsConfig {
   private String originQ = "GW.Transient.ErrorQ";
   private String destRoute = "GW.Field";
 
-  @Scheduled(fixedDelay = 1000)
+  @Scheduled(cron = "0 0/5 * * * *")
   public void migrateTransientQueueToGWFieldQueue() {
     queueMigrator.migrate(originQ, destRoute);
   }

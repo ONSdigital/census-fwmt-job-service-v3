@@ -1,10 +1,11 @@
 package uk.gov.ons.census.fwmt.jobservice.rabbit;
-import org.springframework.beans.factory.annotation.Value;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +28,7 @@ public class TransientExceptionHandler {
 
 
   @PostConstruct
-  public void TransientExceptionHandler(){
+  public void transientExceptionHandler(){
    log.info("TransientExceptionHandler maxRetryCount :{}" , maxRetryCount);
    log.info("TransientExceptionHandler errorExchange :{}", errorExchange);
    log.info("TransientExceptionHandler permanent routing key :{}", permanentRoutingKey);
@@ -41,7 +42,6 @@ public class TransientExceptionHandler {
     }else {
       retryCount ++;
     }
-    log.info("TransientExceptionHandler retryCount :{}" ,  retryCount);
     message.getMessageProperties().setHeader("retryCount",retryCount);
 
     if(retryCount >maxRetryCount){

@@ -138,7 +138,7 @@ public class JobService {
 
   @Transactional
   public void processCancel(FwmtCancelActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
-    GatewayCache cache = cacheService.getByOriginatingCaseId(rmRequest.getCaseId());
+    GatewayCache cache = cacheService.getByOriginalCaseId(rmRequest.getCaseId());
 
     if (cache != null) {
       rmRequest.setNc(true);

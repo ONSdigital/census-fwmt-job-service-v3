@@ -71,23 +71,22 @@ public class NcHhCancel implements InboundProcessor<FwmtCancelActionInstruction>
   @Override
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_PRE_SENDING,
+    String ncCaseId = cache.caseId;
+    eventManager.triggerEvent(String.valueOf(ncCaseId), COMET_CANCEL_PRE_SENDING,
         "Case Ref", "N/A",
         "Type", "NC Cancel",
         "TM Action", "CLOSE",
         "Source", "RM");
 
-    ResponseEntity<Void> response = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(),
+    ResponseEntity<Void> response = cometRestClient.sendClose(ncCaseId);
+    routingValidator.validateResponseCode(response, ncCaseId,
         "Cancel", FAILED_TO_CANCEL_TM_JOB,
         "rmRequest", rmRequest.toString(),
-        "cache", (cache!=null)?cache.toString():"");
+        "cache", cache.toString());
 
-    if (cache != null) {
       cacheService.save(cache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
           .lastActionTime(messageReceivedTime)
           .build());
-    }
 
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,

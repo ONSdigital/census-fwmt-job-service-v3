@@ -2,6 +2,7 @@ package uk.gov.ons.census.fwmt.jobservice.helper;
 
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
 
 import java.util.UUID;
 
@@ -29,5 +30,27 @@ public class NcActionInstructionBuilder {
     actionInstruction.setBlankFormReturned(true);
     actionInstruction.setUndeliveredAsAddress(true);
     return actionInstruction;
+  }
+
+  public FwmtCancelActionInstruction createNcHhCancelInstruction() {
+    FwmtCancelActionInstruction cancelActionInstruction = new FwmtCancelActionInstruction();
+    cancelActionInstruction.setActionInstruction(ActionInstructionType.CANCEL);
+    cancelActionInstruction.setCaseId("ac623e62-4f4b-11eb-ae93-0242ac130002");
+    cancelActionInstruction.setSurveyName("CENSUS");
+    cancelActionInstruction.setAddressType("HH");
+    cancelActionInstruction.setAddressLevel("U");
+
+    return cancelActionInstruction;
+  }
+
+  public FwmtCancelActionInstruction createNcCeCancelInstruction() {
+    FwmtCancelActionInstruction cancelActionInstruction = new FwmtCancelActionInstruction();
+    cancelActionInstruction.setActionInstruction(ActionInstructionType.CANCEL);
+    cancelActionInstruction.setCaseId("ac623e62-4f4b-11eb-ae93-0242ac130002");
+    cancelActionInstruction.setSurveyName("CENSUS");
+    cancelActionInstruction.setAddressType("CE");
+    cancelActionInstruction.setAddressLevel("E");
+
+    return cancelActionInstruction;
   }
 }

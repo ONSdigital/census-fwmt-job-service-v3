@@ -67,11 +67,12 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
+    GatewayCache previousDetails = cacheService.getById(rmRequest.getOldCaseId());
     String newCaseId = String.valueOf(UUID.randomUUID());
     String accessInfo = null;
     String careCodes = null;
 
-    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, null);
+    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, null, previousDetails);
 
     eventManager.triggerEvent(newCaseId, COMET_CREATE_PRE_SENDING,
         "Original case id", rmRequest.getCaseId(),

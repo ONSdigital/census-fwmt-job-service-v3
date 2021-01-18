@@ -77,6 +77,8 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
     CaseDetailsDTO houseHolderDetails;
+    GatewayCache previousDetails = cacheService.getById(rmRequest.getOldCaseId());
+
     String accessInfo = null;
     String careCodes = null;
     String householder = "";
@@ -88,11 +90,12 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
       houseHolderDetails = null;
     }
 
-    if (houseHolderDetails != null && houseHolderDetails.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
+    if (houseHolderDetails != null && houseHolderDetails.getRefusalReceived() != null
+        && houseHolderDetails.getRefusalReceived().equals(RefusalTypeDTO.HARD_REFUSAL)) {
       householder = namedHouseholderRetrieval.getAndSortRmRefusalCases(caseId, houseHolderDetails);
     }
 
-    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, householder);
+    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, householder, previousDetails);
 
     eventManager.triggerEvent(caseId, COMET_CREATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),

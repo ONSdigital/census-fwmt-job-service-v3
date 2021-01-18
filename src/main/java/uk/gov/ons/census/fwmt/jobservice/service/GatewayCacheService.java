@@ -24,7 +24,7 @@ public class GatewayCacheService {
     return repository.findByCaseId(caseId);
   }
 
-  public GatewayCache getByOriginatingCaseId(String caseId) {
+  public GatewayCache getByOriginalCaseId(String caseId) {
     return repository.findByOriginalCaseId(caseId);
   }
 

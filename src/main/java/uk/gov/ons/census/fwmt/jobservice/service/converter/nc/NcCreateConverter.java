@@ -4,8 +4,8 @@ import uk.gov.ons.census.fwmt.common.data.tm.Address;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
 import uk.gov.ons.census.fwmt.common.data.tm.Geography;
+import uk.gov.ons.census.fwmt.common.data.tm.Location;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
@@ -26,7 +26,17 @@ public class NcCreateConverter {
     commonBuilder.type(CaseType.NC);
     commonBuilder.surveyType(SurveyType.NC);
     commonBuilder.category("HH");
+    commonBuilder.estabType(ffu.getEstabType());
+    commonBuilder.coordCode(ffu.getFieldCoordinatorId());
     commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
+
+    Location location = Location
+        .builder()
+        .lat(ffu.getLatitude())
+        ._long(ffu.getLongitude())
+        .build();
+
+    commonBuilder.location(location);
 
     Geography outGeography = Geography
         .builder()
@@ -45,31 +55,31 @@ public class NcCreateConverter {
         .build();
 
     commonBuilder.address(outAddress);
+    commonBuilder.uaa(ffu.isUndeliveredAsAddress());
+    commonBuilder.blankFormReturned(ffu.isBlankFormReturned());
 
     return commonBuilder;
   }
 
-  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder)
-      throws GatewayException {
+  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
+      GatewayCache previousDetails) {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
-        .specialInstructions(getSpecialInstructions(cache))
-        .description(getDescription(ffu, cache, householder))
+        .specialInstructions(getSpecialInstructions(previousDetails))
+        .description(getDescription(ffu, previousDetails, householder))
         .build();
   }
 
-  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) throws GatewayException {
+  private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) {
     StringBuilder description = new StringBuilder();
     if (cache != null && cache.getCareCodes() != null && !cache.getCareCodes().isEmpty()) {
       description.append(cache.getCareCodes());
       description.append("\n");
     }
-    if (ffu.getAddressType().equals(CaseType.HH.toString()) && householder != null) {
-      if (!householder.equals("")) {
-        description.append(householder);
-        description.append("\n");
-      }
+    if (ffu.getAddressType().equals(CaseType.HH.toString()) && householder != null && !householder.equals("")) {
+      description.append(householder);
+      description.append("\n");
     }
     return description.toString();
   }

@@ -163,6 +163,7 @@ dependencies {
     // Mocking Objects
     testCompile 'org.mockito:mockito-core'
     testCompile 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.mockito:mockito-inline:2.13.0'
 
     // integrationTestCompile 'org.assertj:assertj-core'
 

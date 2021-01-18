@@ -131,6 +131,7 @@ app:
       queues:
           errorPer: "GW.Permanent.ErrorQ"
           errorTrans: "GW.Transient.ErrorQ"
+          input: "GW.Field"
 #      queues:
 #        error: "GW.ErrorQ"
     rm:

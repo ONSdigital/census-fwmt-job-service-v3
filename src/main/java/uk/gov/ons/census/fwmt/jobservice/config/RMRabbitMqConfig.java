@@ -149,4 +149,13 @@ public class RMRabbitMqConfig {
     return factory;
   }
 
+  @Bean("gwContainerFactory")
+  public SimpleRabbitListenerContainerFactory gwContainerFactory(
+      @Qualifier("gatewayConnectionFactory") ConnectionFactory connectionFactory, RetryOperationsInterceptor interceptor,
+      @Qualifier("JS") MessageConverter jsonMessageConverter) {
+    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    factory.setMessageConverter(jsonMessageConverter);
+    return factory;
+  }
 }

@@ -20,6 +20,8 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 import java.time.Instant;
 
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.*;
+import static uk.gov.ons.census.fwmt.jobservice.service.routing.nc.NcEventValues.NC_CSV_LOAD_FAILURE;
+import static uk.gov.ons.census.fwmt.jobservice.service.routing.nc.NcEventValues.NOT_EXIST_WITHIN_CACHE;
 
 @Qualifier("Create")
 @Service
@@ -68,10 +70,8 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
     String originalCaseId = rmRequest.getOldCaseId();
     GatewayCache originalCache = cacheService.getById(originalCaseId);
     if (originalCache == null) {
-      String reason = "Original case does not exist with cache";
-      String NC_CSV_LOAD_FAILURE = "NC_CSV_LOAD_FAILURE";
-      eventManager.triggerErrorEvent(this.getClass(), reason, originalCaseId, NC_CSV_LOAD_FAILURE);
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, reason);
+      eventManager.triggerErrorEvent(this.getClass(), NOT_EXIST_WITHIN_CACHE, originalCaseId, NC_CSV_LOAD_FAILURE);
+      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, NOT_EXIST_WITHIN_CACHE);
     }
 
     CaseRequest tmRequest = NcCreateConverter.convertCeNcEnglandAndWales(rmRequest, cache, null, originalCache);
@@ -100,11 +100,10 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
         .lastActionTime(messageReceivedTime)
         .build());
 
-    eventManager
-        .triggerEvent(ncCaseId, COMET_CREATE_ACK,
-            "Original case id", originalCaseId,
-            "Case Ref", rmRequest.getCaseRef(),
-            "Response Code", response.getStatusCode().name(),
-            "Survey Type", tmRequest.getSurveyType().toString());
+    eventManager.triggerEvent(ncCaseId, COMET_CREATE_ACK,
+        "Original case id", originalCaseId,
+        "Case Ref", rmRequest.getCaseRef(),
+        "Response Code", response.getStatusCode().name(),
+        "Survey Type", tmRequest.getSurveyType().toString());
   }
 }

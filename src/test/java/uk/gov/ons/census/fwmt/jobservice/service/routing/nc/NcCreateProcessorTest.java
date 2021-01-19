@@ -1,6 +1,5 @@
 package uk.gov.ons.census.fwmt.jobservice.service.routing.nc;
 
-import liquibase.pro.packaged.S;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

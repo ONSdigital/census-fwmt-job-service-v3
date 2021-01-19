@@ -94,7 +94,7 @@ public class NcCreateProcessorTest {
 
   @Test
   @DisplayName("Should error if original case not in cache")
-  public void shouldErrorIfOriginalCaseDoesntExistInCache() throws GatewayException {
+  public void shouldErrorIfOriginalCaseDoesntExistInCache() {
     final FwmtActionInstruction instruction = new NcActionInstructionBuilder().createNcActionInstruction();
 
     GatewayException exception = assertThrows(GatewayException.class, () -> {

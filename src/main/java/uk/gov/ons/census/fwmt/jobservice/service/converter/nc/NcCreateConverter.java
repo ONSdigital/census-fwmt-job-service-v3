@@ -1,11 +1,6 @@
 package uk.gov.ons.census.fwmt.jobservice.service.converter.nc;
 
-import uk.gov.ons.census.fwmt.common.data.tm.Address;
-import uk.gov.ons.census.fwmt.common.data.tm.CaseRequest;
-import uk.gov.ons.census.fwmt.common.data.tm.CaseType;
-import uk.gov.ons.census.fwmt.common.data.tm.Geography;
-import uk.gov.ons.census.fwmt.common.data.tm.Location;
-import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
+import uk.gov.ons.census.fwmt.common.data.tm.*;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.service.converter.common.CommonCreateConverter;
@@ -61,7 +56,7 @@ public class NcCreateConverter {
   }
 
   public static CaseRequest convertHhNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
-                                                       GatewayCache previousDetails) {
+      GatewayCache previousDetails) {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
         .category("HH")
@@ -72,14 +67,14 @@ public class NcCreateConverter {
   }
 
   public static CaseRequest convertCeNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
-                                                     GatewayCache previousDetails) {
+      GatewayCache previousDetails) {
     return NcCreateConverter
-            .convertNC(ffu, cache, CaseRequest.builder())
-            .category("CE")
-            .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
-            .specialInstructions(getSpecialInstructions(previousDetails))
-            .description(getDescription(ffu, previousDetails, householder))
-            .build();
+        .convertNC(ffu, cache, CaseRequest.builder())
+        .category("CE")
+        .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
+        .specialInstructions(getSpecialInstructions(previousDetails))
+        .description(getDescription(ffu, previousDetails, householder))
+        .build();
   }
 
   private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) {

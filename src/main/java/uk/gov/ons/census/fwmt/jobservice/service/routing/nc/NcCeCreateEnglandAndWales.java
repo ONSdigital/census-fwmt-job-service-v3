@@ -19,9 +19,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.*;
 
 @Qualifier("Create")
 @Service
@@ -91,16 +89,16 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
         "cache", (cache != null) ? cache.toString() : "");
 
     cacheService.save(GatewayCache
-          .builder()
-          .caseId(ncCaseId)
-          .originalCaseId(originalCaseId)
-          .existsInFwmt(true)
-          .careCodes(originalCache.getCareCodes())
-          .accessInfo(originalCache.getAccessInfo())
-          .type(1)
-          .lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime)
-          .build());
+        .builder()
+        .caseId(ncCaseId)
+        .originalCaseId(originalCaseId)
+        .existsInFwmt(true)
+        .careCodes(originalCache.getCareCodes())
+        .accessInfo(originalCache.getAccessInfo())
+        .type(1)
+        .lastActionInstruction(rmRequest.getActionInstruction().toString())
+        .lastActionTime(messageReceivedTime)
+        .build());
 
     eventManager
         .triggerEvent(ncCaseId, COMET_CREATE_ACK,

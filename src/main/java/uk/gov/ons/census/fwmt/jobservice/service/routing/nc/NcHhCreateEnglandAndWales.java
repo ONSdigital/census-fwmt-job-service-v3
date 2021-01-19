@@ -23,9 +23,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.*;
 
 @Qualifier("Create")
 @Service
@@ -91,8 +89,8 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
       houseHolderDetails = rmRestClient.getCase(originalCaseId);
     } catch (RuntimeException e) {
       eventManager.triggerEvent(originalCaseId, "NO_HOUSEHOLDER_DETAILS",
-              "ncCaseId", ncCaseId,
-              "Type", "NC");
+          "ncCaseId", ncCaseId,
+          "Type", "NC");
       houseHolderDetails = null;
     }
 
@@ -117,16 +115,16 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
         "cache", (cache != null) ? cache.toString() : "");
 
     cacheService.save(GatewayCache
-          .builder()
-          .caseId(ncCaseId)
-          .originalCaseId(originalCaseId)
-          .existsInFwmt(true)
-          .type(10)
-          .careCodes(originalCache.getCareCodes())
-          .accessInfo(originalCache.getAccessInfo())
-          .lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime)
-          .build());
+        .builder()
+        .caseId(ncCaseId)
+        .originalCaseId(originalCaseId)
+        .existsInFwmt(true)
+        .type(10)
+        .careCodes(originalCache.getCareCodes())
+        .accessInfo(originalCache.getAccessInfo())
+        .lastActionInstruction(rmRequest.getActionInstruction().toString())
+        .lastActionTime(messageReceivedTime)
+        .build());
 
     eventManager
         .triggerEvent(ncCaseId, COMET_CREATE_ACK,

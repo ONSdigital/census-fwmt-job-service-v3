@@ -34,7 +34,7 @@ public class NcCreateConverterTest {
     final FwmtActionInstruction ncInstruction = new NcActionInstructionBuilder().createNcActionInstruction();
     GatewayCache gatewayCache = GatewayCache.builder()
         .caseId("ac623e62-4f4b-11eb-ae93-0242ac130002").careCodes("Mind dog").accessInfo("1234").build();
-    CaseRequest caseRequest = NcCreateConverter.convertNcEnglandAndWales(ncInstruction, null, "", gatewayCache);
+    CaseRequest caseRequest = NcCreateConverter.convertHhNcEnglandAndWales(ncInstruction, null, "", gatewayCache);
     String expectedSpecialInstructions = gatewayCache.careCodes + "\n" + gatewayCache.accessInfo + "\n";
     Assertions.assertEquals(gatewayCache.careCodes + "\n", caseRequest.getDescription());
     Assertions.assertEquals(expectedSpecialInstructions, caseRequest.getSpecialInstructions());
@@ -44,7 +44,7 @@ public class NcCreateConverterTest {
   @DisplayName("Should send estabType, coordCode, location, uaa and blankFormReturned")
   public void shouldSendEstabTypeCoordCodeLoaction() throws GatewayException {
     final FwmtActionInstruction ncInstruction = new NcActionInstructionBuilder().createNcActionInstruction();
-    CaseRequest caseRequest = NcCreateConverter.convertNcEnglandAndWales(ncInstruction, null, "", gatewayCache);
+    CaseRequest caseRequest = NcCreateConverter.convertHhNcEnglandAndWales(ncInstruction, null, "", gatewayCache);
     Assertions.assertEquals(ncInstruction.getEstabType(), caseRequest.getEstabType());
     Assertions.assertEquals(ncInstruction.getFieldCoordinatorId(), caseRequest.getCoordCode());
     Assertions.assertEquals(ncInstruction.getLatitude(), caseRequest.getLocation().getLat());

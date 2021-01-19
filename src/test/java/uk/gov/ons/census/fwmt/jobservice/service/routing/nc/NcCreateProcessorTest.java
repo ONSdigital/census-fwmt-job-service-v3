@@ -24,11 +24,11 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 @ExtendWith(MockitoExtension.class)
 public class NcCreateProcessorTest {
@@ -58,12 +58,17 @@ public class NcCreateProcessorTest {
   private ArgumentCaptor<GatewayCache> spiedCache;
 
   @Test
-  @DisplayName("Should save the oldCaseId")
+  @DisplayName("Should save the original case id")
   public void shouldHandleIncorrectSurveyTypeCE() throws GatewayException {
     final FwmtActionInstruction instruction = new NcActionInstructionBuilder().createNcActionInstruction();
+    final GatewayCache originalCache = new GatewayCache();
+
     ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
+    when(cacheService.getById(anyString())).thenReturn(originalCache);
     when(cometRestClient.sendCreate(any(CaseRequest.class), eq(instruction.getCaseId()))).thenReturn(responseEntity);
+
     ncHhCreateEnglandAndWales.process(instruction, null, Instant.now());
+
     verify(cacheService).save(spiedCache.capture());
     String originalCaseId = spiedCache.getValue().originalCaseId;
     Assertions.assertEquals(instruction.getOldCaseId(), originalCaseId);
@@ -71,14 +76,36 @@ public class NcCreateProcessorTest {
 
   @Test
   @DisplayName("Should not error if a null refusal value is present")
-  public void shoudlHandleNullRefusalValue() throws GatewayException {
+  public void shouldHandleNullRefusalValue() throws GatewayException {
     final FwmtActionInstruction instruction = new NcActionInstructionBuilder().createNcActionInstruction();
     final CaseDetailsDTO caseDetailsDTO = new CaseDetailsDTO();
+    final GatewayCache originalCache = new GatewayCache();
+
+    when(cacheService.getById(anyString())).thenReturn(originalCache);
     when(rmRestClient.getCase(instruction.getOldCaseId())).thenReturn(caseDetailsDTO);
     ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
     when(cometRestClient.sendCreate(any(CaseRequest.class), eq(instruction.getCaseId()))).thenReturn(responseEntity);
+
     Assertions.assertDoesNotThrow(() -> {
       ncHhCreateEnglandAndWales.process(instruction, null, Instant.now());
     });
+  }
+
+  @Test
+  @DisplayName("Should error if original case not in cache")
+  public void shouldErrorIfOriginalCaseDoesntExistInCache() {
+    final FwmtActionInstruction instruction = new NcActionInstructionBuilder().createNcActionInstruction();
+
+    GatewayException exception = assertThrows(GatewayException.class, () -> {
+      ncHhCreateEnglandAndWales.process(instruction, null, Instant.now());
+    });
+
+    GatewayException.Fault expectedFault = GatewayException.Fault.SYSTEM_ERROR;
+    GatewayException.Fault actualFault = exception.getFault();
+    String expectedErrorMessage = "Original case does not exist within cache";
+    String actualErrorMessage = exception.getMessage();
+
+    assertEquals(expectedFault, actualFault);
+    assertEquals(expectedErrorMessage, actualErrorMessage);
   }
 }

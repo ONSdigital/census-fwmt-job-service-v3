@@ -25,7 +25,6 @@ public class NcCreateConverter {
     commonBuilder.reference(ffu.getCaseRef());
     commonBuilder.type(CaseType.NC);
     commonBuilder.surveyType(SurveyType.NC);
-    commonBuilder.category("HH");
     commonBuilder.estabType(ffu.getEstabType());
     commonBuilder.coordCode(ffu.getFieldCoordinatorId());
     commonBuilder.requiredOfficer(ffu.getFieldOfficerId());
@@ -61,14 +60,26 @@ public class NcCreateConverter {
     return commonBuilder;
   }
 
-  public static CaseRequest convertNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
-      GatewayCache previousDetails) {
+  public static CaseRequest convertHhNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
+                                                       GatewayCache previousDetails) {
     return NcCreateConverter
         .convertNC(ffu, cache, CaseRequest.builder())
+        .category("HH")
         .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
         .specialInstructions(getSpecialInstructions(previousDetails))
         .description(getDescription(ffu, previousDetails, householder))
         .build();
+  }
+
+  public static CaseRequest convertCeNcEnglandAndWales(FwmtActionInstruction ffu, GatewayCache cache, String householder,
+                                                     GatewayCache previousDetails) {
+    return NcCreateConverter
+            .convertNC(ffu, cache, CaseRequest.builder())
+            .category("CE")
+            .sai("Sheltered Accommodation".equals(ffu.getEstabType()))
+            .specialInstructions(getSpecialInstructions(previousDetails))
+            .description(getDescription(ffu, previousDetails, householder))
+            .build();
   }
 
   private static String getDescription(FwmtActionInstruction ffu, GatewayCache cache, String householder) {

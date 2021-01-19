@@ -29,7 +29,7 @@ public class GWMessageProcessor {
 
   private final JobService jobService;
   private final GatewayEventManager gatewayEventManager;
-  private final TransientExceptionHandler transientExceptionHandler;
+  private final MessageExceptionHandler messageExceptionHandler;
 
   @Autowired
   @Qualifier("GW_EVENT_RT")
@@ -70,7 +70,7 @@ public class GWMessageProcessor {
       }
     } catch (RestClientException e) {
       log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
-      transientExceptionHandler.handleMessage(message);
+      messageExceptionHandler.handleMessage(message);
     } catch (Exception e) {
       log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
@@ -94,7 +94,7 @@ public class GWMessageProcessor {
       }
     } catch (RestClientException e) {
       log.error("- Cancel Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
-      transientExceptionHandler.handleMessage(message);
+      messageExceptionHandler.handleMessage(message);
     } catch (Exception e) {
       log.error("- Cancel Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
       gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);

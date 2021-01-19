@@ -43,7 +43,7 @@ class GWMessageProcessorTest {
   private GatewayEventManager gatewayEventManager;
 
   @Mock
-  private TransientExceptionHandler transientExceptionHandler;
+  private MessageExceptionHandler messageExceptionHandler;
 
   @DisplayName("Should call JobService process for CREATE")
   @Test
@@ -100,7 +100,7 @@ class GWMessageProcessorTest {
     doThrow(RestClientException.class).when(jobService).processCreate(any(), any());
 
     gwMessageProcessor.processCreateInstruction(instruction, now, message);
-    verify(transientExceptionHandler).handleMessage(eq(message));
+    verify(messageExceptionHandler).handleMessage(eq(message));
   }
 
   @DisplayName("Should process Process Cancel Message ")

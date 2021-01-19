@@ -34,10 +34,11 @@ public class QueueMigrator {
         while (itemsToProcess > 0) {
           final Message message = template.receive(originQ);
           if (message != null) {
-            template.send(destRoutingKey,message);
+            template.send(destRoutingKey, message);
           }
           itemsToProcess--;
         }
+
         log.info("Completed {} items from queue {} and redirecting to route {}", cntValue, originQ, destRoutingKey);
       } else {
         log.info("no items to migrate this time. ");

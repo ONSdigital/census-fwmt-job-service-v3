@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component
-public class TransientExceptionHandler {
+public class MessageExceptionHandler {
   @Autowired
   @Qualifier("GW_EVENT_RT")
   private RabbitTemplate gatewayRabbitTemplate;
@@ -26,28 +26,28 @@ public class TransientExceptionHandler {
   @Value("${app.rabbitmq.gw.routingkey.trans}")
   private String transientRoutingKey;
 
-
   @PostConstruct
-  public void transientExceptionHandler(){
-   log.info("TransientExceptionHandler maxRetryCount :{}" , maxRetryCount);
-   log.info("TransientExceptionHandler errorExchange :{}", errorExchange);
-   log.info("TransientExceptionHandler permanent routing key :{}", permanentRoutingKey);
-   log.info("TransientExceptionHandler transient routing key :{}", transientRoutingKey);
+  public void transientExceptionHandler() {
+    log.info("TransientExceptionHandler maxRetryCount :{}", maxRetryCount);
+    log.info("TransientExceptionHandler errorExchange :{}", errorExchange);
+    log.info("TransientExceptionHandler permanent routing key :{}", permanentRoutingKey);
+    log.info("TransientExceptionHandler transient routing key :{}", transientRoutingKey);
   }
 
   public void handleMessage(Message message) {
     Integer retryCount = message.getMessageProperties().getHeader("retryCount");
-    if(null == retryCount){
-      retryCount =1;
-    }else {
-      retryCount ++;
+    if (null == retryCount) {
+      retryCount = 1;
+    } else {
+      retryCount++;
     }
-    message.getMessageProperties().setHeader("retryCount",retryCount);
+    message.getMessageProperties().setHeader("retryCount", retryCount);
 
-    if(retryCount >maxRetryCount){
-      log.error("Retry limit exceeded and message has been routed to permanent queue");
+    if (retryCount > maxRetryCount) {
+      log.error("We've reached our retry limit {} for this message \n {} ", maxRetryCount, message.getBody().toString());
       gatewayRabbitTemplate.convertAndSend(errorExchange, permanentRoutingKey, message);
-    }else {
+    } else {
+      log.error("Fail attempt number {} to deliver this message {} ", retryCount, message.getBody().toString());
       gatewayRabbitTemplate.convertAndSend(errorExchange, transientRoutingKey, message);
     }
   }

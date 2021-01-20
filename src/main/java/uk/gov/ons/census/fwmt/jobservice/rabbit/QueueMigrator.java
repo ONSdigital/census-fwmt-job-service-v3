@@ -7,6 +7,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import uk.gov.ons.census.fwmt.common.error.GatewayException;
 
 import java.util.Properties;
 
@@ -24,7 +25,7 @@ public class QueueMigrator {
   @Qualifier("gatewayAmqpAdmin")
   private AmqpAdmin gatewayAmqpAdmin;
 
-  public String migrate(String originQ, String destRoutingKey) {
+  public String migrate(String originQ, String destRoutingKey) throws GatewayException {
     final Properties props = gatewayAmqpAdmin.getQueueProperties(originQ);
     if (props != null) {
       final Object cntValue = props.get(QUEUE_MESSAGE_COUNT);
@@ -46,8 +47,8 @@ public class QueueMigrator {
         return "No items to migrate";
       }
     }
-    log.info("Failed attempt to migrate, no quque properties");
-    return "No queue props, nothing to migrate";
+    log.info("Failed attempt to migrate, no queue properties");
+    throw new GatewayException(GatewayException.Fault.BAD_REQUEST, "Cannot migrate as there are no properties for origin queue");
   }
 
 }

@@ -41,13 +41,13 @@ public class MessageExceptionHandler {
     } else {
       retryCount++;
     }
-    message.getMessageProperties().setHeader("retryCount", retryCount);
 
     if (retryCount > maxRetryCount) {
       log.error("We've reached our retry limit {}", maxRetryCount);
       gatewayRabbitTemplate.convertAndSend(errorExchange, permanentRoutingKey, message);
     } else {
-      log.error("Retry number {}", retryCount);
+      message.getMessageProperties().setHeader("retryCount", retryCount);
+      log.warn("Retry number {}", retryCount);
       gatewayRabbitTemplate.convertAndSend(errorExchange, transientRoutingKey, message);
     }
   }

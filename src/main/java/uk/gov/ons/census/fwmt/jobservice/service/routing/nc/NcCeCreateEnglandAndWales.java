@@ -18,11 +18,10 @@ import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
 import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
-import java.util.UUID;
 
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_ACK;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CREATE_PRE_SENDING;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.*;
+import static uk.gov.ons.census.fwmt.jobservice.service.routing.nc.NcEventValues.NC_CSV_LOAD_FAILURE;
+import static uk.gov.ons.census.fwmt.jobservice.service.routing.nc.NcEventValues.NOT_EXIST_WITHIN_CACHE;
 
 @Qualifier("Create")
 @Service
@@ -67,51 +66,44 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
-    GatewayCache previousDetails = cacheService.getById(rmRequest.getOldCaseId());
-    String newCaseId = String.valueOf(UUID.randomUUID());
-    String accessInfo = null;
-    String careCodes = null;
+    String ncCaseId = rmRequest.getCaseId();
+    String originalCaseId = rmRequest.getOldCaseId();
+    GatewayCache originalCache = cacheService.getById(originalCaseId);
+    if (originalCache == null) {
+      eventManager.triggerErrorEvent(this.getClass(), NOT_EXIST_WITHIN_CACHE, originalCaseId, NC_CSV_LOAD_FAILURE);
+      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, NOT_EXIST_WITHIN_CACHE);
+    }
 
-    CaseRequest tmRequest = NcCreateConverter.convertNcEnglandAndWales(rmRequest, cache, null, previousDetails);
+    CaseRequest tmRequest = NcCreateConverter.convertCeNcEnglandAndWales(rmRequest, cache, null, originalCache);
 
-    eventManager.triggerEvent(newCaseId, COMET_CREATE_PRE_SENDING,
-        "Original case id", rmRequest.getCaseId(),
+    eventManager.triggerEvent(ncCaseId, COMET_CREATE_PRE_SENDING,
+        "Original case id", originalCaseId,
         "Case Ref", tmRequest.getReference(),
         "Survey Type", tmRequest.getSurveyType().toString());
 
-    ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, newCaseId);
-    routingValidator.validateResponseCode(response, newCaseId,
+    ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, ncCaseId);
+    routingValidator.validateResponseCode(response, ncCaseId,
         "Create", FAILED_TO_CREATE_TM_JOB,
         "tmRequest", tmRequest.toString(),
         "rmRequest", rmRequest.toString(),
         "cache", (cache != null) ? cache.toString() : "");
 
-    GatewayCache newCache = cacheService.getById(newCaseId);
+    cacheService.save(GatewayCache
+        .builder()
+        .caseId(ncCaseId)
+        .originalCaseId(originalCaseId)
+        .existsInFwmt(true)
+        .careCodes(originalCache.getCareCodes())
+        .accessInfo(originalCache.getAccessInfo())
+        .type(1)
+        .lastActionInstruction(rmRequest.getActionInstruction().toString())
+        .lastActionTime(messageReceivedTime)
+        .build());
 
-    if (cache != null) {
-      careCodes =  cache.getCareCodes();
-      accessInfo = cache.getAccessInfo();
-    }
-
-    if (newCache == null) {
-      cacheService.save(GatewayCache
-          .builder()
-          .caseId(newCaseId)
-          .originalCaseId(rmRequest.getCaseId())
-          .existsInFwmt(true)
-          .careCodes(careCodes)
-          .accessInfo(accessInfo)
-          .type(1)
-          .lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime)
-          .build());
-    }
-
-    eventManager
-        .triggerEvent(newCaseId, COMET_CREATE_ACK,
-            "Original case id", rmRequest.getCaseId(),
-            "Case Ref", rmRequest.getCaseRef(),
-            "Response Code", response.getStatusCode().name(),
-            "Survey Type", tmRequest.getSurveyType().toString());
+    eventManager.triggerEvent(ncCaseId, COMET_CREATE_ACK,
+        "Original case id", originalCaseId,
+        "Case Ref", rmRequest.getCaseRef(),
+        "Response Code", response.getStatusCode().name(),
+        "Survey Type", tmRequest.getSurveyType().toString());
   }
 }

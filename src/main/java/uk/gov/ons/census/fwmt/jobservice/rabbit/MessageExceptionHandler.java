@@ -44,10 +44,10 @@ public class MessageExceptionHandler {
     message.getMessageProperties().setHeader("retryCount", retryCount);
 
     if (retryCount > maxRetryCount) {
-      log.error("We've reached our retry limit {} for this message \n {} ", maxRetryCount, message.getBody().toString());
+      log.error("We've reached our retry limit {}", maxRetryCount);
       gatewayRabbitTemplate.convertAndSend(errorExchange, permanentRoutingKey, message);
     } else {
-      log.error("Fail attempt number {} to deliver this message {} ", retryCount, message.getBody().toString());
+      log.error("Retry number {}", retryCount);
       gatewayRabbitTemplate.convertAndSend(errorExchange, transientRoutingKey, message);
     }
   }

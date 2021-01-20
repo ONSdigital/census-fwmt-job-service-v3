@@ -20,7 +20,6 @@ public class RabbitQueueController {
 
   @GetMapping(value = "/migratetransients")
   public String transferTransientMessagesToGWFieldQueue() {
-    log.info("Executing migration from {} , to {}", originQ, destRoute);
     queueMigrator.migrate(originQ, destRoute);
     return "MIGRATION COMPLETE.";
   }

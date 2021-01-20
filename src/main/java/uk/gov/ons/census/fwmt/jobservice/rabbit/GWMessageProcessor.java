@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtSuperInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 
@@ -69,11 +70,9 @@ public class GWMessageProcessor {
         log.error("ActionInstruction not supported {} ", instruction.getActionInstruction());
       }
     } catch (RestClientException e) {
-      log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
-      messageExceptionHandler.handleMessage(message);
+      handleTransientException(instruction, message, e);
     } catch (Exception e) {
-      log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
+      handlePermException(instruction, message, e);
     }
   }
 
@@ -93,12 +92,20 @@ public class GWMessageProcessor {
         throw new RuntimeException("Could not route Request");
       }
     } catch (RestClientException e) {
-      log.error("- Cancel Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
-      messageExceptionHandler.handleMessage(message);
+      handleTransientException(instruction, message, e);
     } catch (Exception e) {
-      log.error("- Cancel Message - Error sending message - {}  error - {} ", instruction, e.getMessage(), e);
-      gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
+      handlePermException(instruction, message, e);
     }
+  }
+
+  private void handlePermException(FwmtSuperInstruction instruction, Message message, Exception e) {
+    log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage());
+    gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
+  }
+
+  private void handleTransientException(FwmtSuperInstruction instruction, Message message, RestClientException e) {
+    log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage());
+    messageExceptionHandler.handleMessage(message);
   }
 
 }

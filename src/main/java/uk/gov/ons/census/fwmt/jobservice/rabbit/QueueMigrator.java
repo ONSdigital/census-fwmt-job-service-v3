@@ -24,7 +24,7 @@ public class QueueMigrator {
   @Qualifier("gatewayAmqpAdmin")
   private AmqpAdmin gatewayAmqpAdmin;
 
-  public void migrate(String originQ, String destRoutingKey) {
+  public String migrate(String originQ, String destRoutingKey) {
     final Properties props = gatewayAmqpAdmin.getQueueProperties(originQ);
     if (props != null) {
       final Object cntValue = props.get(QUEUE_MESSAGE_COUNT);
@@ -40,9 +40,14 @@ public class QueueMigrator {
         }
 
         log.info("Completed {} items from queue {} and redirecting to route {}", cntValue, originQ, destRoutingKey);
+        return "Migration complete - No items : ".concat(cntValue.toString());
       } else {
         log.info("no items to migrate this time. ");
+        return "No items to migrate";
       }
     }
+    log.info("Failed attempt to migrate, no quque properties");
+    return "No queue props, nothing to migrate";
   }
+
 }

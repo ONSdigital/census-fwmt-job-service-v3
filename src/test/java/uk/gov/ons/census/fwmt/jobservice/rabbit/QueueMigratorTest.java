@@ -21,8 +21,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class QueueMigratorTest {
 
-  private final String originQ = "GW.Transient.ErrorQ";
-  private final String destRoutingKey = "";
+  private final static String originQ = "GW.Transient.ErrorQ";
+  private final static String destRoutingKey = "";
 
   @InjectMocks
   private QueueMigrator queueMigrator;
@@ -46,7 +46,6 @@ class QueueMigratorTest {
 
   @Test
   public void shouldThrowExceptionIfQueuePropsDontExist() {
-    Properties queueProps = new Properties();
     when(gatewayAmqpAdmin.getQueueProperties(originQ)).thenReturn(null);
     Message dummyMessage = RabbitTestUtils.createMessage("Response", null);
 

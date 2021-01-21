@@ -6,8 +6,9 @@ services:
       args:
         jar: 'build/libs/census-fwmt-job-service-v4-4.0.0-SNAPSHOT.jar'
     depends_on:
-      - 'postgres'
-      - 'rabbitmq'
+      - postgres
+      - rabbitRM
+      - rabbitGW
     ports:
       - '8025:8025'
     environment:
@@ -15,7 +16,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: 'password'
       SPRING_LIQUIBASE_URL: 'jdbc:postgresql://postgres/postgres?currentSchema=fwmtg'
       SPRING_LIQUIBASE_PASSWORD: 'password'
-      TOTALMOBILE_BASEURL: 'http://mockserver:1080/'
       RABBITMQ_HOSTNAME: 'rabbitmq'
   postgres:
     image: 'postgres:alpine'
@@ -32,11 +32,6 @@ services:
   rabbitGW:
     image: rabbitmq:3-management-alpine
     container_name: rabbitGW
-    environment:
     ports:
       - 5673:5672
       - 15673:15672
-  mockserver:
-    image: 'mockserver/mockserver'
-    ports:
-      - '1080:1080'

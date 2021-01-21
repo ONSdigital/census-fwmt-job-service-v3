@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 @Slf4j
 @Configuration
-public class RMRabbitMqConfig {
+public class JSRabbitConfig {
   public final String inputQueue;
 //  public final String inputDlq;
   private final String username;
@@ -41,7 +41,7 @@ public class RMRabbitMqConfig {
   private final int maxRetries;
   private final int prefetchCount;
 
-  public RMRabbitMqConfig(
+  public JSRabbitConfig(
       @Value("${app.rabbitmq.rm.username}") String username,
       @Value("${app.rabbitmq.rm.password}") String password,
       @Value("${app.rabbitmq.rm.host}") String hostname,
@@ -149,4 +149,13 @@ public class RMRabbitMqConfig {
     return factory;
   }
 
+  @Bean("gwContainerFactory")
+  public SimpleRabbitListenerContainerFactory gwContainerFactory(
+      @Qualifier("gatewayConnectionFactory") ConnectionFactory connectionFactory, RetryOperationsInterceptor interceptor,
+      @Qualifier("JS") MessageConverter jsonMessageConverter) {
+    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    factory.setMessageConverter(jsonMessageConverter);
+    return factory;
+  }
 }

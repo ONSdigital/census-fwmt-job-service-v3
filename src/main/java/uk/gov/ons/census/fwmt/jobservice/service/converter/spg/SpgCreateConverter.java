@@ -70,6 +70,8 @@ public final class SpgCreateConverter {
   public static CaseRequest convertSite(FwmtActionInstruction ffu, GatewayCache cache) {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Site)
+        .description(getCareCodes(cache))
+        .specialInstructions(getSpecialInstructions(cache))
         .build();
   }
 
@@ -84,6 +86,8 @@ public final class SpgCreateConverter {
   public static CaseRequest convertUnitFollowup(FwmtActionInstruction ffu, GatewayCache cache) {
     return SpgCreateConverter.convertSPG(ffu, cache, CaseRequest.builder())
         .surveyType(SurveyType.SPG_Unit_F)
+        .description(getCareCodes(cache))
+        .specialInstructions(getSpecialInstructions(cache))
         .build();
   }
 

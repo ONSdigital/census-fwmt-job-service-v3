@@ -86,6 +86,7 @@ public class FeedbackCancel implements InboundProcessor<FwmtCancelActionInstruct
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
             "Case Ref", "N/A",
             "Response Code", response.getStatusCode().name(),
-            "Source", "Internal");
+            "Source", "Internal",
+            "Feedback Cancel", rmRequest.toString());
   }
 }

@@ -104,6 +104,7 @@ public class NcCeCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
         "Original case id", originalCaseId,
         "Case Ref", rmRequest.getCaseRef(),
         "Response Code", response.getStatusCode().name(),
-        "Survey Type", tmRequest.getSurveyType().toString());
+        "Survey Type", tmRequest.getSurveyType().toString(),
+        "NC CE Create England And Wales", tmRequest.toString());
   }
 }

@@ -73,7 +73,10 @@ public class HhCreateNisra implements InboundProcessor<FwmtActionInstruction> {
         "Survey Type", tmRequest.getSurveyType().toString());
 
     ResponseEntity<Void> response = cometRestClient.sendCreate(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Create", FAILED_TO_CREATE_TM_JOB,
+        "tmRequest", tmRequest.toString(),
+        "rmRequest", rmRequest.toString(),
+        "cache", (cache!=null)?cache.toString():"");
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache == null) {
@@ -91,6 +94,7 @@ public class HhCreateNisra implements InboundProcessor<FwmtActionInstruction> {
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK,
             "Case Ref", rmRequest.getCaseRef(),
             "Response Code", response.getStatusCode().name(),
-            "Survey Type", tmRequest.getSurveyType().toString());
+            "Survey Type", tmRequest.getSurveyType().toString(),
+            "HH Create Nisra", tmRequest.toString());
   }
 }

@@ -93,6 +93,7 @@ public class CcsInterviewCECreate implements InboundProcessor<FwmtActionInstruct
     eventManager
         .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK,
             "Case Ref", rmRequest.getCaseRef(),
+            "CCS Int CE Create", tmRequest.toString(),
             "Response Code", response.getStatusCode().name(),
             "Survey Type", tmRequest.getSurveyType().toString());
   }

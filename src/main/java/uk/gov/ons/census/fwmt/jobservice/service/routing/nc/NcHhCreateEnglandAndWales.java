@@ -130,6 +130,7 @@ public class NcHhCreateEnglandAndWales implements InboundProcessor<FwmtActionIns
         "Original case id", originalCaseId,
         "Case Ref", rmRequest.getCaseRef(),
         "Response Code", response.getStatusCode().name(),
-        "Survey Type", tmRequest.getSurveyType().toString());
+        "Survey Type", tmRequest.getSurveyType().toString(),
+        "NC HH Create England And Wales", tmRequest.toString());
   }
 }

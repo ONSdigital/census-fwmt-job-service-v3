@@ -95,8 +95,11 @@ public class CeCreateSiteProcessor implements InboundProcessor<FwmtActionInstruc
     }
 
     eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref", rmRequest.getCaseRef(), "Response Code",
-            response.getStatusCode().name(), "Survey Type", tmRequest.getSurveyType().toString());
+        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK,
+            "Case Ref", rmRequest.getCaseRef(),
+            "CE Create Site", tmRequest.toString(),
+            "Response Code", response.getStatusCode().name(),
+            "Survey Type", tmRequest.getSurveyType().toString());
 
   }
 }

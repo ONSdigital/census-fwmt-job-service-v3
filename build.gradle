@@ -92,7 +92,7 @@ dependencies {
     // Custom Libraries
     compile 'uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.17-RELEASE'
     compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.52-RELEASE'
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.27-RELEASE'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.29-RELEASE'
 
     // Decryption
     compile 'org.bouncycastle:bcprov-jdk15on:1.61'

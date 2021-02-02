@@ -28,6 +28,7 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTI
 
 @Slf4j
 @Service
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("NP_NULL_PARAM_DEREF")
 public class JobService {
 
   @Autowired

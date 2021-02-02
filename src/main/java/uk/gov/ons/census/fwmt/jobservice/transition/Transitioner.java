@@ -24,6 +24,8 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.NO_AC
 @Component
 public class Transitioner {
   private static final String REJECTED_RM_REQUEST = "REJECTED_RM_REQUEST";
+  private static final String PRE_TRANSITION = "PRE_TRANSITION";
+  private static final String POST_TRANSITION = "POST_TRANSITION";
 
   @Autowired
   private GatewayEventManager eventManager;
@@ -66,6 +68,11 @@ public class Transitioner {
       isCancel = true;
     }
 
+    eventManager.triggerEvent(caseId, PRE_TRANSITION,
+        "Case Reference", caseRef,
+        "Action Instruction", actionInstruction,
+        "Cached Action Instruction", cache.getLastActionInstruction());
+
     if (messageQueueTime == null) {
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Message did not include a timestamp", caseId);
     }
@@ -74,6 +81,10 @@ public class Transitioner {
         .collectTransitionRules(cache, actionInstruction, caseId, messageQueueTime);
 
     MessageCache messageCache = messageCacheService.getById(caseId);
+
+    eventManager.triggerEvent(caseId, POST_TRANSITION,
+        "Action type", returnedRules.getAction().toString(),
+        "Request action", returnedRules.getRequestAction().toString());
 
     switch (returnedRules.getAction()) {
       case NO_ACTION:

@@ -37,8 +37,8 @@ Cancel|Update|NEWER,PROCESS,Update,clear
 Cancel|Update|OLDER,PROCESS,Update,clear
 Cancel|Cancel|NEWER,REJECT
 Cancel|Cancel|OLDER,NO_ACTION
-Cancel(Held)|Create|NEWER,PROCESS,Cancel,clear
-Cancel(Held)|Create|OLDER,MERGE,Cancel,clear
+Cancel(Held)|Create|NEWER,NO_ACTION,Cancel,clear
+Cancel(Held)|Create|OLDER,NO_ACTION,Cancel,clear
 Cancel(Held)|Update|NEWER,NO_ACTION,Update(Held),save
 Cancel(Held)|Update|OLDER,NO_ACTION
 Cancel(Held)|Cancel|NEWER,REJECT

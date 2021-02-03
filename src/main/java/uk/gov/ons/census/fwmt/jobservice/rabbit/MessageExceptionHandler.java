@@ -74,5 +74,7 @@ public class MessageExceptionHandler {
         .build();
 
     quarantinedMessageRepository.save(quarantinedMessage);
+    log.info("Stored perm issue in DB for later processing {}", maxRetryCount);
+
   }
 }

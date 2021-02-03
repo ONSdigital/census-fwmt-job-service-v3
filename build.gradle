@@ -92,7 +92,7 @@ dependencies {
     // Custom Libraries
     compile 'uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.17-RELEASE'
     compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.52-RELEASE'
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.27-RELEASE'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.29-SNAPSHOT'
 
     // Decryption
     compile 'org.bouncycastle:bcprov-jdk15on:1.61'
@@ -167,9 +167,6 @@ dependencies {
     testCompile 'org.mockito:mockito-junit-jupiter'
     testImplementation 'org.mockito:mockito-inline:2.13.0'
 
-    // integrationTestCompile 'org.assertj:assertj-core'
-
-    integrationTestRuntime 'uk.gov.ons.fwmt:fwmt-service-mocks:1.0.1-SNAPSHOT'
 }
 
 test {

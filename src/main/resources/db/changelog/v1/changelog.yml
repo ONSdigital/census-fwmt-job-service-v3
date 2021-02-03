@@ -125,3 +125,12 @@ databaseChangeLog:
             path: add_column_original_case_id.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v15
+      author: Conor O Callaghan
+      comment: Created QuarantinedMessage Table
+      changes:
+        - sqlFile:
+            path: quarantined_table.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

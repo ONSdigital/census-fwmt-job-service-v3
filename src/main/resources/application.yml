@@ -26,7 +26,6 @@ spring:
     user: postgres
     password: postgres
   #     enabled: false
-
 management:
   # Place /info and /health in the root
   endpoints.web.base-path: ''
@@ -117,7 +116,7 @@ app:
       port: 5673
       virtualHost: "/"
       initialInterval: 5000
-      multiplier: 3.0
+      multiplier: 3.0If yo
       maxInterval: 45000
       maxRetries: 1
       prefetchCount: 500
@@ -129,11 +128,11 @@ app:
         perm: "gw.permanent.error"
         trans: "gw.transient.error"
       queues:
-          errorPer: "GW.Permanent.ErrorQ"
-          errorTrans: "GW.Transient.ErrorQ"
-          input: "GW.Field"
-#      queues:
-#        error: "GW.ErrorQ"
+        errorPer: "GW.Permanent.ErrorQ"
+        errorTrans: "GW.Transient.ErrorQ"
+        input: "GW.Field"
+    #      queues:
+    #        error: "GW.ErrorQ"
     rm:
       username: "guest"
       password: "guest"

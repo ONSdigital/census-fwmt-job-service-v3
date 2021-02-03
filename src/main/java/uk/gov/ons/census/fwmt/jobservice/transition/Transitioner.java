@@ -42,8 +42,8 @@ public class Transitioner {
   @Autowired
   private MergeMessages mergeMessages;
 
-  public void processTransition(GatewayCache cache, Object rmRequestReceived,
-        InboundProcessor<?> processor, Instant messageQueueTime) throws GatewayException {
+  public void processTransition(GatewayCache cache, Object rmRequestReceived, InboundProcessor<?> processor, Instant messageQueueTime)
+      throws GatewayException {
     boolean isCancel = false;
     String actionInstruction;
     String caseId;
@@ -71,7 +71,7 @@ public class Transitioner {
     eventManager.triggerEvent(caseId, PRE_TRANSITION,
         "Case Reference", caseRef,
         "Action Instruction", actionInstruction,
-        "Cached Action Instruction", cache.getLastActionInstruction());
+        "Cached Action Instruction", cache != null && cache.getLastActionInstruction().isEmpty() ? cache.getLastActionInstruction() : "No entry");
 
     if (messageQueueTime == null) {
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Message did not include a timestamp", caseId);
@@ -129,5 +129,13 @@ public class Transitioner {
     default:
       break;
     }
+  }
+
+  public void processTransition(GatewayCache cache, Object rmRequestReceived, Instant messageQueueTime) throws GatewayException {
+    processTransition(cache, rmRequestReceived, null, messageQueueTime);
+  }
+
+  public void processTransition(Object rmRequestReceived, Instant messageQueueTime) throws GatewayException {
+    processTransition(null, rmRequestReceived, null, messageQueueTime);
   }
 }

@@ -17,8 +17,6 @@ import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,9 +26,9 @@ import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.ROUTI
 
 @Slf4j
 @Service
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("NP_NULL_PARAM_DEREF")
 public class JobService {
 
+  public static final String CANCEL_HELD = "CANCEL(HELD)";
   @Autowired
   private GatewayCacheService cacheService;
 
@@ -55,9 +53,9 @@ public class JobService {
   @Qualifier("CancelProcessorMap")
   private Map<ProcessorKey, List<InboundProcessor<FwmtCancelActionInstruction>>> cancelProcessorMap;
 
-  @Autowired  
-  @Qualifier("PauseProcessorMap") 
-  private Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> pauseProcessorMap; 
+  @Autowired
+  @Qualifier("PauseProcessorMap")
+  private Map<ProcessorKey, List<InboundProcessor<FwmtActionInstruction>>> pauseProcessorMap;
 
   @Transactional
   public void processCreate(FwmtActionInstruction rmRequest, Instant messageReceivedTime) throws GatewayException {
@@ -66,25 +64,21 @@ public class JobService {
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = createProcessorMap.get(key);
 
-    if (processors == null)
-      processors = Collections.emptyList();
-    else
-      processors = createProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
+    if (processors != null) processors = createProcessorMap.get(key).stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
 
-    if (processors.size() == 0) {
-      // TODO throw routing error & exit;
+    if (processors != null && processors.isEmpty()) {
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a CREATE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtActionInstruction", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Could not find a CREATE processor for request from RM", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
     }
-    if (processors.size() > 1) {
-      // TODO throw routing error & exit;
+    if (processors != null && processors.size() > 1) {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple CREATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple CREATE processors for request from RM", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
     }
-    transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
-
+    if (processors != null) {
+      transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
+    }
   }
 
   @Transactional
@@ -92,11 +86,10 @@ public class JobService {
     final GatewayCache cache = cacheService.getById(rmRequest.getCaseId());
     boolean isHeld = false;
 
-    if (cache != null) {
-      if ("UPDATE(HELD)".equals(cache.getLastActionInstruction()) || "CANCEL(HELD)".equals(cache.getLastActionInstruction())) {
+    if (cache != null && ("UPDATE(HELD)".equals(cache.getLastActionInstruction()) || CANCEL_HELD.equals(cache.getLastActionInstruction()))) {
         isHeld = true;
-      }
     }
+
     if (cache == null && rmRequest.isUndeliveredAsAddress() && (rmRequest.getAddressType().equals("HH") || rmRequest.getAddressType().equals("SPG"))) {
       rmRequest.setActionInstruction(ActionInstructionType.CREATE);
 
@@ -109,31 +102,25 @@ public class JobService {
 
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtActionInstruction>> processors = updateProcessorMap.get(key);
-    if (processors == null)
-      processors = new ArrayList<>();
-    else
-      processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
+    if (processors != null) processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
 
-    if (processors.size() == 0 && cache != null && !isHeld) {
-      // TODO throw routing error & exit;
+    if (processors == null && cache != null && !isHeld) {
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM",
           String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "rmRequest", rmRequest.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,
           "Could not find a UPDATE processor for request from RM", rmRequest, cache);
     }
-    if (processors.size() > 1) {
-      // TODO throw routing error & exit;
+    if (processors != null && processors.size() > 1) {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple UPDATE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple UPDATE processors for request from RM", rmRequest, cache, "rmRequest",
           rmRequest.toString());
     }
-    if (processors.size() == 1) {
+    if (processors != null && processors.size() == 1) {
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
-    if (processors.size() == 0 && (cache == null || isHeld)) {
-      processors.add(null);
-      transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
+    if (processors == null) {
+      transitioner.processTransition(cache, rmRequest, messageReceivedTime);
     }
   }
 
@@ -150,31 +137,26 @@ public class JobService {
     ProcessorKey key = ProcessorKey.buildKey(rmRequest);
     List<InboundProcessor<FwmtCancelActionInstruction>> processors = cancelProcessorMap.get(key);
 
-    if (processors == null)
-      processors = new ArrayList<>();
-    else {
+    if (processors != null) {
       final GatewayCache finalCache = cache;
       processors = processors.stream().filter(p -> p.isValid(rmRequest, finalCache)).collect(Collectors.toList());
     }
 
-    if (processors.size() == 0 && cache != null && !cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
-      // TODO throw routing error & exit;
+    if (processors != null && processors.isEmpty() && cache != null && !cache.getLastActionInstruction().equals(CANCEL_HELD)) {
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a CANCEL processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtCancelActionInstruction", rmRequest.toString(), cache.toString());
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Could not find a CANCEL processor for request from RM", rmRequest, cache);
     }
-    if (processors.size() > 1) {
-      // TODO throw routing error & exit;
+    if (processors != null && processors.size() > 1) {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple CANCEL processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtCancelActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple CANCEL processors for request from RM", rmRequest, cache);
     }
-    if (processors.size() == 1) {
+    if (processors != null && processors.size() == 1) {
       transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
     }
-    if (processors.size() == 0 && (cache == null || cache.getLastActionInstruction().equals("CANCEL(HELD)"))) {
-      processors.add(null);
-      transitioner.processTransition(cache, rmRequest, processors.get(0), messageReceivedTime);
+    if (processors == null && (cache == null || cache.getLastActionInstruction().equals(CANCEL_HELD))) {
+      transitioner.processTransition(rmRequest, messageReceivedTime);
     }
   }
 
@@ -186,24 +168,21 @@ public class JobService {
 
     List<InboundProcessor<FwmtActionInstruction>> processors = pauseProcessorMap.get(key);
 
-    if (processors == null)
-      processors = new ArrayList<>();
-    else
-      processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());    
+    if (processors != null) processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
     
-    if (processors.size() == 0) {
-      // TODO throw routing error & exit;
+    if (processors != null && processors.isEmpty()) {
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a PAUSE processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Could not find a PAUSE processor for request from RM", rmRequest, cache);
     }
-    if (processors.size() > 1) {
-      // TODO throw routing error & exit;
+    if (processors != null && processors.size() > 1) {
       eventManager.triggerErrorEvent(this.getClass(), "Found multiple PAUSE processors for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtActionInstruction", rmRequest.toString(), (cache!=null)?cache.toString():"no cache");
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Found multiple PAUSE processors for request from RM", rmRequest, cache);
     }
-    processors.get(0).process(rmRequest, cache, messageReceivedTime);
+    if (processors != null) {
+      processors.get(0).process(rmRequest, cache, messageReceivedTime);
+    }
   }
   
   /*

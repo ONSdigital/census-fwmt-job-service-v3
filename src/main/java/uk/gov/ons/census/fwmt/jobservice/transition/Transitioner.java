@@ -71,7 +71,7 @@ public class Transitioner {
     eventManager.triggerEvent(caseId, PRE_TRANSITION,
         "Case Reference", caseRef,
         "Action Instruction", actionInstruction,
-        "Cached Action Instruction", cache.getLastActionInstruction());
+        "Cached Action Instruction", (cache != null && cache.getLastActionInstruction() !=null ? cache.getLastActionInstruction() : "no cache"));
 
     if (messageQueueTime == null) {
       throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED, "Message did not include a timestamp", caseId);

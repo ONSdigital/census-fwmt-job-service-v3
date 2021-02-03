@@ -116,7 +116,8 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
           .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_DELETE_ACK,
               "Case Ref", rmRequest.getCaseRef(),
               "Response Code", response.getStatusCode().name(),
-              "Survey Type", tmRequest.getSurveyType().toString());
+              "Survey Type", tmRequest.getSurveyType().toString(),
+              "HH Update Nisra", tmRequest.toString());
     }
   }
 }

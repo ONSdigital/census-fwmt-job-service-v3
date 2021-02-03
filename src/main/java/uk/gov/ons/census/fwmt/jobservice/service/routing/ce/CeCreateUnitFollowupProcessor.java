@@ -114,9 +114,11 @@ public class CeCreateUnitFollowupProcessor implements InboundProcessor<FwmtActio
           .lastActionTime(messageReceivedTime).build());
     }
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK, "Case Ref",
-        rmRequest.getCaseRef(), "Response Code", response.getStatusCode().name(), "Survey Type",
-        tmRequest.getSurveyType().toString());
+    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CREATE_ACK,
+        "Case Ref", rmRequest.getCaseRef(),
+        "CE Create Unit Follow Up", tmRequest.toString(),
+        "Response Code", response.getStatusCode().name(),
+        "Survey Type", tmRequest.getSurveyType().toString());
   }
 
 }

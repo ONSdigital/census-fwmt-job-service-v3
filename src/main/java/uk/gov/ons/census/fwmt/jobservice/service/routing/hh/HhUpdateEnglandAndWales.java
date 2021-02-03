@@ -114,7 +114,8 @@ public class HhUpdateEnglandAndWales implements InboundProcessor<FwmtActionInstr
           .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_DELETE_ACK,
               "Case Ref", rmRequest.getCaseRef(),
               "Response Code", response.getStatusCode().name(),
-              "Survey Type", tmRequest.getSurveyType().toString());
+              "Survey Type", tmRequest.getSurveyType().toString(),
+              "HH Update England And Wales", rmRequest.toString());
     }
   }
 }

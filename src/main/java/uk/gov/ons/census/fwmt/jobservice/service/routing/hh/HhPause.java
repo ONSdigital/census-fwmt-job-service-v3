@@ -84,13 +84,14 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
     if (newCache != null) {
-      cacheService.save(newCache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+      cacheService.save(newCache.toBuilder().lastActionInstruction(ActionInstructionType.CANCEL.toString())
           .lastActionTime(messageReceivedTime)
           .build());
     }
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_ACK,
         "Case Ref", rmRequest.getCaseRef(),
-        "Response Code", response.getStatusCode().name());
+        "Response Code", response.getStatusCode().name(),
+        "HH Pause", tmRequest.toString());
   }
 }

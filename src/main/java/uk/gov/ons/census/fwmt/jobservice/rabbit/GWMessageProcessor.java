@@ -92,12 +92,12 @@ public class GWMessageProcessor {
   }
 
   private void handlePermException(FwmtCommonInstruction instruction, Message message, Exception e) {
-    log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage(),e);
+    log.error("- Error sending message - HARD Failure- {}  error - {} ", instruction, e.getMessage(), e);
     messageExceptionHandler.handlePermMessage(message, instruction);
   }
 
   private void handleTransientException(FwmtCommonInstruction instruction, Message message, RestClientException e) {
-    log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage(),e);
+    log.error(" Error sending message - SOFT Failure {}  error - {} ", instruction, e.getMessage(), e);
     messageExceptionHandler.handleTransientMessage(message, instruction);
   }
 

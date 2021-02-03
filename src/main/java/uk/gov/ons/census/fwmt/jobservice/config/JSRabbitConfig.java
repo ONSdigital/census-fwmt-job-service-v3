@@ -67,9 +67,11 @@ public class JSRabbitConfig {
     this.prefetchCount = prefetchCount;
   }
 
+
   @Bean("rmRabbitTemplate")
   public RabbitTemplate rabbitTemplate(@Qualifier("rmConnectionFactory") ConnectionFactory rmConnectionFactory, @Qualifier("JS") MessageConverter messageConverter) {
     RabbitTemplate template = new RabbitTemplate(rmConnectionFactory);
+
     template.setMessageConverter(messageConverter);
     return template;
   }

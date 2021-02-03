@@ -3,15 +3,12 @@ package uk.gov.ons.census.fwmt.jobservice.rabbit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
-import uk.gov.ons.census.fwmt.common.rm.dto.FwmtSuperInstruction;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCommonInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
 
@@ -31,10 +28,6 @@ public class GWMessageProcessor {
   private final JobService jobService;
   private final GatewayEventManager gatewayEventManager;
   private final MessageExceptionHandler messageExceptionHandler;
-
-  @Autowired
-  @Qualifier("GW_EVENT_RT")
-  private RabbitTemplate gatewayRabbitTemplate;
 
   public void processCreateInstruction(FwmtActionInstruction instruction, Instant messageTime, Message message) {
     try {
@@ -98,14 +91,14 @@ public class GWMessageProcessor {
     }
   }
 
-  private void handlePermException(FwmtSuperInstruction instruction, Message message, Exception e) {
+  private void handlePermException(FwmtCommonInstruction instruction, Message message, Exception e) {
     log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage());
-    gatewayRabbitTemplate.convertAndSend("GW.Error.Exchange", "gw.permanent.error", message);
+    messageExceptionHandler.handlePermMessage(message, instruction);
   }
 
-  private void handleTransientException(FwmtSuperInstruction instruction, Message message, RestClientException e) {
+  private void handleTransientException(FwmtCommonInstruction instruction, Message message, RestClientException e) {
     log.error("- Create Message - Error sending message - {}  error - {} ", instruction, e.getMessage());
-    messageExceptionHandler.handleMessage(message);
+    messageExceptionHandler.handleTransientMessage(message, instruction);
   }
 
 }

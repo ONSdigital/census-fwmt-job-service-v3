@@ -13,6 +13,7 @@ import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
+import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCommonInstruction;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
 import uk.gov.ons.census.fwmt.jobservice.service.JobService;
@@ -100,7 +101,7 @@ class GWMessageProcessorTest {
     doThrow(RestClientException.class).when(jobService).processCreate(any(), any());
 
     gwMessageProcessor.processCreateInstruction(instruction, now, message);
-    verify(messageExceptionHandler).handleMessage(eq(message));
+    verify(messageExceptionHandler).handleTransientMessage(eq(message),any(FwmtCommonInstruction.class));
   }
 
   @DisplayName("Should process Process Cancel Message ")

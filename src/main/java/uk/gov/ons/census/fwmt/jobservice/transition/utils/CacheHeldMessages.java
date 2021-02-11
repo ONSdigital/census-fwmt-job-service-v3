@@ -31,7 +31,6 @@ public class CacheHeldMessages {
   private MessageCacheService messageCacheService;
 
   public void cacheMessage(MessageCache messageCache, GatewayCache cache, Object rmRequest, Instant messageQueueTime) {
-    boolean existsInFwmt = false;
     int type = 0;
     String actionInstruction;
     String addressLevel;
@@ -45,32 +44,24 @@ public class CacheHeldMessages {
       caseId = requestReceived.getCaseId();
       actionInstruction = "UPDATE(HELD)";
       addressLevel = requestReceived.getAddressLevel();
-      addressType = requestReceived.getAddressType();
     } else {
       FwmtCancelActionInstruction requestReceived = (FwmtCancelActionInstruction) rmRequest;
       caseId = requestReceived.getCaseId();
       actionInstruction = "CANCEL(HELD)";
       addressLevel = requestReceived.getAddressLevel();
-      addressType = requestReceived.getAddressType();
     }
 
     if ("E".equals(addressLevel)) {
       type = 1;
-      existsInFwmt = false;
     } else if ("U".equals(addressLevel)) {
       type = 3;
-      if ("SPG".equals(addressType)) {
-        existsInFwmt = false;
-      } else {
-        existsInFwmt = true;
-      }
     }
 
     if (cache == null) {
-      cacheService.save(GatewayCache.builder().caseId(caseId).existsInFwmt(existsInFwmt)
+      cacheService.save(GatewayCache.builder().caseId(caseId).existsInFwmt(false)
           .lastActionTime(messageQueueTime).lastActionInstruction(actionInstruction).type(type).build());
     } else {
-      cacheService.save(cache.toBuilder().existsInFwmt(existsInFwmt).lastActionTime(messageQueueTime)
+      cacheService.save(cache.toBuilder().lastActionTime(messageQueueTime)
           .lastActionInstruction(actionInstruction).build());
     }
 

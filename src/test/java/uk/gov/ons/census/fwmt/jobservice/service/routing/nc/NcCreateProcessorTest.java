@@ -61,12 +61,12 @@ public class NcCreateProcessorTest {
   @DisplayName("Should save the original case id")
   public void shouldHandleIncorrectSurveyTypeCE() throws GatewayException {
     final FwmtActionInstruction instruction = new NcActionInstructionBuilder().createNcActionInstruction();
-    final GatewayCache originalCache = new GatewayCache();
+    final GatewayCache originalCache = GatewayCache.builder()
+        .caseId("ac623e62-4f4b-11eb-ae93-0242ac130002").careCodes("Mind dog").accessInfo("1234").build();
 
     ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
     when(cacheService.getById(anyString())).thenReturn(originalCache);
     when(cometRestClient.sendCreate(any(CaseRequest.class), eq(instruction.getCaseId()))).thenReturn(responseEntity);
-
     ncHhCreateEnglandAndWales.process(instruction, null, Instant.now());
 
     verify(cacheService).save(spiedCache.capture());

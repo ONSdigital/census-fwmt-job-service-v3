@@ -31,7 +31,7 @@ public class QueueMigrator {
       final Object cntValue = props.get(QUEUE_MESSAGE_COUNT);
       if (cntValue != null) {
         log.info("Migrating {} items from queue {} and redirecting to route {}", cntValue, originQ, destRoutingKey);
-        long itemsToProcess = Long.parseLong(cntValue.toString());
+        int itemsToProcess = Integer.parseInt(cntValue.toString());
         while (itemsToProcess > 0) {
           final Message message = template.receive(originQ);
           if (message != null) {

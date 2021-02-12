@@ -48,7 +48,7 @@ public class MessageExceptionHandler {
     if (retryCount == null) {
       retryCount = 0;
     }
-    if (retryCount < 5) {
+    if (retryCount < maxRetryCount) {
       message.getMessageProperties().setHeader("retryCount", ++retryCount);
       log.warn("Retry number {}", retryCount);
       gatewayRabbitTemplate.convertAndSend(errorExchange, transientRoutingKey, message);

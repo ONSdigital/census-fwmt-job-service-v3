@@ -157,7 +157,7 @@ public class JobService {
       processors = processors.stream().filter(p -> p.isValid(rmRequest, finalCache)).collect(Collectors.toList());
     }
 
-    if (processors.size() == 0 && cache != null && !cache.getLastActionInstruction().equals("CANCEL(HELD)")) {
+    if (processors.size() == 0 && cache != null && !"CANCEL(HELD)".equals(cache.getLastActionInstruction())) {
       // TODO throw routing error & exit;
       eventManager.triggerErrorEvent(this.getClass(), "Could not find a CANCEL processor for request from RM", String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED,
           "FwmtCancelActionInstruction", rmRequest.toString(), cache.toString());

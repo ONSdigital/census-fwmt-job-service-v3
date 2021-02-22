@@ -74,10 +74,9 @@ public class HhUpdateNisra implements InboundProcessor<FwmtActionInstruction> {
         "type", "NISRA",
         "action", "Update");
     
-    CaseRequest tmRequest = HhCreateConverter.convertHhEnglandAndWales(rmRequest, cache);
+    CaseRequest tmRequest = HhCreateConverter.convertHhNisra(rmRequest, cache);
 
     GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-
 
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_UPDATE_PRE_SENDING,
         "Case Ref", tmRequest.getReference(),

@@ -107,7 +107,7 @@ resthttp:
       maxTotal: 100
 
 app:
-  testing: false
+  testing: true
   rabbitmq:
     gw:
       username: "guest"

@@ -70,14 +70,4 @@ public final class CeRequestBuilder {
 
                 .build();
     }
-
-    public static FwmtActionInstruction ceUpdateInstruction(){
-        FwmtActionInstruction fwmtActionInstruction = makeBase();
-        fwmtActionInstruction.setActionInstruction(ActionInstructionType.UPDATE);
-        fwmtActionInstruction.setCaseId("ac623e62-4f4b-11eb-ae93-0242ac130002");
-        fwmtActionInstruction.setAddressLevel("E");
-        fwmtActionInstruction.setHandDeliver(true);
-
-        return fwmtActionInstruction;
-    }
 }

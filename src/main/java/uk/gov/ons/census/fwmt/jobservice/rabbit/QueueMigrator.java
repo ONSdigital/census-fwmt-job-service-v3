@@ -26,7 +26,6 @@ public class QueueMigrator {
   private AmqpAdmin gatewayAmqpAdmin;
 
   public String migrate(String originQ, String destRoutingKey) throws GatewayException {
-    log.info("migrate {} to {} called.", originQ, destRoutingKey);
     final Properties props = gatewayAmqpAdmin.getQueueProperties(originQ);
     if (props != null) {
       final Object cntValue = props.get(QUEUE_MESSAGE_COUNT);

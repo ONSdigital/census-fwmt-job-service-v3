@@ -13,6 +13,7 @@ import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.rabbit.RmFieldPublisher;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.InboundProcessor;
 import uk.gov.ons.census.fwmt.jobservice.service.processor.ProcessorKey;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.ignore.CeUpdateIgnoreProcessor;
 import uk.gov.ons.census.fwmt.jobservice.transition.Transitioner;
 
 import javax.transaction.Transactional;
@@ -41,6 +42,9 @@ public class JobService {
 
   @Autowired
   private RmFieldPublisher rmFieldPublisher;
+
+  @Autowired
+  private CeUpdateIgnoreProcessor ceUpdateIgnoreProcessor;
 
   @Autowired
   @Qualifier("CreateProcessorMap")
@@ -116,11 +120,15 @@ public class JobService {
       processors = processors.stream().filter(p -> p.isValid(rmRequest, cache)).collect(Collectors.toList());
 
     if (processors.size() == 0 && cache != null && !isHeld) {
-      // TODO throw routing error & exit;
-      eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM",
-          String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "rmRequest", rmRequest.toString());
-      throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,
-          "Could not find a UPDATE processor for request from RM", rmRequest, cache);
+      if("UPDATE".equals(rmRequest.getActionInstruction().toString())&& "CE".equals(rmRequest.getAddressType())) {
+        ceUpdateIgnoreProcessor.process(rmRequest);
+      }else {
+        // TODO throw routing error & exit;
+        eventManager.triggerErrorEvent(this.getClass(), "Could not find a UPDATE processor for request from RM",
+            String.valueOf(rmRequest.getCaseId()), ROUTING_FAILED, "rmRequest", rmRequest.toString());
+        throw new GatewayException(GatewayException.Fault.VALIDATION_FAILED,
+            "Could not find a UPDATE processor for request from RM", rmRequest, cache);
+      }
     }
     if (processors.size() > 1) {
       // TODO throw routing error & exit;

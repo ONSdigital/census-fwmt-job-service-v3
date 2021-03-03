@@ -35,6 +35,7 @@ public class GatewayEventsConfig {
   public static final String MESSAGE_HELD = "MESSAGE_HELD";
   public static final String COMET_DELETE_PRE_SENDING = "COMET_DELETE_PRE_SENDING";
   public static final String COMET_DELETE_ACK = "COMET_DELETE_ACK";
+  public static final String IGNORED_UPDATE = "IGNORED_UPDATE";
 
   public static final String FAILED_TO_CREATE_TM_JOB = "FAILED_TO_CREATE_TM_JOB";
   public static final String FAILED_TO_CANCEL_TM_JOB = "FAILED_TO_CANCEL_TM_JOB";

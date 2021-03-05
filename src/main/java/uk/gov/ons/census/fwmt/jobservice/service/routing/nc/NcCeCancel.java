@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtCancelActionInstruction;
@@ -17,6 +18,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CANCEL_ON_A_CANCEL;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CANCEL_TM_JOB;
 
 @Qualifier("Cancel")
@@ -71,27 +73,42 @@ public class NcCeCancel implements InboundProcessor<FwmtCancelActionInstruction>
   @Override
   public void process(FwmtCancelActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime)
       throws GatewayException {
+    boolean alreadyCancelled = false;
+    ResponseEntity<Void> response = null;
     String ncCaseId = cache.caseId;
     eventManager.triggerEvent(String.valueOf(ncCaseId), COMET_CANCEL_PRE_SENDING,
         "Case Ref", "N/A",
         "Type", "NC Cancel",
         "TM Action", "CLOSE",
         "Source", "RM");
+    try {
+      response = cometRestClient.sendClose(ncCaseId);
+      routingValidator.validateResponseCode(response, rmRequest.getCaseId(),
+          "Cancel", FAILED_TO_CANCEL_TM_JOB,
+          "rmRequest", rmRequest.toString(),
+          "cache", cache.toString());
+    } catch (RestClientException e) {
+      String tmResponse = e.getMessage();
+      if (tmResponse != null && tmResponse.contains("400") && tmResponse.contains("Case State must be Open")){
+        eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), CANCEL_ON_A_CANCEL,
+            "A cancel case has been received for a case that already has been cancelled",
+            "Message received: " + rmRequest.toString());
+        alreadyCancelled = true;
+      } else {
+        throw e;
+      }
+    }
 
-    ResponseEntity<Void> response = cometRestClient.sendClose(ncCaseId);
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(),
-        "Cancel", FAILED_TO_CANCEL_TM_JOB,
-        "rmRequest", rmRequest.toString(),
-        "cache", cache.toString());
+    cacheService.save(cache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
+        .lastActionTime(messageReceivedTime)
+        .build());
 
-      cacheService.save(cache.toBuilder().lastActionInstruction(rmRequest.getActionInstruction().toString())
-          .lastActionTime(messageReceivedTime)
-          .build());
-
-    eventManager
-        .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
-            "Case Ref", "N/A",
-            "Type", "NC Cancel",
-            "Response Code", response.getStatusCode().name());
+    if (response != null && !alreadyCancelled) {
+      eventManager
+          .triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CANCEL_ACK,
+              "Case Ref", "N/A",
+              "Type", "NC Cancel",
+              "Response Code", response.getStatusCode().name());
+    }
   }
 }

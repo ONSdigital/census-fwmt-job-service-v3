@@ -47,6 +47,7 @@ public class GatewayEventsConfig {
   public static final String UNABLE_TO_READ_EVENT_PAYLOAD = "UNABLE_TO_READ_EVENT_PAYLOAD";
   public static final String UNABLE_TO_DECRYPT_NAME = "UNABLE_TO_DECRYPT_NAME";
   public static final String ROUTING_FAILED = "ROUTING_FAILED";
+  public static final String CANCEL_ON_A_CANCEL = "CANCEL_ON_A_CANCEL";
 
   public static final String CONVERT_SPG_UNIT_UPDATE_TO_CREATE = "CONVERT_SPG_UNIT_UPDATE_TO_CREATE";
   public static final String FAILED_TO_ROUTE_REQUEST = "FAILED_TO_ROUTE_REQUEST";

@@ -68,8 +68,9 @@ rmapi:
   baseUrl: "http://localhost:8000/"
 
 decryption:
-  pgp: "file://${home}/Documents/Dev/census-fwmt-job-service-v4/src/main/resources/testPrivateKey.private"
+  pgp: "classpath:/testPrivateKey.private"
   password: testJobService
+ 
 
 
 fwmt:
@@ -107,13 +108,13 @@ resthttp:
       maxTotal: 100
 
 app:
-  testing: false
+  testing: true
   rabbitmq:
     gw:
       username: "guest"
       password: "guest"
       host: "localhost"
-      port: 5673
+      port: 5672
       virtualHost: "/"
       initialInterval: 5000
       multiplier: 3.0If yo

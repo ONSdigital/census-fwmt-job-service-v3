@@ -1,11 +1,25 @@
 package uk.gov.ons.census.fwmt.jobservice.nc.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.DECRYPTED_HH_NAMES;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_READ_EVENT_PAYLOAD;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.census.ffa.storage.utils.StorageUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsDTO;
 import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsEventDTO;
 import uk.gov.ons.census.fwmt.common.data.nc.CaseDetailsEventHardRefusal;
@@ -13,33 +27,22 @@ import uk.gov.ons.census.fwmt.common.data.nc.RefusalContact;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 
-import java.net.URI;
-import java.time.OffsetDateTime;
-import java.util.List;
-
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.DECRYPTED_HH_NAMES;
-import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.UNABLE_TO_READ_EVENT_PAYLOAD;
-
 @Service
 public class NamedHouseholderRetrieval {
 
   @Autowired
   private GatewayEventManager eventManager;
 
-  @Autowired
-  private StorageUtils storageUtils;
-
-  @Value("${decryption.pgp}")
-  private String privateKey;
-
   @Value("${decryption.password}")
   private String privateKeyPassword;
-
+  
   @Autowired
   private ObjectMapper objectMapper;
+  
+  @Autowired
+  private byte[] privateKeyByteArray;
 
   public String getAndSortRmRefusalCases(String caseId, CaseDetailsDTO houseHolder) throws GatewayException {
-    URI privateKeyUri = URI.create(privateKey);
     StringBuilder contact = new StringBuilder();
     OffsetDateTime previousDate = null;
 
@@ -78,19 +81,19 @@ public class NamedHouseholderRetrieval {
 
     if (refusalContact.getTitle() != null && !refusalContact.getTitle().equals("")) {
       decryptedTitle = DecryptNames.decryptFile(
-          storageUtils.getFileInputStream(privateKeyUri), refusalContact.getTitle(),
+          new ByteArrayInputStream(privateKeyByteArray), refusalContact.getTitle(),
           privateKeyPassword.toCharArray());
       contact.append(" ").append(decryptedTitle);
     }
     if (refusalContact.getForename() != null && !refusalContact.getForename().equals("")) {
       decryptedFirstname = DecryptNames.decryptFile(
-          storageUtils.getFileInputStream(privateKeyUri),  refusalContact.getForename(),
+          new ByteArrayInputStream(privateKeyByteArray),  refusalContact.getForename(),
           privateKeyPassword.toCharArray());
       contact.append(" ").append(decryptedFirstname);
     }
     if (refusalContact.getSurname() != null && !refusalContact.getSurname().equals("")) {
       decryptedSurname = DecryptNames.decryptFile(
-          storageUtils.getFileInputStream(privateKeyUri), refusalContact.getSurname(),
+          new ByteArrayInputStream(privateKeyByteArray), refusalContact.getSurname(),
           privateKeyPassword.toCharArray());
       contact.append(" ").append(decryptedSurname);
     }

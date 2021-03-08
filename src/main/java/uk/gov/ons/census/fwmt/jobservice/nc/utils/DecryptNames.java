@@ -26,42 +26,46 @@ import java.util.Base64;
 import java.util.Iterator;
 
 public class DecryptNames {
+  
+  private static Object lockKey = new Object();
 
   public static String decryptFile(InputStream secretKeyFile, String householder, char[] passwd) throws GatewayException {
-    PGPPrivateKey secretKey = null;
-    PGPPublicKeyEncryptedData encryptedData = null;
-    Iterator<PGPPublicKeyEncryptedData> encryptedObjects;
-    long encryptedFileKeyId = 0;
-    try {
-      encryptedObjects = getEncryptedObjects(Base64.getDecoder().decode(householder));
-    } catch (IOException e) {
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Failed to obtain decryption data");
-    }
-    while (encryptedObjects.hasNext() && secretKey == null) {
-      encryptedData = encryptedObjects.next();
-      encryptedFileKeyId = encryptedData.getKeyID();
-
+    synchronized (lockKey) {
+      PGPPrivateKey secretKey = null;
+      PGPPublicKeyEncryptedData encryptedData = null;
+      Iterator<PGPPublicKeyEncryptedData> encryptedObjects;
+      long encryptedFileKeyId = 0;
       try {
-        secretKey = getSecretKey(secretKeyFile, passwd, encryptedFileKeyId);
-      } catch (IOException | PGPException e) {
-        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to obtain secret key");
+        encryptedObjects = getEncryptedObjects(Base64.getDecoder().decode(householder));
+      } catch (IOException e) {
+        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, "Failed to obtain decryption data");
       }
-    }
-    try {
-      InputStream decryptedData = null;
-      if (encryptedData != null) {
-        decryptedData = encryptedData.getDataStream(
-            new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(new BouncyCastleProvider()).build(secretKey));
-      }
-      PGPLiteralData pgpLiteralData = asLiteral(decryptedData);
-      final ByteArrayOutputStream out = new ByteArrayOutputStream();
-      if (pgpLiteralData != null) {
-        Streams.pipeAll(pgpLiteralData.getInputStream(), out);
-      }
+      while (encryptedObjects.hasNext() && secretKey == null) {
+        encryptedData = encryptedObjects.next();
+        encryptedFileKeyId = encryptedData.getKeyID();
 
-      return out.toString(Charset.defaultCharset());
-    } catch (IOException | PGPException e) {
-      throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to stream decryption data");
+        try {
+          secretKey = getSecretKey(secretKeyFile, passwd, encryptedFileKeyId);
+        } catch (IOException | PGPException e) {
+          throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to obtain secret key");
+        }
+      }
+      try {
+        InputStream decryptedData = null;
+        if (encryptedData != null) {
+          decryptedData = encryptedData.getDataStream(
+              new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(new BouncyCastleProvider()).build(secretKey));
+        }
+        PGPLiteralData pgpLiteralData = asLiteral(decryptedData);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        if (pgpLiteralData != null) {
+          Streams.pipeAll(pgpLiteralData.getInputStream(), out);
+        }
+
+        return out.toString(Charset.defaultCharset());
+      } catch (IOException | PGPException e) {
+        throw new GatewayException(GatewayException.Fault.SYSTEM_ERROR, e, "Failed to stream decryption data");
+      }
     }
   }
 

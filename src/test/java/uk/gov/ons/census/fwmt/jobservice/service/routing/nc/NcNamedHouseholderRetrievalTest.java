@@ -55,14 +55,18 @@ public class NcNamedHouseholderRetrievalTest {
     final CaseDetailsEventHardRefusal caseDetailsEventHardRefusal = new NcCaseDetailsDtoBuilder().createCaseDetailsEventHardRefusal();
     List<CaseDetailsEventDTO> caseDetailsEventDTO = caseDetailsDTO.getEvents();
 
-    
     File pkFile = new ClassPathResource("/testPrivateKey.private").getFile();
-    FileInputStream fis = new FileInputStream(pkFile);
-    byte[] readAllBytes= fis.readAllBytes();
 
-    ReflectionTestUtils.setField(namedHouseholderRetrieval, "privateKeyByteArray", readAllBytes);
-    when(objectMapper.readValue(caseDetailsEventDTO.get(0).getEventPayload(), CaseDetailsEventHardRefusal.class)).thenReturn(caseDetailsEventHardRefusal);
-    String returnedHouseholder = namedHouseholderRetrieval.getAndSortRmRefusalCases(caseDetailsDTO.getCaseId().toString(), caseDetailsDTO);
-    Assertions.assertEquals("Named householder = No", returnedHouseholder);
+    try (FileInputStream fis = new FileInputStream(pkFile)) {
+      byte[] readAllBytes = fis.readAllBytes();
+      ReflectionTestUtils.setField(namedHouseholderRetrieval, "privateKeyByteArray", readAllBytes);
+      when(objectMapper.readValue(caseDetailsEventDTO.get(0).getEventPayload(), CaseDetailsEventHardRefusal.class)).thenReturn(caseDetailsEventHardRefusal);
+      String returnedHouseholder = namedHouseholderRetrieval.getAndSortRmRefusalCases(caseDetailsDTO.getCaseId().toString(), caseDetailsDTO);
+      Assertions.assertEquals("Named householder = No", returnedHouseholder);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }

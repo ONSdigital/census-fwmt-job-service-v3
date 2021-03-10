@@ -32,7 +32,10 @@ public class GatewayCacheService {
     return repository.existsByEstabUprn(uprn);
   };
 
-  public boolean doesEstabUprnAndTypeExist(String estabUprn, int type) {
+  public boolean doesEstabUprnAndTypeExist(String uprn, int type) {
+    return repository.existsByEstabUprnAndType(uprn, type);}
+
+  public boolean doesUprnAndTypeExist(String estabUprn, int type) {
     return repository.existsByUprnAndType(estabUprn, type);}
 
   public String getEstabCaseId(String estabUprn) {

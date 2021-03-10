@@ -24,6 +24,9 @@ public interface GatewayCacheRepository extends JpaRepository<GatewayCache, Long
   boolean existsByUprnAndType(String estabUprn, int type);
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
+  boolean existsByEstabUprnAndType(String uprn, int type);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT estab.caseId FROM GatewayCache estab WHERE estab.uprn = :estabUprn")
   String findByEstabUprn(@Param("estabUprn") String estabUprn);
 

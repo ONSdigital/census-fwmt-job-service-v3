@@ -77,7 +77,7 @@ public class CeCreateUnitDeliverProcessor implements InboundProcessor<FwmtAction
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     CaseRequest tmRequest;
 
-    if (cacheService.doesEstabUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
+    if (cacheService.doesUprnAndTypeExist(rmRequest.getEstabUprn(), 1)) {
       FwmtActionInstruction ceSwitch = new FwmtActionInstruction();
 
       ceSwitch.setActionInstruction(ActionInstructionType.SWITCH_CE_TYPE);

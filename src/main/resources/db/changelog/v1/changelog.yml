@@ -144,3 +144,12 @@ databaseChangeLog:
             path: quarantined_table.sql
             relativeToChangelogFile: true
             splitStatements: false2
+  - changeSet:
+      id: v17
+      author: Simon Diaz
+      comment: Add Index for Ops 
+      changes:
+        - sqlFile:
+            path: add_last_action_instruction_index.sql
+            relativeToChangelogFile: true
+            splitStatements: false2

@@ -19,6 +19,8 @@ public class HHCancelledPause implements InboundProcessor<FwmtActionInstruction>
 
   private static final String CASE_ALREADY_CANCELLED = "CASE_ALREADY_CANCELLED";
 
+  private static final String IGNORED_PAUSE_HH = "IGNORED_PAUSE_HH";
+
   private static final ProcessorKey key = ProcessorKey.builder()
       .actionInstruction(ActionInstructionType.PAUSE.toString())
       .surveyName("CENSUS")
@@ -50,6 +52,6 @@ public class HHCancelledPause implements InboundProcessor<FwmtActionInstruction>
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), CASE_ALREADY_CANCELLED,
         "Type", "HH Pause Case",
-        "Action", "IGNORED");
+        "Action", IGNORED_PAUSE_HH);
   }
 }

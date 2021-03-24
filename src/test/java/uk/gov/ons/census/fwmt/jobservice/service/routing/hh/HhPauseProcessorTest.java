@@ -13,10 +13,12 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
+import uk.gov.ons.census.fwmt.events.component.GatewayEventManager;
 import uk.gov.ons.census.fwmt.jobservice.data.GatewayCache;
 import uk.gov.ons.census.fwmt.jobservice.hh.HhRequestBuilder;
 import uk.gov.ons.census.fwmt.jobservice.http.comet.CometRestClient;
 import uk.gov.ons.census.fwmt.jobservice.service.GatewayCacheService;
+import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
@@ -35,6 +37,18 @@ public class HhPauseProcessorTest {
 
   @Mock
   private GatewayCacheService cacheService;
+
+  @Mock
+  private GatewayCache gatewayCache;
+
+  @Mock
+  private GatewayEventManager eventManager;
+
+  @Mock
+  private CasePauseRequest casePauseRequest;
+
+  @Mock
+  private RoutingValidator routingValidator;
 
   @Captor
   private ArgumentCaptor<GatewayCache> spiedCache;

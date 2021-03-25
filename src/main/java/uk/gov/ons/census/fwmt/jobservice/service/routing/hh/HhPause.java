@@ -61,6 +61,7 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
       return rmRequest.getActionInstruction() == ActionInstructionType.PAUSE
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("HH")
+          && rmRequest.getAddressLevel().equals("U")
           && (cache != null && cache.existsInFwmt && !cache.lastActionInstruction.equals("Cancel"));
     } catch (NullPointerException e) {
       return false;

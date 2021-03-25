@@ -22,15 +22,19 @@ class HHCancelledPauseTest {
     final FwmtActionInstruction request = FwmtActionInstruction.builder()
         .actionInstruction(ActionInstructionType.PAUSE)
         .surveyName("CENSUS")
-        .addressType("HH").build();
+        .addressType("HH")
+        .addressLevel("U")
+        .build();
 
     final GatewayCache cache = GatewayCache.builder()
         .existsInFwmt(true)
         .lastActionInstruction("Cancel")
         .build();
-
     assertTrue(hhCancelledPause.isValid(request, cache));
-    assertFalse(hhCancelledPause.isValid(request, null));
+    request.setAddressLevel("");
+    assertFalse(hhCancelledPause.isValid(request, cache), "Shouldn't pass as address level not set.");
+    request.setAddressLevel("U");
+    assertFalse(hhCancelledPause.isValid(request, null),"No cache set should return false");
     request.setActionInstruction(ActionInstructionType.CREATE);
     assertFalse(hhCancelledPause.isValid(request, cache));
 

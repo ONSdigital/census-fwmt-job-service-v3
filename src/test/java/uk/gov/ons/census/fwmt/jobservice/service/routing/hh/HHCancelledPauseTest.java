@@ -28,7 +28,7 @@ class HHCancelledPauseTest {
 
     final GatewayCache cache = GatewayCache.builder()
         .existsInFwmt(true)
-        .lastActionInstruction("Cancel")
+        .lastActionInstruction("CANCEL")
         .build();
     assertTrue(hhCancelledPause.isValid(request, cache));
     request.setAddressLevel("");

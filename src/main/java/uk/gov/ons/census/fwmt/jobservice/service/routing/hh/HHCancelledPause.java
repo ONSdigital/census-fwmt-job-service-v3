@@ -43,7 +43,7 @@ public class HHCancelledPause implements InboundProcessor<FwmtActionInstruction>
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("HH")
           && rmRequest.getAddressLevel().equals("U")
-          && (cache != null && cache.existsInFwmt && cache.lastActionInstruction.equals("Cancel"));
+          && (cache != null && cache.existsInFwmt && cache.lastActionInstruction.equals("CANCEL"));
     } catch (NullPointerException e) {
       return false;
     }

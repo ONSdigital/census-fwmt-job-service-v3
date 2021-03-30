@@ -50,6 +50,7 @@ public class NisraCaseExists implements InboundProcessor<FwmtActionInstruction> 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), NISRA_CASE_EXISTS,
-        "Nisra case already exists in cache and TM");
+        "UPRN", rmRequest.getUprn(),
+        "Estab UPRN", rmRequest.getEstabUprn());
   }
 }

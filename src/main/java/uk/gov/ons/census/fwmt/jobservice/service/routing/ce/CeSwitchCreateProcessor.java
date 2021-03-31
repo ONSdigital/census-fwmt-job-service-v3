@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.data.tm.ReopenCaseRequest;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
@@ -20,6 +21,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.SWITCH_ON_A_CANCEL;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_ACK;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_CLOSE_PRE_SENDING;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.COMET_REOPEN_ACK;
@@ -109,36 +111,52 @@ public class CeSwitchCreateProcessor implements InboundProcessor<FwmtActionInstr
   private void processSwitch(GatewayCache cache, FwmtActionInstruction rmRequest, ReopenCaseRequest tmRequest)
       throws GatewayException {
 
+    boolean alreadyCancelled = false;
+    ResponseEntity<Void> closeResponse = null;
+
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_PRE_SENDING,
         "Survey Type", rmRequest.getSurveyType().toString());
-
-    ResponseEntity<Void> closeResponse = cometRestClient.sendClose(rmRequest.getCaseId());
-    routingValidator.validateResponseCode(closeResponse, rmRequest.getCaseId(), "Close", FAILED_TO_CLOSE_TM_JOB,
-        "rmRequest", rmRequest.toString(),
-        "cache", (cache!=null)?cache.toString():"");
-
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_ACK,
-        "Survey Type", tmRequest.getSurveyType().toString());
-
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_PRE_SENDING,
-        "Survey Type", tmRequest.getSurveyType().toString());
-
-    ResponseEntity<Void> reopenResponse = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB,
-        "tmRequest", tmRequest.toString(),
-        "rmRequest", rmRequest.toString(),
-        "cache", (cache!=null)?cache.toString():"");
-
-    if(cache != null) {
-      if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
-        cacheService.save(cache.toBuilder().usualResidents(0).build());
+    try {
+      closeResponse = cometRestClient.sendClose(rmRequest.getCaseId());
+      routingValidator.validateResponseCode(closeResponse, rmRequest.getCaseId(), "Close", FAILED_TO_CLOSE_TM_JOB,
+          "rmRequest", rmRequest.toString(),
+          "cache", (cache!=null)?cache.toString():"");
+    } catch (RestClientException e) {
+      String tmResponse = e.getMessage();
+      if (tmResponse != null && tmResponse.contains("400") && tmResponse.contains("Case State must be Open")){
+        eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), SWITCH_ON_A_CANCEL,
+            "A switch case has been received for a case that has already been cancelled",
+            "Message received: " + rmRequest.toString());
+        alreadyCancelled = true;
       } else {
-        cacheService.save(cache.toBuilder().build());
+        throw e;
       }
     }
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_ACK,
-        "Survey Type", tmRequest.getSurveyType().toString(),
-        "CE Switch Create", tmRequest.toString());
+    if (closeResponse != null && !alreadyCancelled) {
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_CLOSE_ACK,
+          "Survey Type", tmRequest.getSurveyType().toString());
+
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_PRE_SENDING,
+          "Survey Type", tmRequest.getSurveyType().toString());
+
+      ResponseEntity<Void> reopenResponse = cometRestClient.sendReopen(tmRequest, rmRequest.getCaseId());
+      routingValidator.validateResponseCode(reopenResponse, rmRequest.getCaseId(), "Reopen", FAILED_TO_REOPEN_TM_JOB,
+          "tmRequest", tmRequest.toString(),
+          "rmRequest", rmRequest.toString(),
+          "cache", (cache != null) ? cache.toString() : "");
+
+      if (cache != null) {
+        if (rmRequest.getSurveyType().equals(SurveyType.CE_SITE)) {
+          cacheService.save(cache.toBuilder().usualResidents(0).build());
+        } else {
+          cacheService.save(cache.toBuilder().build());
+        }
+      }
+
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_REOPEN_ACK,
+          "Survey Type", tmRequest.getSurveyType().toString(),
+          "CE Switch Create", tmRequest.toString());
+    }
   }
 }

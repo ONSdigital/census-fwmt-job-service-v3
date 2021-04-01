@@ -64,4 +64,5 @@ class HHCancelHeldProcessorTest {
     String checkEvent = spiedEvent.getValue();
     Assertions.assertEquals(HH_CANCEL_HELD, checkEvent);
   }
+
 }

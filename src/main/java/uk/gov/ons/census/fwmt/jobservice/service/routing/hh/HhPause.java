@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.data.tm.CasePauseRequest;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.ActionInstructionType;
@@ -19,6 +20,7 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.CASE_DOES_NOT_EXIST;
 import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.FAILED_TO_CREATE_TM_JOB;
 
 @Qualifier("Pause")
@@ -70,6 +72,10 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
 
   @Override
   public void process(FwmtActionInstruction rmRequest, GatewayCache cache, Instant messageReceivedTime) throws GatewayException {
+
+    boolean alreadyCancelled = false;
+    ResponseEntity<Void> response = null;
+
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), PROCESSING,
         "type", "HH Pause Case",
         "action", "Pause");
@@ -80,19 +86,33 @@ public class HhPause implements InboundProcessor<FwmtActionInstruction> {
     eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_PRE_SENDING,
         "Case Ref", rmRequest.getCaseRef());
 
-    ResponseEntity<Void> response = cometRestClient.sendPause(tmRequest, rmRequest.getCaseId());
-    routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Pause", FAILED_TO_CREATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
-
-    GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
-    if (newCache != null) {
-      cacheService.save(newCache.toBuilder().lastActionInstruction(ActionInstructionType.CANCEL.toString())
-          .lastActionTime(messageReceivedTime)
-          .build());
+    try {
+      response = cometRestClient.sendPause(tmRequest, rmRequest.getCaseId());
+      routingValidator.validateResponseCode(response, rmRequest.getCaseId(), "Pause", FAILED_TO_CREATE_TM_JOB, "tmRequest", tmRequest.toString(), "rmRequest", rmRequest.toString(), "cache", (cache!=null)?cache.toString():"");
+    } catch (RestClientException e) {
+      String tmResponse = e.getMessage();
+      if (tmResponse != null && tmResponse.contains("404") && tmResponse.contains("Unable to find Case")){
+        eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), CASE_DOES_NOT_EXIST,
+            "A HH pause case has been received for a case that does not exist",
+            "Message received: " + rmRequest.toString());
+        alreadyCancelled = true;
+      } else {
+        throw e;
+      }
     }
 
-    eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_ACK,
-        "Case Ref", rmRequest.getCaseRef(),
-        "Response Code", response.getStatusCode().name(),
-        "HH Pause", tmRequest.toString());
+    if (response != null && !alreadyCancelled) {
+      GatewayCache newCache = cacheService.getById(rmRequest.getCaseId());
+      if (newCache != null) {
+        cacheService.save(newCache.toBuilder().lastActionInstruction(ActionInstructionType.CANCEL.toString())
+            .lastActionTime(messageReceivedTime)
+            .build());
+      }
+
+      eventManager.triggerEvent(String.valueOf(rmRequest.getCaseId()), COMET_PAUSE_ACK,
+          "Case Ref", rmRequest.getCaseRef(),
+          "Response Code", response.getStatusCode().name(),
+          "HH Pause", tmRequest.toString());
+    }
   }
 }

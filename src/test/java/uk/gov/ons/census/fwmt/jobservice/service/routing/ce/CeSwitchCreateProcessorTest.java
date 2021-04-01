@@ -9,6 +9,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import uk.gov.ons.census.fwmt.common.data.tm.SurveyType;
 import uk.gov.ons.census.fwmt.common.error.GatewayException;
 import uk.gov.ons.census.fwmt.common.rm.dto.FwmtActionInstruction;
@@ -20,7 +22,11 @@ import uk.gov.ons.census.fwmt.jobservice.service.routing.RoutingValidator;
 
 import java.time.Instant;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.fwmt.jobservice.config.GatewayEventsConfig.SWITCH_ON_A_CANCEL;
 
 @ExtendWith(MockitoExtension.class)
 public class CeSwitchCreateProcessorTest {
@@ -42,6 +48,9 @@ public class CeSwitchCreateProcessorTest {
 
   @Captor
   private ArgumentCaptor<GatewayCache> spiedCache;
+
+  @Captor
+  private ArgumentCaptor<String> spiedEvent;
 
   private FwmtActionInstruction createInstruction() {
     return FwmtActionInstruction.builder().caseRef("345").build();
@@ -69,9 +78,25 @@ public class CeSwitchCreateProcessorTest {
     instruction.setSurveyType(SurveyType.CE_SITE);
     instruction.setCaseId("1234");
     GatewayCache cache = createGatewayCache("1234", 1, 10);
+    ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
+    when(cometRestClient.sendClose(any())).thenReturn(responseEntity);
     ceSwitchCreateProcessor.process(instruction, cache, Instant.now());
     verify(cacheService).save(spiedCache.capture());
     int usualResidents = spiedCache.getValue().usualResidents;
     Assertions.assertEquals(0, usualResidents);
+  }
+
+  @Test
+  @DisplayName("Should ignore a CE Switch on a closed case in TM")
+  public void shouldIgnoreACeSwitchOnAClosedCaseinTm() throws GatewayException {
+    final FwmtActionInstruction instruction = createInstruction();
+    instruction.setSurveyType(SurveyType.CE_SITE);
+    instruction.setCaseId("1234");
+    GatewayCache cache = createGatewayCache("1234", 1, 10);
+    when(cometRestClient.sendClose(any())).thenThrow(new RestClientException("(400 BAD_REQUEST) {“id”:[“Case State must be Open”]}"));
+    ceSwitchCreateProcessor.process(instruction, cache,  Instant.now());
+    verify(eventManager, atLeast(2)).triggerEvent(any(), spiedEvent.capture(), any());
+    String checkEvent = spiedEvent.getValue();
+    Assertions.assertEquals(SWITCH_ON_A_CANCEL, checkEvent);
   }
 }

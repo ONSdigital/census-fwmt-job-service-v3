@@ -58,7 +58,7 @@ public class HhUpdateNisraProcessorTest {
   @Test
   @DisplayName("Should send NISRA required officer to TM as update ")
   public void shouldSendNisraRequiredOfficerToTmAsUpdate() throws GatewayException {
-    final FwmtActionInstruction instruction = HhRequestBuilder.updateNisraActionInstruction();
+    final FwmtActionInstruction instruction = HhRequestBuilder.updateActionInstruction();
     GatewayCache gatewayCache = GatewayCache.builder()
         .caseId("ac623e62-4f4b-11eb-ae93-0242ac130002").build();
     when(cacheService.getById(anyString())).thenReturn(gatewayCache);

@@ -17,7 +17,7 @@ public final class HhRequestBuilder {
                 .build();
     }
 
-    public static FwmtActionInstruction updateNisraActionInstruction() {
+    public static FwmtActionInstruction updateActionInstruction() {
         return FwmtActionInstruction.builder()
             .actionInstruction(ActionInstructionType.UPDATE)
             .surveyName("CENSUS")

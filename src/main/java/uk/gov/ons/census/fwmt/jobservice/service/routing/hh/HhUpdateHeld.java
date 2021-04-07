@@ -15,7 +15,7 @@ import java.time.Instant;
 
 @Qualifier("Update")
 @Service
-public class HhUpdateHeldEnglandAndWales implements InboundProcessor<FwmtActionInstruction> {
+public class HhUpdateHeld implements InboundProcessor<FwmtActionInstruction> {
 
   private static final String HH_UPDATE_HELD = "HH_UPDATE_HELD";
 
@@ -40,7 +40,6 @@ public class HhUpdateHeldEnglandAndWales implements InboundProcessor<FwmtActionI
       return rmRequest.getActionInstruction() == ActionInstructionType.UPDATE
           && rmRequest.getSurveyName().equals("CENSUS")
           && rmRequest.getAddressType().equals("HH")
-          && !rmRequest.getOa().startsWith("N")
           && (cache == null
           || !cache.existsInFwmt);
     } catch (NullPointerException e) {

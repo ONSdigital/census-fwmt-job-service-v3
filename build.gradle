@@ -90,15 +90,13 @@ dependencies {
     implementation 'com.github.spotbugs:spotbugs-annotations:4.0.1'
 
     // Custom Libraries
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-canonical:1.0.17-RELEASE'
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:1.0.52-RELEASE'
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:1.2.30-RELEASE'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:2.0.0-RELEASE'
+    compile 'uk.gov.ons.census.fwmt:census-fwmt-common:2.0.0-RELEASE'
+    compile 'uk.gov.ons.census.ffa:census-ffa-storage-utils:0.0.4-RELEASE'
 
     // Decryption
     compile 'org.bouncycastle:bcprov-jdk15on:1.61'
     compile 'org.bouncycastle:bcpg-jdk15on:1.61'
-    compile("uk.gov.ons.census.ffa:census-ffa-storage-utils:0.0.3-RELEASE")
-
 
     // General Libraries
     compile 'com.google.guava:guava:27.0.1-jre'

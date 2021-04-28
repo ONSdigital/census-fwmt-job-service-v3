@@ -90,7 +90,8 @@ dependencies {
     implementation 'com.github.spotbugs:spotbugs-annotations:4.0.1'
 
     // Custom Libraries
-    compile 'uk.gov.ons.census.fwmt:census-fwmt-events:2.0.0-RELEASE'
+	// This events library is specifically for this release. Branch of this release for code changes
+    compile('uk.gov.ons.census.fwmt:census-fwmt-events:4.0.52-RELEASE')
     compile 'uk.gov.ons.census.fwmt:census-fwmt-common:2.0.0-RELEASE'
     compile 'uk.gov.ons.census.ffa:census-ffa-storage-utils:0.0.4-RELEASE'
 

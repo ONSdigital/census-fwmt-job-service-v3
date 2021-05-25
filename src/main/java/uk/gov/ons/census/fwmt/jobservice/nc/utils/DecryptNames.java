@@ -1,5 +1,14 @@
 package uk.gov.ons.census.fwmt.jobservice.nc.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Base64;
+import java.util.Iterator;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
@@ -15,21 +24,14 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.Streams;
-import uk.gov.ons.census.fwmt.common.error.GatewayException;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Base64;
-import java.util.Iterator;
+import uk.gov.ons.census.fwmt.common.error.GatewayException;
 
 public class DecryptNames {
   
   private static Object lockKey = new Object();
 
-  public static String decryptFile(InputStream secretKeyFile, String householder, char[] passwd) throws GatewayException {
+  public static String decryptFile(byte[] secretKeyFile, String householder, char[] passwd) throws GatewayException {
     synchronized (lockKey) {
       PGPPrivateKey secretKey = null;
       PGPPublicKeyEncryptedData encryptedData = null;
@@ -81,9 +83,10 @@ public class DecryptNames {
     }
   }
 
-  private static PGPPrivateKey getSecretKey(InputStream pgpSecretKey, char[] password, long encryptedFileKeyId)
+  private static PGPPrivateKey getSecretKey(byte[] pgpSecretKey, char[] password, long encryptedFileKeyId)
       throws IOException, PGPException {
-    InputStream decoderStream = PGPUtil.getDecoderStream(pgpSecretKey);
+    ByteArrayInputStream bais = new ByteArrayInputStream(pgpSecretKey);
+    InputStream decoderStream = PGPUtil.getDecoderStream(bais);
     JcaPGPSecretKeyRing pgpSecretKeys = new JcaPGPSecretKeyRing(decoderStream);
     decoderStream.close();
     Iterator<PGPSecretKey> secretKeys = pgpSecretKeys.getSecretKeys();
@@ -119,4 +122,7 @@ public class DecryptNames {
           "message is not a simple encrypted file - type unknown: " + message.getClass().getName());
     }
   }
+  
+
+  
 }

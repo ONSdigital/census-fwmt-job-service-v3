@@ -80,20 +80,17 @@ public class NamedHouseholderRetrieval {
     isHouseHolder = householdContact.getIsHouseholder().equals("true") ? "Yes" : "No";
 
     if (refusalContact.getTitle() != null && !refusalContact.getTitle().equals("")) {
-      decryptedTitle = DecryptNames.decryptFile(
-          new ByteArrayInputStream(privateKeyByteArray), refusalContact.getTitle(),
+      decryptedTitle = DecryptNames.decryptFile(privateKeyByteArray, refusalContact.getTitle(),
           privateKeyPassword.toCharArray());
       contact.append(" ").append(decryptedTitle);
     }
     if (refusalContact.getForename() != null && !refusalContact.getForename().equals("")) {
-      decryptedFirstname = DecryptNames.decryptFile(
-          new ByteArrayInputStream(privateKeyByteArray),  refusalContact.getForename(),
+      decryptedFirstname = DecryptNames.decryptFile(privateKeyByteArray,  refusalContact.getForename(),
           privateKeyPassword.toCharArray());
       contact.append(" ").append(decryptedFirstname);
     }
     if (refusalContact.getSurname() != null && !refusalContact.getSurname().equals("")) {
-      decryptedSurname = DecryptNames.decryptFile(
-          new ByteArrayInputStream(privateKeyByteArray), refusalContact.getSurname(),
+      decryptedSurname = DecryptNames.decryptFile(privateKeyByteArray, refusalContact.getSurname(),
           privateKeyPassword.toCharArray());
       contact.append(" ").append(decryptedSurname);
     }
